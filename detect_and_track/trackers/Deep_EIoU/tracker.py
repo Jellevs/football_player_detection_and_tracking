@@ -37,7 +37,6 @@ class DeepEIOUTracker:
             with_reid=with_reid
         )
         
-        # Initialize tracker
         self.tracker = Deep_EIoU(self.args, frame_rate=frame_rate)
         
         # Initialize ReID if enabled
@@ -110,7 +109,7 @@ class DeepEIOUTracker:
                 best_class_id = 0
                 
                 for i, det_box in enumerate(detections.xyxy):
-                    iou = self._compute_iou(tlbr, det_box)
+                    iou = self.compute_iou(tlbr, det_box)
                     if iou > best_iou:
                         best_iou = iou
                         best_class_id = detections.class_id[i]
@@ -130,7 +129,6 @@ class DeepEIOUTracker:
             tracker_id=np.array(tracked_ids)
         )
         
-        # Initialize empty data dict
         tracked_detections.data = {}
 
         if self.with_reid:
@@ -148,7 +146,7 @@ class DeepEIOUTracker:
                 best_idx = -1
 
                 for j, det_box in enumerate(detections.xyxy):
-                    iou = self._compute_iou(tracked_box, det_box)
+                    iou = self.compute_iou(tracked_box, det_box)
                     if iou > best_iou:
                         best_iou = iou
                         best_idx = j
@@ -186,7 +184,6 @@ class DeepEIOUTracker:
             return np.array([]).reshape(0, 512)
         
         # Match tracked detections to original detections using IoU
-        # This handles cases where tracking reorders or filters detections
         matched_embeddings = []
         
         for tracked_box in tracked_detections.xyxy:
@@ -195,7 +192,7 @@ class DeepEIOUTracker:
             
             # Find the detection with highest IoU
             for i, det_box in enumerate(self.last_detections_array[:, :4]):
-                iou = self._compute_iou(tracked_box, det_box)
+                iou = self.compute_iou(tracked_box, det_box)
                 if iou > best_iou:
                     best_iou = iou
                     best_idx = i
@@ -211,8 +208,8 @@ class DeepEIOUTracker:
     
     
     @staticmethod
-    def _compute_iou(box1, box2):
-        """Compute IoU between two boxes [x1, y1, x2, y2]"""
+    def compute_iou(box1, box2):
+        """ Compute IoU between two boxes [x1, y1, x2, y2] """
         x1 = max(box1[0], box2[0])
         y1 = max(box1[1], box2[1])
         x2 = min(box1[2], box2[2])

@@ -12,6 +12,8 @@ class Paths:
     reid_model_path: Path
     parseq_model_path: Path
     centroid_reid_path: Path
+    siglip_model_path: Path
+    vitpose_model_path: Path
     sequence: str
 
     def set_cache_path(self, name, sequence):
@@ -42,3 +44,19 @@ class JerseyPredictorConfig:
     reid_threshold_std: float = 2.0
     debug_tracklet_id: int = None
     debug_dir: Path = None
+
+
+@dataclass
+class SplitterConfig:
+    # Jersey splitter
+    jersey_min_fragment: int = 20
+    jersey_min_persistence: int = 5 
+    jersey_lookahead: int = 20
+    jersey_lookback: int = 50
+    jersey_min_pixel_jump: int = 10
+    jersey_entropy_threshold: float = 0.2
+
+    # Team splitter
+    team_min_persistence: int = 5
+    team_min_fragment: int = 10
+    team_lookahead: int = 50

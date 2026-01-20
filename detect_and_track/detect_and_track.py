@@ -1,10 +1,7 @@
 from tqdm import tqdm
 import cv2
-
-
 import pickle
 import json
-from pathlib import Path
 import cv2
 import numpy as np
 import supervision as sv
@@ -77,12 +74,10 @@ def detect_and_track(images, tracker, paths):
     """ Run tracker on ground truth detections """
     cache_path = paths.set_cache_path("tracked_detections", paths.sequence)
 
-    # Check cache
     if cache_path and cache_path.exists():
         with open(cache_path, 'rb') as f:
             return pickle.load(f)
     
-    # Load all annotations
     frame_annotations = load_annotations_by_frame(paths.gt_detections_path)
     
     all_tracked_detections = []
@@ -103,7 +98,6 @@ def detect_and_track(images, tracker, paths):
             'tracked_detections': tracked_detections,
         })
     
-    # Save cache
     if cache_path:
         cache_path.parent.mkdir(parents=True, exist_ok=True)
         with open(cache_path, 'wb') as f:

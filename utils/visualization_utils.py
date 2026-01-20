@@ -4,10 +4,12 @@ import numpy as np
 from tqdm import tqdm
 
 
-def visualize_tracklets(images, tracklets_dict, output_path, title="tracklets", show_teams=True):
-    """Visualize tracklets"""
+def visualize_tracklets(images, tracklets_dict, output_path, title="tracklets"):
+    """ Visualize tracklets with predictions """
 
-    frame_to_detections = tracklets_to_frame_detections(tracklets_dict)
+    frame_to_detections = tracklets_to_frame_detections(
+        tracklets_dict, 
+    )
     
     # Create video
     first_frame = cv2.imread(str(images[0]))
@@ -30,7 +32,6 @@ def visualize_tracklets(images, tracklets_dict, output_path, title="tracklets", 
         border_radius=1
     )
 
-    
     for frame_idx, image_path in tqdm(enumerate(images), total=len(images), desc=f"Visualizing {title}"):
         image = cv2.imread(str(image_path))
         
@@ -39,7 +40,6 @@ def visualize_tracklets(images, tracklets_dict, output_path, title="tracklets", 
         if not detections_list:
             out.write(image)
             continue
-        
 
         xyxy = np.array([d['bbox'] for d in detections_list])
         confidence = np.array([d['score'] for d in detections_list])
@@ -54,30 +54,25 @@ def visualize_tracklets(images, tracklets_dict, output_path, title="tracklets", 
         labels = []
         for detection in detections_list:
 
-            # Ground Truth attributes
             tracker_id = detection['tracker_id']
             parent_id = detection.get('parent_id')
-
-            gt_jersey = detection.get('gt_jersey')
-            gt_jersey = str(gt_jersey) if gt_jersey else "X"
             
-            # Team
-            gt_team = detection.get('gt_team')
-            gt_team = str(gt_team) if gt_team is not None else "X"
-
-            # Role
-            gt_role = detection.get('gt_role', -1)
-            gt_role = str(gt_role) if gt_role is not None else "X"
-
-
-            # Predicted attributes
-            # pred_jersey_window = detection.get('final_jersey')
-            # pred_jersey_window = str(pred_jersey_window) if pred_jersey_window is not None else "X"
+            # Ground Truth
+            gt_jersey = detection.get('gt_jersey', 'X')
+            gt_team = detection.get('gt_team', 'X')
+            gt_role = detection.get('gt_role', 'X')
             
+            # Per-frame predictions
             pred_jersey_frame = detection.get('pred_jersey')
             pred_jersey_frame = str(pred_jersey_frame) if pred_jersey_frame is not None else "X"
+            
+            pred_team_frame = detection.get('pred_team')
+            pred_team_frame = str(pred_team_frame) if pred_team_frame is not None else "X"
 
-            label = f"{tracker_id}|{gt_jersey}|{gt_team}|{gt_role}:pred{pred_jersey_frame}"
+            pred_team_confidence = detection.get('pred_jersey_entropies')
+            pred_team_confidence = f"{pred_team_confidence:.4g}" if pred_team_confidence is not None else "X"
+            
+            label = f"{tracker_id}|{pred_team_frame}|{pred_jersey_frame}:{pred_team_confidence}"
                                    
             labels.append(label)
 
@@ -90,11 +85,10 @@ def visualize_tracklets(images, tracklets_dict, output_path, title="tracklets", 
     print(f"Video saved to: {output_path}")
 
 
-
 def tracklets_to_frame_detections(tracklets_dict):
-    """Convert tracklets to frame-by-frame detections"""
+    """ Convert tracklets to frame-by-frame detections """
     frame_to_detections = {}
-    
+
     for tracker_id, tracklet in tracklets_dict.items():
         for i in range(len(tracklet.frames)):
             frame_idx = tracklet.frames[i]
@@ -107,24 +101,21 @@ def tracklets_to_frame_detections(tracklets_dict):
                 'bbox': tracklet.bboxes[i],
                 'score': tracklet.scores[i],
             }
-
+            
 
             # Ground Truth attributes
-            # GT jersey
             gt_jerseys = tracklet.gt_attributes.get('jerseys')
             if gt_jerseys is not None and len(gt_jerseys) > 0 and i < len(gt_jerseys):
                 gt_jersey = gt_jerseys[i]
                 if gt_jersey and gt_jersey != 'unknown':
                     detection_data['gt_jersey'] = str(gt_jersey)
 
-            # GT Team
             gt_teams = tracklet.gt_attributes.get('teams')
             if gt_teams is not None and len(gt_teams) > 0 and i < len(gt_teams):
                 gt_team = gt_teams[i]
                 if gt_team and gt_team != 'unknown':
                     detection_data['gt_team'] = str(gt_team)
             
-            # GT Role
             gt_roles = tracklet.gt_attributes.get('roles')
             if gt_roles is not None and len(gt_roles) > 0 and i < len(gt_roles):
                 gt_role = gt_roles[i]
@@ -132,30 +123,21 @@ def tracklets_to_frame_detections(tracklets_dict):
                     detection_data['gt_role'] = str(gt_role)
 
 
-            # Predicted attributes
-            # Jersey: use final jersey, otherwise per frame
-            if tracklet.final_jersey is not None:
-                detection_data['final_jersey'] = tracklet.final_jersey
-            
+            # Per-frame predictions
             jerseys = tracklet.pred_attributes.get('jerseys', [])
+            entropies = tracklet.pred_attributes.get('jersey_entropies', [])
             if jerseys is not None and len(jerseys) > 0 and i < len(jerseys):
                 jersey = jerseys[i]
+                entropy = entropies[i]
                 if not (isinstance(jersey, float) and np.isnan(jersey)):
                     detection_data['pred_jersey'] = int(jersey)
+                    detection_data['pred_jersey_entropies'] = float(entropy)
 
-            # Team: use final team, otherwise per frame
-            if tracklet.final_team is not None:
-                detection_data['team'] = tracklet.final_team
-            else:
-                teams = tracklet.pred_attributes.get('teams', [])
-                if teams is not None and len(teams) > 0 and i < len(teams):
-                    team = teams[i]
-                    if team != -1:
-                        detection_data['team'] = team
-                    else:
-                        detection_data['team'] = -1
-                else:
-                    detection_data['team'] = -1
+            teams = tracklet.pred_attributes.get('teams', [])
+            if teams is not None and len(teams) > 0 and i < len(teams):
+                team = teams[i]
+                if not (isinstance(team, float) and np.isnan(team)):
+                    detection_data['pred_team'] = int(team)
             
             
             frame_to_detections[frame_idx].append(detection_data)

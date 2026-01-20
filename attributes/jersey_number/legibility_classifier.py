@@ -7,7 +7,7 @@ from PIL import Image
 
 
 class LegibilityClassifier34(nn.Module):
-    """ResNet34 based model for binary classification"""
+    """ ResNet34 based model for binary classification """
 
     def __init__(self, train=False, finetune=False):
         super().__init__()
@@ -129,7 +129,7 @@ class LegibilityPredictor:
     
 
     def process_batch(self, crops):
-        """Process a single batch through the model"""
+        """ Process a single batch through the model """
 
         batch_tensors = []
         for crop in crops:

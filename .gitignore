@@ -3,3 +3,5 @@ output/
 pose/
 reid/
 parseq/
+
+test_parseq.py

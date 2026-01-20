@@ -6,7 +6,7 @@ sys.path.insert(0, str(CENTROIDS_REID_PATH))
 
 import types
 
-# Fixing imports etc
+# Fixing imports, imcompatibility issues etc
 try:
     from pytorch_lightning.callbacks import Callback
     base_module = types.ModuleType('base')
@@ -53,13 +53,12 @@ from config import cfg
 class CentroidReIDFilter:
     """ ReID-based outlier filter using Centroid-ReID """
     
-    def __init__(self, checkpoint_path, threshold_std=3.5, rounds=3, min_samples=3, device='cuda'):
+    def __init__(self, checkpoint_path, threshold_std=3.5, rounds=5, min_samples=3, device='cuda'):
         self.threshold_std = threshold_std
         self.rounds = rounds
         self.min_samples = min_samples
         self.device = device
         
-        # Load model
         self.model = self._load_model(checkpoint_path)
         self.transforms = self._get_transforms()
             
@@ -67,7 +66,6 @@ class CentroidReIDFilter:
     def _load_model(self, checkpoint_path):
         """ Load Centroid-ReID model with all compatibility fixes """
         
-        # Find config file
         config_file = CENTROIDS_REID_PATH / 'configs' / '256_resnet50.yml'
         
         if not config_file.exists():
@@ -107,7 +105,6 @@ class CentroidReIDFilter:
         except (ImportError, AttributeError):
             pass
         
-        # Load model (suppress warnings about version mismatch)
         use_cuda = self.device == 'cuda' and torch.cuda.is_available()
         
         with warnings.catch_warnings():
@@ -135,12 +132,10 @@ class CentroidReIDFilter:
     
     
     def _load_checkpoint_manually(self, checkpoint_path, cfg):
-        """Manual checkpoint loading to bypass hparams issues"""
+        """ Manual checkpoint loading to bypass hparams issues """
         
         # Load checkpoint dict
         checkpoint = torch.load(checkpoint_path, map_location='cpu')
-        
-        # Create model instance
         model = CTLModel(cfg)
         
         # Load state dict
@@ -170,7 +165,6 @@ class CentroidReIDFilter:
             else:
                 img = Image.fromarray((crop * 255).astype(np.uint8))
             
-            # Transform
             img_tensor = torch.stack([self.transforms(img)])
             
             # Extract features
@@ -187,7 +181,7 @@ class CentroidReIDFilter:
     
     
     def filter(self, crops_list, indices, original_embeddings=None):
-        """Filter crops by removing ReID outliers"""
+        """ Filter crops by removing ReID outliers """
         full_crops = crops_list[0]
         
         if len(full_crops) < self.min_samples:
@@ -197,7 +191,7 @@ class CentroidReIDFilter:
         embeddings = self.extract_embeddings(full_crops)
         
         # Apply Gaussian filtering
-        kept_mask = self._iterative_outlier_removal(embeddings)
+        kept_mask = self.iterative_outlier_removal(embeddings)
         
         # Filter all crop lists
         filtered_crops_list = [
@@ -209,8 +203,8 @@ class CentroidReIDFilter:
         return filtered_crops_list, filtered_indices
     
     
-    def _iterative_outlier_removal(self, embeddings):
-        """Iterative Gaussian outlier removal"""
+    def iterative_outlier_removal(self, embeddings):
+        """ Iterative Gaussian outlier removal """
         current_mask = np.ones(len(embeddings), dtype=bool)
         
         for round_idx in range(self.rounds):
@@ -229,50 +223,4 @@ class CentroidReIDFilter:
                 break
         
         return current_mask
-    
-    
-    def get_statistics(self, crops):
-        """Get filtering statistics"""
-        if len(crops) < self.min_samples:
-            return {'total_samples': len(crops), 'rounds': []}
-        
-        embeddings = self.extract_embeddings(crops)
-        current_mask = np.ones(len(embeddings), dtype=bool)
-        
-        stats = {
-            'total_samples': len(embeddings),
-            'rounds': []
-        }
-        
-        for round_idx in range(self.rounds):
-            current_embeddings = embeddings[current_mask]
-            mu = np.mean(current_embeddings, axis=0, keepdims=True)
-            euclidean_distances = np.linalg.norm(embeddings - mu, axis=1)
-            
-            mean_distance = np.mean(euclidean_distances)
-            std_distance = np.std(euclidean_distances)
-            threshold = self.threshold_std * std_distance
-            
-            new_mask = (euclidean_distances - mean_distance) <= threshold
-            
-            round_stats = {
-                'round': round_idx + 1,
-                'samples_before': np.sum(current_mask),
-                'samples_after': np.sum(new_mask),
-                'removed': np.sum(current_mask) - np.sum(new_mask),
-                'mean_distance': mean_distance,
-                'std_distance': std_distance,
-                'threshold': threshold
-            }
-            stats['rounds'].append(round_stats)
-            
-            current_mask = current_mask & new_mask
-            
-            if np.sum(new_mask) == np.sum(current_mask):
-                break
-        
-        stats['final_kept'] = np.sum(current_mask)
-        stats['total_removed'] = len(embeddings) - np.sum(current_mask)
-        stats['removal_rate'] = stats['total_removed'] / len(embeddings)
-        
-        return stats
+

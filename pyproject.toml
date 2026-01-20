@@ -15,10 +15,12 @@ dependencies = [
     "nltk>=3.9.2",
     "pytorch-lightning>=2.6.0",
     "qwen-vl-utils>=0.0.14",
+    "sentencepiece>=0.2.1",
     "supervision>=0.27.0",
     "tensorboard>=2.20.0",
     "timm>=1.0.23",
     "torchreid>=0.2.5",
     "transformers>=4.57.3",
+    "umap-learn>=0.5.11",
     "yacs>=0.1.8",
 ]

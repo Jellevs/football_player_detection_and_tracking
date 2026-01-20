@@ -1,5 +1,4 @@
 import torch
-import numpy as np
 import cv2
 from PIL import Image
 from transformers import VitPoseForPoseEstimation, AutoProcessor
@@ -12,13 +11,16 @@ RIGHT_HIP = 12
 
 
 class PoseCropper:
-    """ Pose cropping not using mkoshkina's posing model (implemented using mmpose which causes loads of problems) """
-    def __init__(self, device='cuda', model_name='usyd-community/vitpose-base-simple'):
+    """ Pose-based torso cropping using ViTPose from huggingface instead of MMPose because of import/version problems"""
+    
+    def __init__(self, device='cuda', model_path='usyd-community/vitpose-base-simple'):
         self.device = torch.device(device if torch.cuda.is_available() else 'cpu')
-
-        self.processor = AutoProcessor.from_pretrained(model_name)
         
-        self.model = VitPoseForPoseEstimation.from_pretrained(model_name)
+        # Check if local path or HuggingFace model name
+        local_only = self.is_local_path(model_path)
+
+        self.processor = AutoProcessor.from_pretrained(model_path, local_files_only=local_only)
+        self.model = VitPoseForPoseEstimation.from_pretrained(model_path, local_files_only=local_only)
         self.model = self.model.to(self.device)
         self.model.eval()
 
@@ -30,10 +32,17 @@ class PoseCropper:
         self.min_keypoint_conf = 0.3
         
         print(f"PoseCropper loaded on {self.device}")
+    
+    
+    @staticmethod
+    def is_local_path(path):
+        """ Check if path is a local directory (not a HuggingFace model name) """
+        import os
+        return os.path.isdir(path)
 
 
     def get_torso_crop(self, image, bbox, return_keypoints=False):
-        """Extract torso crop from image using pose estimation"""
+        """ Extract torso crop from image using pose estimation """
 
         x1, y1, x2, y2 = map(int, bbox)
 
@@ -59,10 +68,10 @@ class PoseCropper:
         torso_bbox = self.get_torso_bbox(keypoints, scores, player_crop.shape)
         
         if torso_bbox is None:
-            # Fallback to heuristic - use upper portion with no bottom padding
+            # Fallback to heuristic
             crop_h = player_crop.shape[0]
             torso_y1 = int(crop_h * 0.2)
-            torso_y2 = int(crop_h * 0.8)  # Roughly shoulder to hip height
+            torso_y2 = int(crop_h * 0.8)
             torso_crop = player_rgb[torso_y1:torso_y2, :, :]
         else:
             tx1, ty1, tx2, ty2 = torso_bbox
@@ -77,10 +86,9 @@ class PoseCropper:
     
 
     def detect_pose(self, pil_image):
-        """Run ViTPose on a single PIL image"""
+        """ Run ViTPose on a single PIL image """
 
         width, height = pil_image.size
-        
         boxes = [[[0, 0, width, height]]]
         
         inputs = self.processor(
@@ -93,28 +101,24 @@ class PoseCropper:
         
         with torch.no_grad():
             outputs = self.model(**inputs)
-        
             
         pose_results = self.processor.post_process_pose_estimation(
             outputs,
             boxes=boxes,
-            # target_sizes=[(height, width)]
         )
         
         if pose_results and len(pose_results) > 0:
             if len(pose_results[0]) > 0:
                 person_result = pose_results[0][0]
-                
                 keypoints = person_result['keypoints'].cpu().numpy()
                 scores = person_result['scores'].cpu().numpy()
-                
                 return keypoints, scores
                 
         return None, None
             
 
     def get_torso_bbox(self, keypoints, scores, crop_shape):
-        """ Get jersey number bounding box following mkoshkina's approach """
+        """ Get torso bounding box from keypoints """
         h, w = crop_shape[:2]
         
         left_shoulder = keypoints[LEFT_SHOULDER]
@@ -128,11 +132,9 @@ class PoseCropper:
         valid_shoulders = sum(s >= self.min_keypoint_conf for s in shoulder_scores)
         valid_hips = sum(s >= self.min_keypoint_conf for s in hip_scores)
         
-        # Need at least 1 shoulder and 1 hip (mkoshkina requires all 4)
         if valid_shoulders < 1 or valid_hips < 1:
             return None
         
-        # Collect all valid keypoints for bounds calculation
         x_coords = []
         y_coords = []
         
@@ -157,11 +159,9 @@ class PoseCropper:
         y1 = int(min(y_coords) - self.pad_top)
         y2 = int(max(y_coords) + self.pad_bottom)
         
-        # Clamp to image bounds
         x1 = max(0, x1)
         y1 = max(0, y1)
         x2 = min(w, x2)
         y2 = min(h, y2)
         
         return (x1, y1, x2, y2)
-

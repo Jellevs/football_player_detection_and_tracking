@@ -1,12 +1,5 @@
-import json
 from pathlib import Path
-from dataclasses import dataclass
-import supervision as sv
-import numpy as np
-from tqdm import tqdm
-import cv2
 
-from detect_and_track.trackers.Deep_EIoU import tracker
 from tracklets.tracklet import Tracklet
 
 
