@@ -29,14 +29,8 @@ class JerseySplitter():
         if not switch_indices:
             return None
         
-        refined_switch_indices = []
-        for switch_idx in switch_indices:
-            refined_switch_idx = self.refine_split_point(tracklet, switch_idx)
-            refined_switch_indices.append(refined_switch_idx)
-
-
         # Create fragment boundaries
-        boundaries = [0] + refined_switch_indices + [len(jerseys)]
+        boundaries = [0] + switch_indices + [len(jerseys)]
 
         fragments = []
         current_id = next_available_id
@@ -149,43 +143,3 @@ class JerseySplitter():
             return most_common_jersey == new_jersey
 
         return new_count >= min_persistence
-
-
-    def refine_split_point(self, tracklet, detected_idx):
-        """ Look for earlier split point by bbox anomalies """
-        bboxes = tracklet.bboxes
-
-        if bboxes is None or len(bboxes) == 0:
-            return detected_idx
-
-        # Set search window
-        start_search = max(0, detected_idx - self.config.jersey_lookback)
-        search_slice = np.array(bboxes[start_search : detected_idx + 1])
-
-        # Not enough data
-        if len(search_slice) < 4:
-            return detected_idx
-
-        centers = search_slice[:, :2] + search_slice[:, 2:] / 2
-
-        # Calculate velocity
-        velocities = np.linalg.norm(np.diff(centers, axis=0), axis=1)
-
-        mean_v = np.mean(velocities)
-        std_v = np.std(velocities)
-        
-        # Find biggest peak
-        max_v_idx = np.argmax(velocities)
-        max_v = velocities[max_v_idx]
-
-        # Define threshold
-        threshold = mean_v + (2.5 * std_v)
-
-        if max_v > threshold and max_v > self.config.jersey_min_pixel_jump:
-            refined_split_idx = start_search + max_v_idx + 1
-            
-            # If earlier split point is found, return it
-            if refined_split_idx < detected_idx:
-                return refined_split_idx
-
-        return detected_idx

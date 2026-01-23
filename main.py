@@ -1,3 +1,6 @@
+import torch
+from pathlib import Path
+
 from utils.data_utils import load_images, organize_detections_by_track
 from utils.config import Paths, TrackerConfig, JerseyPredictorConfig, SplitterConfig
 from utils.visualization_utils import visualize_tracklets 
@@ -5,9 +8,6 @@ from detect_and_track.detect_and_track import detect_and_track
 from detect_and_track.trackers.Deep_EIoU import DeepEIOUTracker
 from attributes.attributes import predict_attributes
 from tracklets.split_tracklets import split_tracklets
-
-import torch
-from pathlib import Path
 
 
 def main(tracker_cfg, paths, device):
@@ -36,22 +36,20 @@ def main(tracker_cfg, paths, device):
     # Organize detections by frame into tracklets
     tracklets = organize_detections_by_track(tracked_detections)
 
-
     # Predict attributes for each tracklet
     attributes_tracklets = predict_attributes(images, tracklets, paths, jersey_cfg, device)
 
-
     # Split tracklets
     splitted_tracklets = split_tracklets(attributes_tracklets, splitter_cfg)
-
 
     # Visualize tracklets
     visualize_tracklets(
         images,
         splitted_tracklets,
-        paths.output_path / "videos" / f"{SEQUENCE}_jersey_team_splitter.mp4",
+        paths.output_path / "videos" / f"{SEQUENCE}_trajectory_splitter.mp4",
         title="PARSeq Jersey Detection",
     )
+
 
 if __name__ == "__main__":
 
@@ -102,6 +100,18 @@ if __name__ == "__main__":
     )
 
     splitter_cfg = SplitterConfig(
+        # Jersey splitter
+        jersey_min_fragment = 20,
+        jersey_min_persistence = 5 ,
+        jersey_lookahead = 20,
+        jersey_lookback = 300,
+        jersey_min_pixel_jump = 10,
+        jersey_entropy_threshold = 0.2,
+
+        # Team splitter
+        team_min_persistence = 5,
+        team_min_fragment = 10,
+        team_lookahead = 50,
     )
 
     main(tracker_cfg, paths, device)

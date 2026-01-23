@@ -73,6 +73,9 @@ class JerseyNumberPredictorParseq:
         torso_crops = []
         indices = []
 
+        all_keypoints = []
+        all_scores = []
+
         for i, (frame_idx, bbox) in enumerate(zip(tracklet.frames, tracklet.bboxes)):
             image = cv2.imread(str(images[frame_idx]))
             if image is None:
@@ -89,13 +92,23 @@ class JerseyNumberPredictorParseq:
                 
             full_crop_rgb = cv2.cvtColor(full_crop, cv2.COLOR_BGR2RGB)
 
+
             # Get torso crop using pose estimation or fallback to heuristic
             if self.pose_cropper:
-                torso_crop = self.pose_cropper.get_torso_crop(image, bbox)
-                if torso_crop is None:
-                    torso_crop = self.simple_torso_crop(full_crop_rgb)
+                result = self.pose_cropper.get_torso_crop(image, bbox, return_keypoints=True)
+                if result[0] is not None:
+                    torso_crop, (keypoints, scores) = result
+                    all_keypoints.append(keypoints)
+                    all_scores.append(scores)
+                else:
+                    torso_crop =  self.simple_torso_crop(full_crop_rgb)
+                    all_keypoints.append(None)
+                    all_scores.append(None)
+
             else:
-                torso_crop = self.simple_torso_crop(full_crop_rgb)
+                torso_crop =  self.simple_torso_crop(full_crop_rgb)
+                all_keypoints.append(None)
+                all_scores.append(None)
 
             if torso_crop is None or torso_crop.size == 0:
                 continue
@@ -104,6 +117,9 @@ class JerseyNumberPredictorParseq:
             torso_crops.append(torso_crop)
             indices.append(i)
 
+        tracklet.pose_keypoints = all_keypoints
+        tracklet.pose_scores = all_scores
+        
         return full_crops, torso_crops, indices
         
 
