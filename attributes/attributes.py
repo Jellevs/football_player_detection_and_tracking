@@ -105,6 +105,8 @@ def predict_attributes(images, tracklets, paths, jersey_cfg, device):
         
         n_crops = len(tracklet_torso_crops[track_id])
         for local_idx in range(n_crops):
+            tracklet_idx = indices[local_idx]
+
             global_idx = all_crop_info.index((track_id, local_idx))
             siglip_embedding = siglip_embeddings[global_idx]
             siglip_full[tracklet_idx] = siglip_embedding
@@ -116,7 +118,6 @@ def predict_attributes(images, tracklets, paths, jersey_cfg, device):
             
             pred = prediction_lookup.get((track_id, local_idx))
             if pred is not None:
-                tracklet_idx = indices[local_idx]
                 teams_full[tracklet_idx] = pred
         
         tracklet.pred_attributes['teams'] = teams_full
