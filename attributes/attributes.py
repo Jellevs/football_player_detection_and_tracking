@@ -82,7 +82,7 @@ def predict_attributes(images, tracklets, paths, jersey_cfg, device):
 
     # Phase 2: Team classification using torso crops
     player_mask = np.array(player_mask)
-    team_predictions = team_classifier.fit_predict_all(all_torso_crops, player_mask)
+    team_predictions, siglip_embeddings = team_classifier.fit_predict_all(all_torso_crops, player_mask)
     
 
 
@@ -95,14 +95,20 @@ def predict_attributes(images, tracklets, paths, jersey_cfg, device):
         prediction_lookup[(track_id, local_idx)] = team_predictions[global_idx]
     
     for track_id, tracklet in tracklets.items():
+
         indices = tracklet_crop_indices[track_id]
         crop_roles = tracklet_crop_roles[track_id]
         num_frames = len(tracklet.frames)
 
         teams_full = [np.nan] * num_frames
+        siglip_full = [np.zeros(768)] * num_frames
         
         n_crops = len(tracklet_torso_crops[track_id])
         for local_idx in range(n_crops):
+            global_idx = all_crop_info.index((track_id, local_idx))
+            siglip_embedding = siglip_embeddings[global_idx]
+            siglip_full[tracklet_idx] = siglip_embedding
+
             # Only assign team to players, skip referees and goalkeepers
             role = crop_roles[local_idx]
             if role != "player":
@@ -114,7 +120,8 @@ def predict_attributes(images, tracklets, paths, jersey_cfg, device):
                 teams_full[tracklet_idx] = pred
         
         tracklet.pred_attributes['teams'] = teams_full
-
+        tracklet.pred_attributes['siglip_embeddings'] = siglip_full
+        
     print("Attribute prediction finished!")
 
 

@@ -1,6 +1,7 @@
 from .splitters.jersey_splitter import JerseySplitter
 from .splitters.team_splitter import TeamSplitter
 from .splitters.trajectory_splitter import TrajectorySplitter
+from .splitters.bbox_anomaly_splitter import BboxAnomalySplitter
 
 
 def split_tracklets(tracklets, splitter_cfg):
@@ -11,25 +12,28 @@ def split_tracklets(tracklets, splitter_cfg):
     """
 
     # Stage 1: Split by jersey numbers
-    # print("\n=== Stage 1: Splitting by jersey numbers ===")
-    # jersey_splitter = JerseySplitter(splitter_cfg) 
-    # tracklets_after_jersey = split_by_jersey(tracklets, jersey_splitter)
+    print("\n=== Stage 1: Splitting by jersey numbers ===")
+    jersey_splitter = JerseySplitter(splitter_cfg) 
+    tracklets_after_jersey = split_by_jersey(tracklets, jersey_splitter)
 
 
-    # # Stage 2: Split by team changes
-    # print("\n=== Stage 2: Splitting by team changes ===")
-    # team_splitter = TeamSplitter(splitter_cfg)
-    # tracklets_after_team = split_by_team(tracklets_after_jersey, team_splitter)
+    # Stage 2: Split by team changes
+    print("\n=== Stage 2: Splitting by team changes ===")
+    team_splitter = TeamSplitter(splitter_cfg)
+    tracklets_after_team = split_by_team(tracklets_after_jersey, team_splitter)
 
     trajectory_splitter = TrajectorySplitter(splitter_cfg)
-    tracklets_after_trajectory = split_by_trajectory(tracklets, trajectory_splitter)
-    
-    return tracklets_after_trajectory
+    tracklets_after_trajectory = trajectory_splitter.split_all_tracklets(tracklets_after_team)
+
+    bbox_anomaly_splitter = BboxAnomalySplitter(splitter_cfg)
+    tracklets_after_bbox_anomaly = split_by_bbox_velocity(tracklets_after_trajectory, bbox_anomaly_splitter)
+
+    return tracklets_after_bbox_anomaly
 
 
 
-def split_by_trajectory(tracklets, trajectory_splitter):
-    """ Split tracklets based on Trajectory changes """
+def split_by_bbox_velocity(tracklets, bbox_splitter):
+    """ Split tracklets based on bbox velocity anomalies """
     max_existing_id = max(tracklets.keys()) if tracklets else 0
     next_available_id = max_existing_id + 1
     
@@ -37,11 +41,11 @@ def split_by_trajectory(tracklets, trajectory_splitter):
     split_count = 0
     
     for track_id, tracklet in tracklets.items():
-        fragments = trajectory_splitter.split_tracklet(tracklet, next_available_id)
+        fragments = bbox_splitter.split_tracklet(tracklet, next_available_id)
         
         if fragments:
             split_count += 1
-            print(f"  Tracklet {track_id} split into {len(fragments)} fragments (trajectory)")
+            print(f"  Tracklet {track_id} split into {len(fragments)} fragments (bbox velocity)")
             
             for fragment in fragments:
                 new_tracklets[fragment.track_id] = fragment
@@ -50,7 +54,7 @@ def split_by_trajectory(tracklets, trajectory_splitter):
             # No split
             new_tracklets[tracklet.track_id] = tracklet
     
-    print(f"Trajectory splitting: {split_count}/{len(tracklets)} tracklets split")
+    print(f"Bbox velocity splitting: {split_count}/{len(tracklets)} tracklets split")
     return new_tracklets
 
 

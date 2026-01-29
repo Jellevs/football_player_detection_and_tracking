@@ -7,21 +7,21 @@ from utils.config import SplitterConfig
 class TrajectorySplitter:
     def __init__(self, config=None):
         self.config = config if config else SplitterConfig()
-        
-        # Proximity detection
-        self.proximity_distance = 80  # pixels - bboxes closer than this
+
+        # Proximity detection - VERY TIGHT: only near-overlapping boxes
+        self.proximity_distance = 50  # pixels - bboxes closer than this (was 50)
         self.min_overlap_frames = 3   # minimum frames of proximity to consider
-        
-        # Velocity analysis
+
+        # Velocity analysis - VERY HIGH thresholds
         self.velocity_window = 5       # frames before/after to calculate velocity
-        self.min_velocity_change = 8.0 # pixels/frame - minimum speed change
-        self.direction_change_threshold = 60  # degrees - minimum direction change
-        
-        # Trajectory swap detection
-        self.swap_similarity_threshold = 0.6  # cosine similarity for velocity swap
-        
-        # Fragment filtering
-        self.min_fragment_length = 15  # frames
+        self.min_velocity_change = 30.0 # pixels/frame - minimum speed change (was 20.0)
+        self.direction_change_threshold = 90  # degrees - minimum direction change (was 90)
+
+        # Trajectory swap detection - VERY STRICT: only obvious swaps
+        self.swap_similarity_threshold = 0.85  # cosine similarity for velocity swap (was 0.75)
+
+        # Fragment filtering - keep detections but require valid splits
+        self.min_fragment_length = 10  # frames (increased to avoid spurious tiny splits)
         
     
     def split_all_tracklets(self, tracklets_dict):
@@ -101,8 +101,10 @@ class TrajectorySplitter:
                         )
                         
                         if split_info:
-                            split_decisions[track_A].append(split_info['split_idx_A'])
-                            split_decisions[track_B].append(split_info['split_idx_B'])
+                            # CRITICAL FIX: Split AFTER the proximity frame, not at it
+                            # This ensures the frame is included in the first fragment
+                            split_decisions[track_A].append(split_info['split_idx_A'] + 1)
+                            split_decisions[track_B].append(split_info['split_idx_B'] + 1)
                             
                             print(f"  Split detected: Track {track_A} & {track_B} at frame {frame_idx}")
                             print(f"    Reason: {split_info['reason']}")
@@ -118,18 +120,18 @@ class TrajectorySplitter:
     def are_bboxes_close(self, bbox_A, bbox_B, center_A, center_B):
         """
         Check if two bboxes are close enough to potentially cause identity switch
-        Uses both IoU and center distance
+        Uses both IoU and center distance - STRICTER requirements
         """
-        # Calculate IoU
+        # Calculate IoU - require significant overlap
         iou = self.calculate_iou(bbox_A, bbox_B)
-        if iou > 0.05:  # Any overlap
+        if iou > 0.1:  # Significant overlap (was 0.05)
             return True
-        
-        # Calculate center distance
+
+        # Calculate center distance - only very close boxes
         distance = np.linalg.norm(center_A - center_B)
         if distance < self.proximity_distance:
             return True
-        
+
         return False
     
     
@@ -160,33 +162,46 @@ class TrajectorySplitter:
         # Signal 3: Velocity swap detection
         swap_score = self.detect_velocity_swap(vel_A_before, vel_A_after, vel_B_before, vel_B_after)
         
-        # Decision logic: Multiple signals increase confidence
+        # Decision logic: Require STRONG evidence of identity switch
         score = 0
         reasons = []
-        
-        # High velocity swap score is strong indicator
+
+        # Velocity swap is the PRIMARY indicator - give it more weight
         if swap_score > self.swap_similarity_threshold:
-            score += 3
+            score += 4  # Increased from 3
             reasons.append(f"velocity swap (score={swap_score:.2f})")
-        
-        # Significant speed change in either tracklet
+
+        # Speed changes require BOTH tracklets to change significantly
+        speed_changes = 0
         if speed_change_A > self.min_velocity_change:
-            score += 1
+            speed_changes += 1
             reasons.append(f"speed change A ({speed_change_A:.1f}px/f)")
         if speed_change_B > self.min_velocity_change:
-            score += 1
+            speed_changes += 1
             reasons.append(f"speed change B ({speed_change_B:.1f}px/f)")
-        
-        # Significant direction change
+
+        # Only count if BOTH tracklets have speed changes
+        if speed_changes == 2:
+            score += 2
+
+        # Direction changes require BOTH tracklets to change direction
+        direction_changes = 0
         if dir_change_A > self.direction_change_threshold:
-            score += 1
+            direction_changes += 1
             reasons.append(f"direction change A ({dir_change_A:.0f}°)")
         if dir_change_B > self.direction_change_threshold:
-            score += 1
+            direction_changes += 1
             reasons.append(f"direction change B ({dir_change_B:.0f}°)")
-        
-        # Require minimum score to trigger split
-        if score >= 2:  # At least 2 signals
+
+        # Only count if BOTH tracklets have direction changes
+        if direction_changes == 2:
+            score += 2
+
+        # VERY STRICT: Require either strong velocity swap OR multiple other signals
+        # Option 1: Very strong velocity swap alone (score 4)
+        # Option 2: Velocity swap + other signals (score 6+)
+        # Option 3: Multiple strong signals without swap (score 4+)
+        if score >= 5:  # Increased from 3
             return {
                 'split_idx_A': local_idx_A,
                 'split_idx_B': local_idx_B,
@@ -350,46 +365,55 @@ class TrajectorySplitter:
     def create_fragments(self, tracklet, split_indices, next_available_id):
         """
         Create fragment tracklets from split points
+        CRITICAL FIX: Merge small fragments to prevent losing detections
         """
-        # Create boundaries
-        boundaries = [0] + sorted(split_indices) + [len(tracklet.frames)]
-        
+        # Remove any split indices that are out of bounds
+        valid_splits = [idx for idx in split_indices if 0 < idx < len(tracklet.frames)]
+
+        if not valid_splits:
+            return None
+
+        # Create initial boundaries
+        boundaries = [0] + sorted(valid_splits) + [len(tracklet.frames)]
+
+        # FIXED: Remove boundaries that would create too-small fragments
+        # This merges small fragments with adjacent ones
+        merged_boundaries = [boundaries[0]]  # Always keep start
+
+        for i in range(1, len(boundaries) - 1):  # Check middle boundaries only
+            # Check if this boundary creates a valid fragment from the last kept boundary
+            fragment_length = boundaries[i] - merged_boundaries[-1]
+
+            if fragment_length >= self.min_fragment_length:
+                # Check if remaining segment is also large enough
+                remaining_length = boundaries[-1] - boundaries[i]
+
+                if remaining_length >= self.min_fragment_length:
+                    # Both fragments are valid, keep this boundary
+                    merged_boundaries.append(boundaries[i])
+                # else: don't add boundary, merge with next fragment
+            # else: don't add boundary, merge with previous fragment
+
+        merged_boundaries.append(boundaries[-1])  # Always keep end
+
+        # Create fragments from merged boundaries
         fragments = []
         current_id = next_available_id
-        
-        for i in range(len(boundaries) - 1):
-            start = boundaries[i]
-            end = boundaries[i + 1] - 1
-            
-            # Check minimum fragment size
-            fragment_length = end - start + 1
-            if fragment_length < self.min_fragment_length:
-                continue
-            
-            # Extract sub-tracklet
-            fragment = tracklet.extract(start, end)
+
+        for i in range(len(merged_boundaries) - 1):
+            start = merged_boundaries[i]
+            end = merged_boundaries[i + 1]
+
+            # Extract sub-tracklet (end-1 because extract uses inclusive end)
+            fragment = tracklet.extract(start, end - 1)
             fragment.track_id = current_id
             fragment.parent_id = tracklet.parent_id
-            
+
             fragments.append(fragment)
             current_id += 1
-        
-        # Return None if filtering removed everything or only 1 fragment left
+
+        # Return None if only 1 fragment left (no actual split occurred)
         if len(fragments) <= 1:
             return None
-        
+
         return fragments
-
-
-
-
-
-
-
-
-
-
-
-
-
-

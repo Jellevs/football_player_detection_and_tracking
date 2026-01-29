@@ -42,13 +42,15 @@ def main(tracker_cfg, paths, device):
     # Split tracklets
     splitted_tracklets = split_tracklets(attributes_tracklets, splitter_cfg)
 
+
+    print(splitted_tracklets[1].to_dict())
     # Visualize tracklets
-    visualize_tracklets(
-        images,
-        splitted_tracklets,
-        paths.output_path / "videos" / f"{SEQUENCE}_trajectory_splitter.mp4",
-        title="PARSeq Jersey Detection",
-    )
+    # visualize_tracklets(
+    #     images,
+    #     splitted_tracklets,
+    #     paths.output_path / "videos" / f"{SEQUENCE}_all_splitter.mp4",
+    #     title="PARSeq Jersey Detection",
+    # )
 
 
 if __name__ == "__main__":

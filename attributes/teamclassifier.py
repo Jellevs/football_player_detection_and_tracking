@@ -78,4 +78,4 @@ class TeamClassifier:
         # Predict on ALL projections and filter non  players out later
         predictions = cluster_model.predict(all_projections)
         
-        return predictions
+        return predictions, all_features
