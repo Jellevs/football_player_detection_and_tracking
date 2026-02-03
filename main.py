@@ -36,6 +36,12 @@ def main(tracker_cfg, paths, device):
     # Organize detections by frame into tracklets
     tracklets = organize_detections_by_track(tracked_detections)
 
+    visualize_tracklets(
+        images,
+        tracklets,
+        paths.output_path / "videos" / f"{SEQUENCE}_original.mp4",
+        title="PARSeq Jersey Detection",
+    )
 
     # Predict attributes for each tracklet
     attributes_tracklets = predict_attributes(images, tracklets, paths, jersey_cfg, device)
