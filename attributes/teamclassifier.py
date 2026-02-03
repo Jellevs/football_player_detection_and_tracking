@@ -35,21 +35,58 @@ class TeamClassifier:
         """ Extract SigLIP embeddings from crops """
         if len(crops) == 0:
             return np.array([]).reshape(0, 768)
-            
-        crops_pil = [sv.cv2_to_pillow(crop) for crop in crops]
-        batches = list(create_batches(crops_pil, self.batch_size))
+        
+        valid_crops = []
+        valid_indices = []
+        
+        # Pre-validate all crops
+        for idx, crop in enumerate(crops):
+            try:
+                # Validate crop
+                if not isinstance(crop, np.ndarray):
+                    continue
+                if len(crop.shape) != 3 or crop.shape[2] != 3:
+                    continue
+                if crop.shape[0] < 20 or crop.shape[1] < 20:
+                    continue
+                
+                # Try to convert to PIL (this is where it often fails)
+                pil_crop = sv.cv2_to_pillow(crop)
+                valid_crops.append(pil_crop)
+                valid_indices.append(idx)
+            except Exception as e:
+                print(f"Warning: Skipping invalid crop {idx}: {e}")
+                continue
+        
+        if len(valid_crops) == 0:
+            return np.array([]).reshape(0, 768)
+        
+        # Process valid crops in batches
+        batches = list(create_batches(valid_crops, self.batch_size))
         data = []
         
         with torch.no_grad():
             for batch in tqdm(batches, desc="Extracting features", leave=False):
-                inputs = self.processor(
-                    images=batch, return_tensors='pt'
-                ).to(self.device)
-                outputs = self.features_model(**inputs)
-                embeddings = torch.mean(outputs.last_hidden_state, dim=1).cpu().numpy()
-                data.append(embeddings)
-
-        return np.concatenate(data)
+                try:
+                    inputs = self.processor(
+                        images=batch, return_tensors='pt'
+                    ).to(self.device)
+                    outputs = self.features_model(**inputs)
+                    embeddings = torch.mean(outputs.last_hidden_state, dim=1).cpu().numpy()
+                    data.append(embeddings)
+                except Exception as e:
+                    print(f"Warning: Batch processing failed: {e}")
+                    # Return zeros for this batch
+                    data.append(np.zeros((len(batch), 768)))
+        
+        all_embeddings = np.concatenate(data)
+        
+        # Map back to original indices (fill skipped crops with zeros)
+        full_embeddings = np.zeros((len(crops), 768))
+        for i, idx in enumerate(valid_indices):
+            full_embeddings[idx] = all_embeddings[i]
+        
+        return full_embeddings
     
 
     def fit_predict_all(self, all_crops, player_mask):

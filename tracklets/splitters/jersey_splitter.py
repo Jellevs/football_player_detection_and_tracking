@@ -126,7 +126,7 @@ class JerseySplitter():
         window_end = min(start_idx + lookahead, len(jerseys))
         window = [
             j for i, j in enumerate(jerseys[start_idx:window_end])
-            if self.is_valid_number(j, entropies[start_idx + 1])
+            if self.is_valid_number(j, entropies[start_idx + i])
         ]
 
         # Count occurrences of new jersey

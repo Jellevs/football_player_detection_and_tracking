@@ -15,7 +15,7 @@ def predict_attributes(images, tracklets, paths, jersey_cfg, device):
         with open(cache_path, 'rb') as f:
             return pickle.load(f)
 
-
+    print(f"cahce not found for {cache_path}")
     jersey_predictor = JerseyNumberPredictorParseq(
         paths=paths,
         jersey_cfg=jersey_cfg,

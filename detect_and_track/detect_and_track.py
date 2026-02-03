@@ -43,21 +43,50 @@ def create_detections(annotations):
     jerseys = []
     teams = []
     roles = []
+    class_ids = []  # ← ADD THIS
     
     for annotation in annotations:
-        # Convert bbox: xywh -> xyxy
+        # Only keep players, goalkeepers and referees
+        if annotation.get('category_id') not in [1, 2, 3]:
+            continue
+        
         b = annotation['bbox_image']
+        
+        # ========== MINIMAL FILTERING ==========
+        # Only filter truly broken annotations
+        
+        # Filter 1: Absurdly small (annotation errors)
+        if b['w'] < 10 or b['h'] < 10:
+            continue
+        
+        # Filter 2: Impossible aspect ratios (lines/artifacts)
+        if b['h'] > 0:
+            aspect_ratio = b['w'] / b['h']
+            if aspect_ratio < 0.1 or aspect_ratio > 5.0:
+                continue
+        
+        # Filter 3: Area check for complete garbage
+        area = b['w'] * b['h']
+        if area < 200:
+            continue
+        
+        # =======================================
+        # If we get here, keep this detection
+        
         bboxes.append([b['x'], b['y'], b['x'] + b['w'], b['y'] + b['h']])
-
         track_ids.append(annotation.get('track_id', -1))
         jerseys.append(annotation.get('attributes', {}).get('jersey', -1))
         teams.append(annotation.get('attributes', {}).get('team', -1))
         roles.append(annotation.get('attributes', {}).get('role', -1))
-
+        class_ids.append(annotation['category_id'])  # ← ADD THIS
+    
+    if not bboxes:
+        return sv.Detections.empty()
+    
     detections = sv.Detections(
         xyxy=np.array(bboxes, dtype=np.float32),
         confidence=np.ones(len(bboxes), dtype=np.float32),
-        class_id=np.array([annotation['category_id'] for annotation in annotations], dtype=int),
+        class_id=np.array(class_ids, dtype=int),  # ← USE THIS instead of list comprehension
     )
     
     detections.data = {

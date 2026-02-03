@@ -38,7 +38,7 @@ class JerseyNumberPredictorParseq:
         indices_for_teams = indices.copy()
 
         if not full_crops:
-            return [], [], np.full(num_frames, np.nan), np.zeros(num_frames)
+            return [], [], np.full(num_frames, np.nan), np.zeros(num_frames), np.ones(num_frames)
         
         # Stage 1: ReID outlier filtering
         if self.reid_filter and tracklet.embeddings:
@@ -92,7 +92,6 @@ class JerseyNumberPredictorParseq:
                 
             full_crop_rgb = cv2.cvtColor(full_crop, cv2.COLOR_BGR2RGB)
 
-
             # Get torso crop using pose estimation or fallback to heuristic
             if self.pose_cropper:
                 result = self.pose_cropper.get_torso_crop(image, bbox, return_keypoints=True)
@@ -101,18 +100,65 @@ class JerseyNumberPredictorParseq:
                     all_keypoints.append(keypoints)
                     all_scores.append(scores)
                 else:
-                    torso_crop =  self.simple_torso_crop(full_crop_rgb)
+                    torso_crop = self.simple_torso_crop(full_crop_rgb)
                     all_keypoints.append(None)
                     all_scores.append(None)
-
             else:
-                torso_crop =  self.simple_torso_crop(full_crop_rgb)
+                torso_crop = self.simple_torso_crop(full_crop_rgb)
                 all_keypoints.append(None)
                 all_scores.append(None)
 
-            if torso_crop is None or torso_crop.size == 0:
+            # ========== ROBUST VALIDATION ==========
+            # Skip if torso crop is invalid
+            if torso_crop is None:
                 continue
+                
+            # Must be numpy array
+            if not isinstance(torso_crop, np.ndarray):
+                continue
+                
+            # Must be non-empty
+            if torso_crop.size == 0:
+                continue
+            
+            # Must have exactly 3 dimensions (height, width, channels)
+            if len(torso_crop.shape) != 3:
+                continue
+            
+            height, width, channels = torso_crop.shape
+            
+            # Must be RGB (3 channels)
+            if channels != 3:
+                continue
+            
+            # Minimum reasonable size (at least 20x20 pixels)
+            if height < 20 or width < 20:
+                continue
+            
+            # Maximum reasonable size (sanity check - should be smaller than original image)
+            if height > h or width > w:
+                continue
+            
+            # Check for degenerate aspect ratios (too thin/tall)
+            aspect_ratio = width / height
+            if aspect_ratio < 0.1 or aspect_ratio > 10.0:
+                continue
+            # ==========================================
 
+
+            
+            # Extra validation just before append
+            try:
+                # Test if crop can be converted to PIL
+                from PIL import Image
+                test_pil = Image.fromarray(torso_crop)
+                if test_pil.size[0] < 20 or test_pil.size[1] < 20:
+                    print(f"Skipping tiny PIL crop: {test_pil.size}")
+                    continue
+            except Exception as e:
+                print(f"Failed PIL conversion test: {e}, shape={torso_crop.shape}")
+                continue
+            
             full_crops.append(full_crop_rgb)
             torso_crops.append(torso_crop)
             indices.append(i)
@@ -213,7 +259,7 @@ class JerseyNumberPredictorParseq:
 
                     confs_mean.append(float(conf_values.mean()))
 
-                    probs_clipped = np.clip(conf_values.mean())
+                    probs_clipped = np.clip(conf_values.mean())     # BUG? SHOULD MAYBE BE ARRAY probs_clipped = np.clip(conf_values, 1e-10, 1.0)
                     entropy = float(-np.sum(probs_clipped * np.log(probs_clipped)))
                     entropies.append(entropy)
                 else:
