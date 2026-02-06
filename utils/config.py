@@ -14,6 +14,7 @@ class Paths:
     centroid_reid_path: Path
     siglip_model_path: Path
     vitpose_model_path: Path
+    evaluation_path: Path
     sequence: str
 
     def set_cache_path(self, name, sequence):
@@ -60,3 +61,12 @@ class SplitterConfig:
     team_min_persistence: int = 5
     team_min_fragment: int = 10
     team_lookahead: int = 50
+
+
+@dataclass
+class MergerConfig:
+    xgboost_model_path: Path = None
+    pca_model_path: Path = None
+    merge_threshold: float = 0.5
+    linkage_method: str = 'average'
+    max_temporal_gap: int = 100

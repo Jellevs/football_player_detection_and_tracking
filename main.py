@@ -46,50 +46,20 @@ def main(tracker_cfg, paths, device):
         title="PARSeq Jersey Detection",
     )
     # Predict attributes for each tracklet
-    attributes_tracklets = predict_attributes(images, tracklets, paths, jersey_cfg, device)
+    # attributes_tracklets = predict_attributes(images, tracklets, paths, jersey_cfg, device)
 
     # # Split tracklets
-    splitted_tracklets = split_tracklets(attributes_tracklets, splitter_cfg)
+    # splitted_tracklets = split_tracklets(attributes_tracklets, splitter_cfg)
 
 
-    # aggregator = FragmentAggregator()
-    # aggregated_fragments = []
-    # for track_id, tracklet in splitted_tracklets.items():
-    #     agg = aggregator.aggregate_tracklet(tracklet)
-    #     if agg is not None:
-    #         aggregated_fragments.append(agg)
-    
-    # print(f"Aggregated {len(aggregated_fragments)} fragments")
-    
-    # # ========== APPLY PCA (NEW!) ==========
-    # pca_reducer = PCAReducer(siglip_components=16, reid_components=8)
-    # aggregated_fragments = pca_reducer.fit_transform(aggregated_fragments)
-    
-    # # Save PCA models
-    # pca_output_dir = paths.output_path / "training_data" / "pca_models"
-    # pca_reducer.save(pca_output_dir)
-    
-    # # ========== GENERATE PAIRS ==========
-    # pair_generator = PairGenerator(
-    #     max_temporal_gap=100,
-    #     include_all_positives=True,
-    #     negative_sampling_ratio=2.0
-    # )
-    
-    # pairs = pair_generator.generate_pairs(aggregated_fragments)
-    
-    # # Save to CSV
-    # saver = DataSaver(paths.output_path / "training_data")
-    # csv_path = saver.save_pairs_to_csv(pairs, filename=f"{paths.sequence}_pairs.csv")
-    
-    # return csv_path
+
     # Visualize tracklets
-    visualize_tracklets(
-        images,
-        splitted_tracklets,
-        paths.output_path / "videos" / f"{SEQUENCE}_all_splitter.mp4",
-        title="PARSeq Jersey Detection",
-    )
+    # visualize_tracklets(
+    #     images,
+    #     splitted_tracklets,
+    #     paths.output_path / "videos" / f"{SEQUENCE}_all_splitter.mp4",
+    #     title="PARSeq Jersey Detection",
+    # )
 
 
 if __name__ == "__main__":
@@ -109,8 +79,8 @@ if __name__ == "__main__":
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     
-    SEQUENCE = "SNGS-123"
-    DATA_ROOT = Path(r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\data\soccernet\data\SoccerNetGS\test")
+    SEQUENCE = "SNGS-061"
+    DATA_ROOT = Path(r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\data\soccernet\data\SoccerNetGS\train")
     OUTPUT_ROOT = Path(r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\output")
     WEIGHTS_ROOT = Path(r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\weights")
     

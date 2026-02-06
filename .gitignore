@@ -1,5 +1,5 @@
 weights/
 output/
 pose/
-
+evaluation/
 test_parseq.py
