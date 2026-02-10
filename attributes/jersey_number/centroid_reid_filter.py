@@ -45,9 +45,10 @@ def _patched_setattr(self, name, value):
 # Apply the patch to the errors
 pl.LightningModule.__setattr__ = _patched_setattr
 
-from train_ctl_model import CTLModel
-from datasets.transforms import ReidTransforms
-from config import cfg
+
+from .centroids_reid.train_ctl_model import CTLModel
+from .centroids_reid.datasets.transforms import ReidTransforms
+from .centroids_reid.config import cfg
 
 
 class CentroidReIDFilter:
