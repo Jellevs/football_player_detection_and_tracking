@@ -1,4 +1,6 @@
 weights/
 output/
 evaluation/
+sn-trackeval/
+trackeval_lite/
 test_parseq.py
