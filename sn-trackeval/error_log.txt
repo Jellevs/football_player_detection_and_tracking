@@ -1,0 +1,21 @@
+MotChallenge2DBox
+after_merge
+Traceback (most recent call last):
+  File "C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\sn-trackeval\trackeval\eval.py", line 113, in evaluate
+    res[curr_seq] = eval_sequence(curr_seq, dataset, tracker, class_list, metrics_list,
+  File "C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\sn-trackeval\trackeval\_timing.py", line 17, in wrap
+    result = f(*args, **kw)
+  File "C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\sn-trackeval\trackeval\eval.py", line 221, in eval_sequence
+    raw_data = dataset.get_raw_seq_data(tracker, seq)
+  File "C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\sn-trackeval\trackeval\_timing.py", line 17, in wrap
+    result = f(*args, **kw)
+  File "C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\sn-trackeval\trackeval\datasets\_base_dataset.py", line 92, in get_raw_seq_data
+    raw_gt_data = self._load_raw_file(tracker, seq, is_gt=True)
+  File "C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\sn-trackeval\trackeval\datasets\mot_challenge_2d_box.py", line 255, in _load_raw_file
+    raise TrackEvalException(
+trackeval.utils.TrackEvalException: GT data is not in a valid format, there is not enough rows in seq SNMOT-116, timestep 0.
+
+
+
+
+
