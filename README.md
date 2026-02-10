@@ -3,12 +3,6 @@ Install:
 2. uv pip install pytorch with cuda
 
 
-Create folders inside jersey_number directory:
-- parseq: clone parseq https://github.com/baudm/parseq
-- pose: clone ViTPose https://github.com/ViTAE-Transformer/ViTPose (not needed anymore)
-- reid: clone centroid reid https://github.com/mikwieczorek/centroids-reid (some import issue you have to fix)
-
-
 put model weights inside weights folder
 
 
