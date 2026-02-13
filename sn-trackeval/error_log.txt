@@ -19,3 +19,129 @@ trackeval.utils.TrackEvalException: GT data is not in a valid format, there is n
 
 
 
+MotChallenge2DBox
+after_gta
+Traceback (most recent call last):
+  File "C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\sn-trackeval\trackeval\eval.py", line 113, in evaluate
+    res[curr_seq] = eval_sequence(curr_seq, dataset, tracker, class_list, metrics_list,
+  File "C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\sn-trackeval\trackeval\_timing.py", line 17, in wrap
+    result = f(*args, **kw)
+  File "C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\sn-trackeval\trackeval\eval.py", line 225, in eval_sequence
+    data = dataset.get_preprocessed_seq_data(raw_data, cls)
+  File "C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\sn-trackeval\trackeval\_timing.py", line 17, in wrap
+    result = f(*args, **kw)
+  File "C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\sn-trackeval\trackeval\datasets\mot_challenge_2d_box.py", line 323, in get_preprocessed_seq_data
+    self._check_unique_ids(raw_data)
+  File "C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\sn-trackeval\trackeval\datasets\_base_dataset.py", line 315, in _check_unique_ids
+    raise TrackEvalException(exc_str)
+trackeval.utils.TrackEvalException: Tracker predicts the same ID more than once in a single timestep (seq: SNMOT-116, frame: 1, ids: 4 5 11)
+
+
+
+
+
+MotChallenge2DBox
+after_gta
+Traceback (most recent call last):
+  File "C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\sn-trackeval\trackeval\eval.py", line 113, in evaluate
+    res[curr_seq] = eval_sequence(curr_seq, dataset, tracker, class_list, metrics_list,
+  File "C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\sn-trackeval\trackeval\_timing.py", line 17, in wrap
+    result = f(*args, **kw)
+  File "C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\sn-trackeval\trackeval\eval.py", line 225, in eval_sequence
+    data = dataset.get_preprocessed_seq_data(raw_data, cls)
+  File "C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\sn-trackeval\trackeval\_timing.py", line 17, in wrap
+    result = f(*args, **kw)
+  File "C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\sn-trackeval\trackeval\datasets\mot_challenge_2d_box.py", line 323, in get_preprocessed_seq_data
+    self._check_unique_ids(raw_data)
+  File "C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\sn-trackeval\trackeval\datasets\_base_dataset.py", line 315, in _check_unique_ids
+    raise TrackEvalException(exc_str)
+trackeval.utils.TrackEvalException: Tracker predicts the same ID more than once in a single timestep (seq: SNMOT-116, frame: 1, ids: 5 6 8)
+
+
+
+
+
+MotChallenge2DBox
+after_gta
+Traceback (most recent call last):
+  File "C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\sn-trackeval\trackeval\eval.py", line 113, in evaluate
+    res[curr_seq] = eval_sequence(curr_seq, dataset, tracker, class_list, metrics_list,
+  File "C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\sn-trackeval\trackeval\_timing.py", line 17, in wrap
+    result = f(*args, **kw)
+  File "C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\sn-trackeval\trackeval\eval.py", line 225, in eval_sequence
+    data = dataset.get_preprocessed_seq_data(raw_data, cls)
+  File "C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\sn-trackeval\trackeval\_timing.py", line 17, in wrap
+    result = f(*args, **kw)
+  File "C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\sn-trackeval\trackeval\datasets\mot_challenge_2d_box.py", line 323, in get_preprocessed_seq_data
+    self._check_unique_ids(raw_data)
+  File "C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\sn-trackeval\trackeval\datasets\_base_dataset.py", line 315, in _check_unique_ids
+    raise TrackEvalException(exc_str)
+trackeval.utils.TrackEvalException: Tracker predicts the same ID more than once in a single timestep (seq: SNMOT-116, frame: 1, ids: 4 5 11)
+
+
+
+
+
+MotChallenge2DBox
+after_gta
+Traceback (most recent call last):
+  File "C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\sn-trackeval\trackeval\eval.py", line 113, in evaluate
+    res[curr_seq] = eval_sequence(curr_seq, dataset, tracker, class_list, metrics_list,
+  File "C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\sn-trackeval\trackeval\_timing.py", line 17, in wrap
+    result = f(*args, **kw)
+  File "C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\sn-trackeval\trackeval\eval.py", line 225, in eval_sequence
+    data = dataset.get_preprocessed_seq_data(raw_data, cls)
+  File "C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\sn-trackeval\trackeval\_timing.py", line 17, in wrap
+    result = f(*args, **kw)
+  File "C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\sn-trackeval\trackeval\datasets\mot_challenge_2d_box.py", line 323, in get_preprocessed_seq_data
+    self._check_unique_ids(raw_data)
+  File "C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\sn-trackeval\trackeval\datasets\_base_dataset.py", line 315, in _check_unique_ids
+    raise TrackEvalException(exc_str)
+trackeval.utils.TrackEvalException: Tracker predicts the same ID more than once in a single timestep (seq: SNMOT-116, frame: 1, ids: 17)
+
+
+
+
+
+MotChallenge2DBox
+after_gta
+Traceback (most recent call last):
+  File "C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\sn-trackeval\trackeval\eval.py", line 113, in evaluate
+    res[curr_seq] = eval_sequence(curr_seq, dataset, tracker, class_list, metrics_list,
+  File "C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\sn-trackeval\trackeval\_timing.py", line 17, in wrap
+    result = f(*args, **kw)
+  File "C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\sn-trackeval\trackeval\eval.py", line 225, in eval_sequence
+    data = dataset.get_preprocessed_seq_data(raw_data, cls)
+  File "C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\sn-trackeval\trackeval\_timing.py", line 17, in wrap
+    result = f(*args, **kw)
+  File "C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\sn-trackeval\trackeval\datasets\mot_challenge_2d_box.py", line 323, in get_preprocessed_seq_data
+    self._check_unique_ids(raw_data)
+  File "C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\sn-trackeval\trackeval\datasets\_base_dataset.py", line 315, in _check_unique_ids
+    raise TrackEvalException(exc_str)
+trackeval.utils.TrackEvalException: Tracker predicts the same ID more than once in a single timestep (seq: SNMOT-116, frame: 1, ids: 4 5 11)
+
+
+
+
+
+MotChallenge2DBox
+after_merge
+Traceback (most recent call last):
+  File "C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\sn-trackeval\trackeval\eval.py", line 113, in evaluate
+    res[curr_seq] = eval_sequence(curr_seq, dataset, tracker, class_list, metrics_list,
+  File "C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\sn-trackeval\trackeval\_timing.py", line 17, in wrap
+    result = f(*args, **kw)
+  File "C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\sn-trackeval\trackeval\eval.py", line 225, in eval_sequence
+    data = dataset.get_preprocessed_seq_data(raw_data, cls)
+  File "C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\sn-trackeval\trackeval\_timing.py", line 17, in wrap
+    result = f(*args, **kw)
+  File "C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\sn-trackeval\trackeval\datasets\mot_challenge_2d_box.py", line 323, in get_preprocessed_seq_data
+    self._check_unique_ids(raw_data)
+  File "C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\sn-trackeval\trackeval\datasets\_base_dataset.py", line 315, in _check_unique_ids
+    raise TrackEvalException(exc_str)
+trackeval.utils.TrackEvalException: Tracker predicts the same ID more than once in a single timestep (seq: SNMOT-121, frame: 685, ids: 5)
+
+
+
+
+

@@ -18,6 +18,7 @@ from gta_link.refine_tracklets import split_tracklets as split_gta, merge_trackl
 from tracklets.soccer_aware_merger import SoccerAwareMerger
 
 def main(sequence, tracker_cfg, jersey_cfg, splitter_cfg, merger_cfg, device):
+
     # Paths config
     paths = Paths(
         img_path=DATA_ROOT / sequence / "img1",
@@ -51,63 +52,14 @@ def main(sequence, tracker_cfg, jersey_cfg, splitter_cfg, merger_cfg, device):
 
     images = load_images(img_dir=paths.img_path)
     tracked_detections = detect_and_track(images, tracker, paths)
+    
     tracklets = organize_detections_by_track(tracked_detections)
 
-    attributes_tracklets = predict_attributes(images, tracklets, paths, jersey_cfg, device)
-
-
-    max_x_range, max_y_range = get_spatial_constraints(attributes_tracklets, 1)
-
-    splitted_gta_tracklets = split_gta(
-        tracklets,
-        eps=0.7,
-        max_k=3,
-        min_samples=10,
-        len_thres=100
-    )
-
-    gta_tracklets = copy.deepcopy(splitted_gta_tracklets)
-    xgb_tracklets = copy.deepcopy(splitted_gta_tracklets)
-    simple_tracklets = copy.deepcopy(splitted_gta_tracklets)
-
-    # splitted_tracklets = split_tracklets(splitted_gta_tracklets, splitter_cfg)
-
-
-    # merger = TrackletMerger(merger_cfg=merger_cfg)
-    # merged_xgb_tracklets = merger.merge_tracklets(xgb_tracklets)
-
-    # soccer_merger = SoccerAwareMerger()
-    # soccer_merged_tracklets = soccer_merger.merge(simple_tracklets)
-    
-
-    distance_matrix = get_distance_matrix(gta_tracklets)
-
-    merged_gta_tracklets = merge_gta(
-        gta_tracklets,
-        {},
-        distance_matrix,
-        paths.sequence,
-        max_x_range,
-        max_y_range,
-        0.4
-    )
-
-
-    # Save MOT files in sn-trackeval format
-    # save_mot_files_for_sn_trackeval(
-    #     tracklets_original=tracklets,
-    #     tracklets_gta=merged_gta_tracklets,
-    #     tracklets_xgb=merged_xgb_tracklets,
-    #     tracklets_simple_merge=soccer_merged_tracklets,
-    #     output_dir=paths.evaluation_path,
-    #     sequence_name=paths.sequence
-    # )
-
     save_mot_file_for_sn_trackeval(
-        tracklets_original=tracklets,
-        tracklets=merged_gta_tracklets,
-        output_dir=paths.evaluation_path,
-        sequence_name=paths.sequence
+        tracklets_dict=tracklets,
+        output_path=paths.evaluation_path,
+        sequence_name=sequence,
+        stage_name="baseline"
     )
 
 

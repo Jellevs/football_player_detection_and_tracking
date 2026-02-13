@@ -429,7 +429,7 @@ def generate_all_training_data(sequences, data_root, output_root, weights_root, 
     print(f"\nTotal fragments collected: {total_fragments}")
     
     # ========== PHASE 2: Fit or load PCA ==========
-    pca_output_dir = output_root / "training_data" / "pca_models"
+    pca_output_dir = weights_root / "pca_models"
     pca_reducer = PCAReducer(siglip_components=16, reid_components=8)
 
     if fit_pca:

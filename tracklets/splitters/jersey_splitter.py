@@ -37,7 +37,8 @@ class JerseySplitter():
 
         for i in range(len(boundaries) - 1):
             start = boundaries[i]
-            end = boundaries[i + 1] - 1
+            end = boundaries[i + 1] # TODO: check if works
+            # end = boundaries[i + 1] - 1
 
             # Check minimum fragment size
             fragment_length = end - start + 1

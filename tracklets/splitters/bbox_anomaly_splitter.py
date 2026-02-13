@@ -205,7 +205,7 @@ class BboxAnomalySplitter:
             end = merged_boundaries[i + 1]
             
             # Extract sub-tracklet (end-1 because extract uses inclusive end)
-            fragment = tracklet.extract(start, end - 1)
+            fragment = tracklet.extract(start, end)
             fragment.track_id = current_id
             fragment.parent_id = tracklet.parent_id
             

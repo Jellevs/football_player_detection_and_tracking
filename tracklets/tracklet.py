@@ -38,7 +38,16 @@ class Tracklet:
             return value
         return [value]
 
-    
+    @property
+    def times(self):
+        """Alias for frames - GTA compatibility"""
+        return self.frames
+
+    @property
+    def features(self):
+        """Alias for embeddings - GTA compatibility"""
+        return self.embeddings
+
     def append_from_detection(self, frame_idx, detection_idx, detections):
         """ Append data from a detection object. """
 
@@ -103,3 +112,36 @@ class Tracklet:
             # 'final_team': self.final_team,
             # 'final_role': self.final_role
         }
+
+
+    # --- GTA Compatibility Section ---
+
+    @property
+    def times(self):
+        """Alias for frames - GTA compatibility"""
+        return self.frames
+
+    @times.setter
+    def times(self, value):
+        """Allows GTA to overwrite/extend frames using the 'times' alias"""
+        self.frames = value
+
+    @property
+    def features(self):
+        """Alias for embeddings - GTA compatibility"""
+        return self.embeddings
+
+    @features.setter
+    def features(self, value):
+        """Allows GTA to overwrite/extend embeddings using the 'features' alias"""
+        self.embeddings = value
+
+    # ----------------------------------
+    def append_emb(self, emb):
+        '''
+        Appends a feature vector to the tracklet.
+
+        Args:
+            feat (np.array): Feature vector of shape (512,).
+        '''
+        self.embeddings.append(emb)

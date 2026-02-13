@@ -3,6 +3,12 @@ from pathlib import Path
 
 
 @dataclass
+class Roots:
+    DATA_ROOT: Path
+    OUTPUT_ROOT: Path
+    WEIGHTS_ROOT: Path
+
+@dataclass
 class Paths:
     img_path: Path
     gt_detections_path: Path

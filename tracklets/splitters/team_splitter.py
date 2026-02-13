@@ -36,7 +36,8 @@ class TeamSplitter():
 
         for i in range(len(boundaries) - 1):
             start = boundaries[i]
-            end = boundaries[i + 1] - 1
+            # end = boundaries[i + 1] - 1
+            end = boundaries[i + 1] # TODO: check if this works
 
             # Check minimum fragment size
             fragment_length = end - start + 1

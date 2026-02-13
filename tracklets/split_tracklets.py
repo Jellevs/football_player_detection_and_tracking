@@ -22,13 +22,13 @@ def split_tracklets(tracklets, splitter_cfg):
     team_splitter = TeamSplitter(splitter_cfg)
     tracklets_after_team = split_by_team(tracklets_after_jersey, team_splitter)
 
-    trajectory_splitter = TrajectorySplitter(splitter_cfg)
-    tracklets_after_trajectory = trajectory_splitter.split_all_tracklets(tracklets_after_team)
+    # trajectory_splitter = TrajectorySplitter(splitter_cfg)
+    # tracklets_after_trajectory = trajectory_splitter.split_all_tracklets(tracklets_after_team)
 
-    bbox_anomaly_splitter = BboxAnomalySplitter(splitter_cfg)
-    tracklets_after_bbox_anomaly = split_by_bbox_velocity(tracklets_after_trajectory, bbox_anomaly_splitter)
+    # bbox_anomaly_splitter = BboxAnomalySplitter(splitter_cfg)
+    # tracklets_after_bbox_anomaly = split_by_bbox_velocity(tracklets_after_trajectory, bbox_anomaly_splitter)
 
-    return tracklets_after_bbox_anomaly
+    return tracklets_after_team
 
 
 
