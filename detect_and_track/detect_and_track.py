@@ -47,7 +47,7 @@ def create_detections(annotations):
     
     for annotation in annotations:
         # Only keep players, goalkeepers and referees
-        if annotation.get('category_id') not in [1, 2, 3]:
+        if annotation.get('category_id') not in [1, 2, 3, 4]:
             continue
         
         b = annotation['bbox_image']

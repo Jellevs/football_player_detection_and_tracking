@@ -12,10 +12,10 @@ from detect_and_track.trackers.Deep_EIoU import DeepEIOUTracker
 from attributes.attributes import predict_attributes
 from tracklets.split_tracklets import split_tracklets
 from tracklets.tracklet_merger import TrackletMerger
+from tracklets.soccer_aware_merger import SoccerAwareMerger
 
 # Import GTA
-from gta_link.refine_tracklets import split_tracklets as split_gta, merge_tracklets as merge_gta, get_spatial_constraints, get_distance_matrix
-from tracklets.soccer_aware_merger import SoccerAwareMerger
+from tracklets.splitters.gta_splitter import split_tracklets as split_tracklets_gta, merge_tracklets as merge_tracklets_gta
 
 def main(sequence, tracker_cfg, jersey_cfg, splitter_cfg, merger_cfg, device):
 
@@ -26,7 +26,8 @@ def main(sequence, tracker_cfg, jersey_cfg, splitter_cfg, merger_cfg, device):
         output_path=OUTPUT_ROOT,
         cache_path=OUTPUT_ROOT / "cache",
         legibility_model_path=WEIGHTS_ROOT / "jersey_weights" / "legibility" / "output.pth",
-        reid_model_path=WEIGHTS_ROOT / "jersey_weights" / "reid" / "osnet_x0_25_msmt17.pt",
+        # reid_model_path=WEIGHTS_ROOT / "jersey_weights" / "reid" / "osnet_x0_25_msmt17.pt",
+        reid_model_path = PARENT_ROOT / "gta_link" / "reid_checkpoints" / "sports_model.pth.tar-60",
         parseq_model_path=WEIGHTS_ROOT / "jersey_weights" / "parseq" / "parseq_epoch=24-step=2575-val_accuracy=95.6044-val_NED=96.3255.ckpt",
         centroid_reid_path=WEIGHTS_ROOT / "jersey_weights" / "centroid_reid" / "market1501_resnet50_256_128_epoch_120.ckpt",
         siglip_model_path=WEIGHTS_ROOT / "team_weights" / "siglip",
@@ -54,14 +55,29 @@ def main(sequence, tracker_cfg, jersey_cfg, splitter_cfg, merger_cfg, device):
     tracked_detections = detect_and_track(images, tracker, paths)
     
     tracklets = organize_detections_by_track(tracked_detections)
+    attributes_tracklets = predict_attributes(images, tracklets, paths, jersey_cfg, device)
+
+    splitted_tracklets = split_tracklets_gta(attributes_tracklets, eps=0.6, max_k=3, min_samples=5, len_thres=100)
+
+    # soccer_merger = SoccerAwareMerger()
+    # soccer_merged_tracklets = soccer_merger.merge(splitted_tracklets)
+
+    merged_tracklets = merge_tracklets_gta(
+        splitted_tracklets, dict(), seq_name=sequence, merge_dist_thres=0.4)
 
     save_mot_file_for_sn_trackeval(
-        tracklets_dict=tracklets,
+        tracklets_dict=merged_tracklets,
         output_path=paths.evaluation_path,
         sequence_name=sequence,
-        stage_name="baseline"
+        stage_name="tracklets_gta_merged"
     )
 
+    # visualize_tracklets(
+    #     images,
+    #     tracklets,
+    #     paths.output_path / "videos" / f"{sequence}_original.mp4",
+    #     title="PARSeq Jersey Detection",
+    # )
 
 if __name__ == "__main__":
     
@@ -83,7 +99,9 @@ if __name__ == "__main__":
         proximity_thresh=0.5,
         appearance_thresh=0.2,
         with_reid=True,
-        reid_model_name="osnet_x0_25",
+        # reid_model_name="osnet_x0_25",
+        reid_model_name="osnet_x1_0",
+
         frame_rate=25
     )
     

@@ -7,9 +7,10 @@ from functools import partial
 from collections import OrderedDict
 import torch
 import torch.nn as nn
+import numpy as np
 
 from .tools import mkdir_if_missing
-
+torch.serialization.add_safe_globals([np.core.multiarray.scalar])
 __all__ = [
     'save_checkpoint', 'load_checkpoint', 'resume_from_checkpoint',
     'open_all_layers', 'open_specified_layers', 'count_num_param',
@@ -82,12 +83,12 @@ def load_checkpoint(fpath):
         raise FileNotFoundError('File is not found at "{}"'.format(fpath))
     map_location = None if torch.cuda.is_available() else 'cpu'
     try:
-        checkpoint = torch.load(fpath, map_location=map_location)
+        checkpoint = torch.load(fpath, map_location=map_location, weights_only=False)
     except UnicodeDecodeError:
         pickle.load = partial(pickle.load, encoding="latin1")
         pickle.Unpickler = partial(pickle.Unpickler, encoding="latin1")
         checkpoint = torch.load(
-            fpath, pickle_module=pickle, map_location=map_location
+            fpath, pickle_module=pickle, map_location=map_location, weights_only=False
         )
     except Exception:
         print('Unable to load checkpoint from "{}"'.format(fpath))

@@ -1,7 +1,7 @@
 import sys
 from pathlib import Path
 
-CENTROIDS_REID_PATH = Path(__file__).parent / 'reid' / 'centroids_reid'
+CENTROIDS_REID_PATH = Path(__file__).parent / 'centroids_reid'
 sys.path.insert(0, str(CENTROIDS_REID_PATH))
 
 import types

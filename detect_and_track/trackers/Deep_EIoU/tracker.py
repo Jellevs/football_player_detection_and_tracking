@@ -98,8 +98,10 @@ class DeepEIOUTracker:
             tracked_confidence.append(track.score)
             tracked_ids.append(track.track_id)
 
-            if self.with_reid and hasattr(track, 'smooth_feat') and track.smooth_feat is not None:
-                tracked_embeddings.append(track.smooth_feat)
+            # if self.with_reid and hasattr(track, 'smooth_feat') and track.smooth_feat is not None:
+            #     tracked_embeddings.append(track.smooth_feat)
+            if self.with_reid and hasattr(track, 'curr_feat') and track.smooth_feat is not None:
+                tracked_embeddings.append(track.curr_feat)
             else:
                 tracked_embeddings.append(np.zeros(512))
             
