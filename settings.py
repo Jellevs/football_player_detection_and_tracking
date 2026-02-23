@@ -36,6 +36,8 @@ JERSEY = dict(
     legibility_arch="resnet34",
     legibility_threshold=0.6,
     reid_threshold_std=0.5,
+    referee_threshold=0.5
+
 )
 
 

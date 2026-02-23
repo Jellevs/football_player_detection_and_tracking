@@ -30,5 +30,6 @@ def build_paths(sequence):
         siglip_model_path=settings.WEIGHTS_ROOT / "team_weights" / "siglip",
         vitpose_model_path=settings.WEIGHTS_ROOT / "jersey_weights" / "vitpose",
         evaluation_path=settings.PROJECT_ROOT / "evaluation",
+        referee_classifier_path =settings.WEIGHTS_ROOT / "referee_weights" / "referee_classifier_segments.pth",
         sequence=sequence,
     )

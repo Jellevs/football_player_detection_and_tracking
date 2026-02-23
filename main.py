@@ -58,6 +58,13 @@ def main(sequence, tracker_cfg, jersey_cfg, splitter_cfg, merger_cfg, device, me
         method_name=method_name
     )
 
+    # visualize_tracklets(
+    #     images=images,
+    #     tracklets_dict=tracklets,
+    #     output_path=paths.output_path / "videos" / f"{sequence}_{method_name}.mp4",
+    #     title="blablabbla",  # Set to None to visualize all frames
+    # )
+
 
 if __name__ == "__main__":
     device, tracker_cfg, jersey_cfg, splitter_cfg, merger_cfg = build_configs()

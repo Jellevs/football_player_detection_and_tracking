@@ -22,6 +22,7 @@ class Paths:
     siglip_model_path: Path
     vitpose_model_path: Path
     evaluation_path: Path
+    referee_classifier_path: Path
     sequence: str
 
     def set_cache_path(self, name, sequence):
@@ -52,6 +53,7 @@ class JerseyPredictorConfig:
     reid_threshold_std: float = 2.0
     debug_tracklet_id: int = None
     debug_dir: Path = None
+    referee_threshold: float = 0.5
 
 
 @dataclass
