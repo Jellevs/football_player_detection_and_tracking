@@ -98,9 +98,7 @@ class DeepEIOUTracker:
             tracked_confidence.append(track.score)
             tracked_ids.append(track.track_id)
 
-            # if self.with_reid and hasattr(track, 'smooth_feat') and track.smooth_feat is not None:
-            #     tracked_embeddings.append(track.smooth_feat)
-            if self.with_reid and hasattr(track, 'curr_feat') and track.smooth_feat is not None:
+            if self.with_reid and hasattr(track, 'curr_feat') and track.curr_feat is not None:
                 tracked_embeddings.append(track.curr_feat)
             else:
                 tracked_embeddings.append(np.zeros(512))
@@ -136,12 +134,9 @@ class DeepEIOUTracker:
         if self.with_reid:
             tracked_detections.data['reid_embedding'] = np.array(tracked_embeddings)
 
-        # Copy attributes
-        if hasattr(detections, 'data') and detections.data:
+        # Copy gt_track_id for pair labeling in training data generation
+        if hasattr(detections, 'data') and detections.data and 'gt_track_id' in detections.data:
             gt_track_ids = []
-            gt_jerseys = []
-            gt_teams = []
-            gt_roles = []
 
             for tracked_box in tracked_xyxy:
                 best_iou = 0
@@ -152,24 +147,13 @@ class DeepEIOUTracker:
                     if iou > best_iou:
                         best_iou = iou
                         best_idx = j
-                        
 
                 if best_iou > 0.5 and best_idx != -1:
-                    gt_track_ids.append(detections.data.get('gt_track_id', [-1])[best_idx])
-                    gt_jerseys.append(detections.data.get('gt_jersey', ['unknown'])[best_idx])
-                    gt_teams.append(detections.data.get('gt_team', ['unknown'])[best_idx])
-                    gt_roles.append(detections.data.get('gt_role', ['unknown'])[best_idx])
-
+                    gt_track_ids.append(detections.data['gt_track_id'][best_idx])
                 else:
                     gt_track_ids.append(-1)
-                    gt_jerseys.append('unknown')
-                    gt_teams.append('unknown')
-                    gt_roles.append('unknown')
 
             tracked_detections.data['gt_track_id'] = np.array(gt_track_ids)
-            tracked_detections.data['gt_jersey'] = np.array(gt_jerseys)
-            tracked_detections.data['gt_team'] = np.array(gt_teams)
-            tracked_detections.data['gt_role'] = np.array(gt_roles)
 
         return tracked_detections
 

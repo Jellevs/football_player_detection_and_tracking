@@ -2,16 +2,14 @@ from pathlib import Path
 
 
 # Paths
-GT_ROOT = Path(r"D:\TUE\Thesis\Code\data\tracking-2023\test\test")
-DATA_ROOT = Path(r"D:\TUE\Thesis\Code\data\gamestate-2024\test")
-OUTPUT_ROOT = Path(r"D:\TUE\Thesis\Code\tracklet_splitter\output")
-WEIGHTS_ROOT = Path(r"D:\TUE\Thesis\Code\tracklet_splitter\weights")
-EVALUATION_ROOT = Path(r"D:\TUE\Thesis\Code\tracklet_splitter\evaluation")
-PROJECT_ROOT = Path(__file__).parent
+DATA_ROOT = Path(r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\data\soccernet\soccernet-player-tracking\test")  # Path to the folder with the images
 
+PROJECT_ROOT = Path(__file__).parent
+OUTPUT_ROOT = Path(PROJECT_ROOT / "output") 
+WEIGHTS_ROOT =  Path(PROJECT_ROOT / "weights")
 
 # Evaluation
-METHOD_NAME = "baseline"
+METHOD_NAME = "only_simple_merge"
 EVAL_SPLIT = "test"  # "train" or "test"
 
 
@@ -34,10 +32,8 @@ JERSEY = dict(
     use_reid_filter=True,
     use_pose_cropper=True,
     legibility_arch="resnet34",
-    legibility_threshold=0.6,
-    reid_threshold_std=0.5,
-    referee_threshold=0.5
-
+    legibility_threshold=0.5,
+    reid_threshold=3.5,
 )
 
 

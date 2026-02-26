@@ -192,13 +192,6 @@ def detect_id_switch(embs, eps=None, min_samples=None, max_clusters=None):
     return n_clusters > 1, labels
 
 
-
-
-
-
-
-
-
 def get_distance(track1_id, track2_id, track1, track2):
     """
     Calculates the cosine distance between two tracks using CPU for memory efficiency.

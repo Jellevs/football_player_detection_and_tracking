@@ -22,11 +22,11 @@ def save_mot_file_for_sn_trackeval(
     """
     # Create output directory structure
     # evaluation/SNMOT/{stage_name}/data/{sequence_name}.txt
-    mot_dir = output_path / "SNMOT" / method_name / "data"
+    mot_dir = output_path / "SNPT" / method_name / "data"
     mot_dir.mkdir(parents=True, exist_ok=True)
     
     seq_number = sequence_name.split('-')[1]
-    snmot_name = f"SNMOT-{seq_number}"
+    snmot_name = f"SNPT-{seq_number}"
 
     mot_file_path = mot_dir / f"{snmot_name}.txt"
 

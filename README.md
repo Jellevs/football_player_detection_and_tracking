@@ -73,13 +73,15 @@ python sn-trackeval/scripts/run_mot_challenge.py `
 --SKIP_SPLIT_FOL True
 
 
+
+### Run evaluation with new dataset SNPT
 python sn-trackeval/scripts/run_mot_challenge.py `
 --BENCHMARK SNMOT `
 --SPLIT_TO_EVAL SNMOT-test `
---GT_FOLDER C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\evaluation\gt\SNMOT-test `
---TRACKERS_FOLDER C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\evaluation\SNMOT\baseline_new_reid `
+--GT_FOLDER "C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\data\soccernet\soccernet-player-tracking\test" `
+--TRACKERS_FOLDER C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\evaluation\SNPT\baseline `
 --TRACKERS_TO_EVAL DeepEIoU_soccernet_Split+Connect_eps0.6_minSamples5_K3_mergeDist0.4_spatial0.7 `
---SEQMAP_FILE C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\evaluation\sequence\SNMOT-test.txt `
+--SEQMAP_FILE C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\evaluation\seqmaps\SNPT-test.txt `
 --METRICS HOTA CLEAR Identity `
 --DO_PREPROC False `
 --USE_PARALLEL False `

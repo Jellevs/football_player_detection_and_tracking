@@ -40,19 +40,36 @@ def main(sequence, tracker_cfg, jersey_cfg, splitter_cfg, merger_cfg, device, me
     # Organize detections into tracklets
     tracklets = organize_detections_by_track(tracked_detections)
 
-    # # Predict attributes for each tracklet
-    # attributes_tracklets = predict_attributes(images, tracklets, paths, jersey_cfg, device)
+    # Predict attributes for each tracklet
+    attributes_tracklets = predict_attributes(images, tracklets, paths, jersey_cfg, device)
 
-    # # Split tracklets based using GTA
-    # splitted_tracklets = split_tracklets_gta(attributes_tracklets, eps=0.6, max_k=3, min_samples=5, len_thres=100)
+    # # Split tracklets based 
+    
+    # using GTA
+    # gta_splitted_tracklets = split_tracklets_gta(attributes_tracklets, eps=0.6, max_k=3, min_samples=5, len_thres=100)
 
-    # # Merge tracklets using GTA
+
+    # Using attribute splitting
+    # splitted_tracklets = split_tracklets(attributes_tracklets, splitter_cfg)
+
+    # print(f"normal {len(attributes_tracklets)}")
+    # print(f"normal {len(gta_splitted_tracklets)}")
+    # print(f"normal {len(splitted_tracklets)}")
+
+    # # Merge tracklets
+
+    #  using GTA
     # merged_tracklets = merge_tracklets_gta(
     #     splitted_tracklets, dict(), seq_name=sequence, merge_dist_thres=0.4)
 
+    # using attribute merging
+    soccer_aware_merger = SoccerAwareMerger(merge_threshold=0.4, spatial_factor=1.0)
+    merged_tracklets = soccer_aware_merger.merge(attributes_tracklets)
+
+
     # Save tracklets in MOT format
     save_mot_file_for_sn_trackeval(
-        tracklets_dict=tracklets,
+        tracklets_dict=merged_tracklets,
         output_path=paths.evaluation_path,
         sequence_name=sequence,
         method_name=method_name
@@ -60,10 +77,16 @@ def main(sequence, tracker_cfg, jersey_cfg, splitter_cfg, merger_cfg, device, me
 
     # visualize_tracklets(
     #     images=images,
-    #     tracklets_dict=tracklets,
+    #     tracklets_dict=attributes_tracklets,
     #     output_path=paths.output_path / "videos" / f"{sequence}_{method_name}.mp4",
-    #     title="blablabbla",  # Set to None to visualize all frames
+    #     title="blablabbla",
     # )
+
+    # from utils.diagnose_jersey_filtering import diagnose_filtering
+    # diagnose_filtering(images, tracklets, paths, jersey_cfg, device, max_tracklets=10)
+
+    # from utils.visualize_jerseys import visualize_jersey_predictions
+    # visualize_jersey_predictions(images, attributes_tracklets, paths.output_path / sequence, max_tracklets=30)
 
 
 if __name__ == "__main__":

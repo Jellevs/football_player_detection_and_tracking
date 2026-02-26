@@ -20,16 +20,15 @@ def build_configs():
 def build_paths(sequence):
     return Paths(
         img_path=settings.DATA_ROOT / sequence / "img1",
-        gt_detections_path=settings.DATA_ROOT / sequence / "Labels-GameState.json",
+        gt_detections_path=settings.DATA_ROOT / sequence / "gt" / "gt.txt",
         output_path=settings.OUTPUT_ROOT,
         cache_path=settings.OUTPUT_ROOT / "cache",
-        legibility_model_path=settings.WEIGHTS_ROOT / "jersey_weights" / "legibility" / "output.pth",
+        legibility_model_path=settings.WEIGHTS_ROOT / "jersey_weights" / "legibility" / "legibility_resnet34_soccer_20240215.pth", # legibility_resnet34_soccer_20240215.pth / output.pth
         reid_model_path=settings.WEIGHTS_ROOT / "reid_weights" / "sports_model.pth.tar-60",
         parseq_model_path=settings.WEIGHTS_ROOT / "jersey_weights" / "parseq" / "parseq_epoch=24-step=2575-val_accuracy=95.6044-val_NED=96.3255.ckpt",
         centroid_reid_path=settings.WEIGHTS_ROOT / "jersey_weights" / "centroid_reid" / "market1501_resnet50_256_128_epoch_120.ckpt",
         siglip_model_path=settings.WEIGHTS_ROOT / "team_weights" / "siglip",
         vitpose_model_path=settings.WEIGHTS_ROOT / "jersey_weights" / "vitpose",
         evaluation_path=settings.PROJECT_ROOT / "evaluation",
-        referee_classifier_path =settings.WEIGHTS_ROOT / "referee_weights" / "referee_classifier_segments.pth",
         sequence=sequence,
     )
