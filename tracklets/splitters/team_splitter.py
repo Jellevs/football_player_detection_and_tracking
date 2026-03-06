@@ -36,8 +36,7 @@ class TeamSplitter():
 
         for i in range(len(boundaries) - 1):
             start = boundaries[i]
-            # end = boundaries[i + 1] - 1
-            end = boundaries[i + 1] # TODO: check if this works
+            end = boundaries[i + 1] - 1
 
             # Check minimum fragment size
             fragment_length = end - start + 1
@@ -110,31 +109,34 @@ class TeamSplitter():
         """ Check if new team persists in the lookahead window """
         lookahead = self.config.team_lookahead
         min_persistence = self.config.team_min_persistence
+        min_ratio = self.config.team_min_persistence_ratio
 
         # Extract window
         window_end = min(start_idx + lookahead, len(teams))
         window = [j for j in teams[start_idx:window_end] if self.is_valid_number(j)]
 
-        # Count occurrences of new teams
+        if len(window) == 0:
+            return False
+
+        # Count occurrences of new team
         new_count = sum(1 for j in window if j == new_team)
 
-        # Must appear at least min_persistence times
+        # Must pass both absolute minimum AND ratio threshold
         if new_count < min_persistence:
+            return False
+        if new_count / len(window) < min_ratio:
             return False
 
         # Should be the dominant value in the window (filters out noise)
-        if len(window) > 0:
-            counts = Counter(window)
-            most_common_team = counts.most_common(1)[0][0]
-            return most_common_team == new_team
-
-        return new_count >= min_persistence
+        counts = Counter(window)
+        most_common_team = counts.most_common(1)[0][0]
+        return most_common_team == new_team
     
 
     def is_valid_number(self, value):
             """ Check if team value is valid """
             if value is None:
                 return False
-            if isinstance(value, int) and np.isnan(value):
+            if isinstance(value, float) and np.isnan(value):
                 return False
             return True

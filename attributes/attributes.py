@@ -28,62 +28,58 @@ def predict_attributes(images, tracklets, paths, jersey_cfg, device):
         paths=paths
     )
 
-    # Phase 1: Extract crops and predict jersey numbers
+    # Phase 1: Predict jersey numbers + collect ReID-filtered torso crops for team classification
+    # The jersey pipeline extracts pose-cropped torsos, applies ReID outlier filtering,
+    # then returns those crops BEFORE legibility filtering — perfect for team classification
+    # (team color is visible even on illegible jersey crops).
     print("Phase 1: Extracting crops and predicting jersey numbers...")
 
-    tracklet_torso_crops = {}
-    tracklet_crop_indices = {}
+    tracklet_team_crops = {}
+    tracklet_team_indices = {}
+    all_team_crops = []
+    all_team_crop_info = []
 
-    all_torso_crops = []
-    all_crop_info = []
+    for track_id, tracklet in tqdm(tracklets.items(), desc="Jersey prediction"):
+        team_crops, team_indices, jerseys, jersey_confs_mean, jersey_entropies = jersey_predictor.predict(images, tracklet)
 
-    for track_id, tracklet in tqdm(tracklets.items(), desc="Processing tracklets"):
-        # Get torso crops for team classification + jersey predictions
-        torso_crops, indices, jerseys, jersey_confs_mean, jersey_entropies = jersey_predictor.predict(images, tracklet)
-
-        # Store jersey predictions
         tracklet.pred_attributes['jerseys'] = jerseys.tolist()
         tracklet.pred_attributes['jersey_confs_mean'] = jersey_confs_mean.tolist()
         tracklet.pred_attributes['jersey_entropies'] = jersey_entropies.tolist()
 
-        # Store torso crops for team classification
-        tracklet_torso_crops[track_id] = torso_crops
-        tracklet_crop_indices[track_id] = indices
+        # Collect ReID-filtered torso crops for team classification
+        tracklet_team_crops[track_id] = team_crops
+        tracklet_team_indices[track_id] = team_indices
 
-        # All tracklets are players or goalkeepers — no GT-based filtering needed
-        for i in range(len(torso_crops)):
-            all_torso_crops.append(torso_crops[i])
-            all_crop_info.append((track_id, i))
+        for local_idx in range(len(team_crops)):
+            all_team_crops.append(team_crops[local_idx])
+            all_team_crop_info.append((track_id, local_idx))
 
-    # Phase 2: Team classification — fit on all crops, no player_mask needed
-    print("Phase 2: Team classification...")
-    team_predictions, siglip_embeddings = team_classifier.fit_predict_all(all_torso_crops)
+    # Phase 2: Team classification — fit on all ReID-filtered torso crops
+    print(f"Phase 2: Team classification ({len(all_team_crops)} crops)...")
+    team_predictions, siglip_embeddings = team_classifier.fit_predict_all(all_team_crops)
+    # team_predictions = team_classifier.fit_predict_all(all_team_crops)
 
     # Phase 3: Map predictions back to tracklets
     print("Phase 3: Mapping predictions to tracklets...")
 
-    prediction_lookup = {}
-    for global_idx, (track_id, local_idx) in enumerate(all_crop_info):
-        prediction_lookup[(track_id, local_idx)] = team_predictions[global_idx]
+    global_idx_lookup = {}
+    for global_idx, (track_id, local_idx) in enumerate(all_team_crop_info):
+        global_idx_lookup[(track_id, local_idx)] = global_idx
 
     for track_id, tracklet in tracklets.items():
-
-        indices = tracklet_crop_indices[track_id]
+        indices = tracklet_team_indices[track_id]
         num_frames = len(tracklet.frames)
 
         teams_full = [np.nan] * num_frames
         siglip_full = [np.zeros(768)] * num_frames
 
-        n_crops = len(tracklet_torso_crops[track_id])
+        n_crops = len(tracklet_team_crops[track_id])
         for local_idx in range(n_crops):
             tracklet_idx = indices[local_idx]
 
-            global_idx = all_crop_info.index((track_id, local_idx))
+            global_idx = global_idx_lookup[(track_id, local_idx)]
             siglip_full[tracklet_idx] = siglip_embeddings[global_idx]
-
-            pred = prediction_lookup.get((track_id, local_idx))
-            if pred is not None:
-                teams_full[tracklet_idx] = pred
+            teams_full[tracklet_idx] = team_predictions[global_idx]
 
         tracklet.pred_attributes['teams'] = teams_full
         tracklet.pred_attributes['siglip_embeddings'] = siglip_full

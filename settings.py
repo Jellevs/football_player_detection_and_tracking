@@ -9,7 +9,7 @@ OUTPUT_ROOT = Path(PROJECT_ROOT / "output")
 WEIGHTS_ROOT =  Path(PROJECT_ROOT / "weights")
 
 # Evaluation
-METHOD_NAME = "only_simple_merge"
+METHOD_NAME = "merge_only_w_reid_splitter"
 EVAL_SPLIT = "test"  # "train" or "test"
 
 
@@ -33,20 +33,30 @@ JERSEY = dict(
     use_pose_cropper=True,
     legibility_arch="resnet34",
     legibility_threshold=0.5,
-    reid_threshold=3.5,
+    reid_threshold=3.0,
 )
 
 
+# 86.715 HOTA
+# SPLITTER = dict(
+#     jersey_min_fragment=20,
+#     jersey_min_persistence=20,
+#     jersey_lookahead=100,
+#     jersey_entropy_threshold=0.01,
+#     team_min_persistence=5,
+#     team_min_fragment=10,
+#     team_lookahead=50,
+# )
+
 SPLITTER = dict(
     jersey_min_fragment=20,
-    jersey_min_persistence=5,
-    jersey_lookahead=20,
-    jersey_lookback=300,
-    jersey_min_pixel_jump=10,
-    jersey_entropy_threshold=0.2,
+    jersey_min_persistence=20,
+    jersey_lookahead=100,
+    jersey_entropy_threshold=0.01,
     team_min_persistence=5,
+    team_min_persistence_ratio=0.8,
     team_min_fragment=10,
-    team_lookahead=50,
+    team_lookahead=100,
 )
 
 

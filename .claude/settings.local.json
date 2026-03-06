@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c:*)",
+      "Bash(ls -la /c/Users/jelle/Documents/TUEindhoven/Master/Thesis/development/tracklet_splitter_scratch/gta*)"
+    ]
+  }
+}

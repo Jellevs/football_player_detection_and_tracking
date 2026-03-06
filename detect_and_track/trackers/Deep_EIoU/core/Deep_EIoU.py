@@ -462,16 +462,22 @@ def sub_stracks(tlista, tlistb):
 
 
 def remove_duplicate_stracks(stracksa, stracksb):
+    # stracksa = tracked_stracks (currently matched to a detection this frame)
+    # stracksb = lost_stracks    (not matched to any detection)
+    #
+    # When both a tracked strack and a lost strack are at the same position
+    # (IoU > 0.85), the original logic removed the tracked one if the lost one
+    # had a longer history (timep=0 < timeq=N). This caused GT detections to
+    # disappear for several frames: the new tracked strack was suppressed, and
+    # the lost strack continued to block new stracks until it expired.
+    #
+    # Fix: always prefer the tracked strack (which just matched a real detection)
+    # over the lost strack (which hasn't matched anything recently).
     pdist = matching.iou_distance(stracksa, stracksb)
     pairs = np.where(pdist < 0.15)
-    dupa, dupb = list(), list()
+    dupb = list()
     for p, q in zip(*pairs):
-        timep = stracksa[p].frame_id - stracksa[p].start_frame
-        timeq = stracksb[q].frame_id - stracksb[q].start_frame
-        if timep > timeq:
-            dupb.append(q)
-        else:
-            dupa.append(p)
-    resa = [t for i, t in enumerate(stracksa) if not i in dupa]
+        dupb.append(q)
+    resa = list(stracksa)
     resb = [t for i, t in enumerate(stracksb) if not i in dupb]
     return resa, resb

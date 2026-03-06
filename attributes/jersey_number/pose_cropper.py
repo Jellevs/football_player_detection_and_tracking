@@ -29,7 +29,7 @@ class PoseCropper:
         self.pad_bottom = 0
         self.pad_top = 5
 
-        self.min_keypoint_conf = 0.3
+        self.min_keypoint_conf = 0.4  # Match Koshkina helpers.py CONFIDENCE_THRESHOLD
         
         print(f"PoseCropper loaded on {self.device}")
     
@@ -126,33 +126,21 @@ class PoseCropper:
         left_hip = keypoints[LEFT_HIP]
         right_hip = keypoints[RIGHT_HIP]
         
-        shoulder_scores = [scores[LEFT_SHOULDER], scores[RIGHT_SHOULDER]]
-        hip_scores = [scores[LEFT_HIP], scores[RIGHT_HIP]]
-        
-        valid_shoulders = sum(s >= self.min_keypoint_conf for s in shoulder_scores)
-        valid_hips = sum(s >= self.min_keypoint_conf for s in hip_scores)
-        
-        if valid_shoulders < 1 or valid_hips < 1:
-            return None
-        
-        x_coords = []
-        y_coords = []
-        
-        if scores[LEFT_SHOULDER] >= self.min_keypoint_conf:
-            x_coords.append(left_shoulder[0])
-            y_coords.append(left_shoulder[1])
-        if scores[RIGHT_SHOULDER] >= self.min_keypoint_conf:
-            x_coords.append(right_shoulder[0])
-            y_coords.append(right_shoulder[1])
-        if scores[LEFT_HIP] >= self.min_keypoint_conf:
-            x_coords.append(left_hip[0])
-            y_coords.append(left_hip[1])
-        if scores[RIGHT_HIP] >= self.min_keypoint_conf:
-            x_coords.append(right_hip[0])
-            y_coords.append(right_hip[1])
-        
-        if not x_coords or not y_coords:
-            return None
+        # Match Koshkina helpers.py get_points(): ALL 4 keypoints must be above
+        # confidence threshold, otherwise skip (return None → fallback to heuristic)
+        all_keypoints = [
+            (LEFT_SHOULDER, left_shoulder),
+            (RIGHT_SHOULDER, right_shoulder),
+            (LEFT_HIP, left_hip),
+            (RIGHT_HIP, right_hip),
+        ]
+
+        for idx, kp in all_keypoints:
+            if scores[idx] < self.min_keypoint_conf:
+                return None
+
+        x_coords = [kp[0] for _, kp in all_keypoints]
+        y_coords = [kp[1] for _, kp in all_keypoints]
         
         x1 = int(min(x_coords) - self.pad_left)
         x2 = int(max(x_coords) + self.pad_right)

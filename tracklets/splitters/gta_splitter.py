@@ -43,6 +43,7 @@ def split_tracklets(tmp_trklets, eps=None, max_k=None, min_samples=None, len_thr
                 tracklets[tid] = trklet
             else:
                 unique_labels = set(clusters)
+                generated_ids = [] # List to track the new IDs for this split
 
                 for label in unique_labels:
                     if label == -1:
@@ -54,7 +55,10 @@ def split_tracklets(tmp_trklets, eps=None, max_k=None, min_samples=None, len_thr
                     assert new_id not in tmp_trklets
                     
                     tracklets[new_id] = Tracklet(new_id, tmp_frames.tolist(), tmp_scores.tolist(), tmp_bboxes.tolist(), embeddings=tmp_embs.tolist())
+                    generated_ids.append(new_id)
                     new_id += 1
+
+                print(f" -> Split Tracklet {tid} into new IDs: {generated_ids}")
 
     assert len(tracklets) >= len(tmp_trklets)
     return tracklets
@@ -146,7 +150,7 @@ def detect_id_switch(embs, eps=None, min_samples=None, max_clusters=None):
         embs = embs[1::2]
 
     embs = np.stack(embs)
-    
+
     # Standardize the embeddings
     scaler = StandardScaler()
     embs_scaled = scaler.fit_transform(embs)

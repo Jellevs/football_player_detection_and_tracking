@@ -18,7 +18,7 @@ def split_tracklets(tracklets, splitter_cfg):
 
 
     # Stage 2: Split by team changes
-    print("\n=== Stage 2: Splitting by team changes ===")
+    # print("\n=== Stage 2: Splitting by team changes ===")
     team_splitter = TeamSplitter(splitter_cfg)
     tracklets_after_team = split_by_team(tracklets_after_jersey, team_splitter)
 
@@ -26,7 +26,7 @@ def split_tracklets(tracklets, splitter_cfg):
     # tracklets_after_trajectory = trajectory_splitter.split_all_tracklets(tracklets_after_team)
 
     # bbox_anomaly_splitter = BboxAnomalySplitter(splitter_cfg)
-    # tracklets_after_bbox_anomaly = split_by_bbox_velocity(tracklets_after_trajectory, bbox_anomaly_splitter)
+    # tracklets_after_bbox_anomaly = split_by_bbox_velocity(tracklets_after_jersey, bbox_anomaly_splitter)
 
     return tracklets_after_team
 

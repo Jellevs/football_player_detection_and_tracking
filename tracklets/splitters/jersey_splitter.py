@@ -37,8 +37,7 @@ class JerseySplitter():
 
         for i in range(len(boundaries) - 1):
             start = boundaries[i]
-            end = boundaries[i + 1] # TODO: check if works
-            # end = boundaries[i + 1] - 1
+            end = boundaries[i + 1] - 1
 
             # Check minimum fragment size
             fragment_length = end - start + 1
@@ -97,6 +96,14 @@ class JerseySplitter():
             if jerseys[i] != current_jersey:
                 candidate = jerseys[i]
 
+                # Skip if the new read is a partial digit read of the current jersey
+                # (e.g. reading "3" when the player wears "33", or "1"/"4" for "14").
+                # A one-digit number that is a substring of a two-digit number (or
+                # vice-versa) is almost certainly an OCR miss, not an identity switch.
+                if self.are_digit_compatible(candidate, current_jersey):
+                    i += 1
+                    continue
+
                 # Verify persistence using a window
                 if self.is_persistent_switch(jerseys, entropies, i, candidate):
                     switch_points.append(i)
@@ -105,6 +112,29 @@ class JerseySplitter():
             i += 1
 
         return switch_points
+
+
+    @staticmethod
+    def are_digit_compatible(jersey_a, jersey_b):
+        """
+        Return True if one number is likely a partial (single-digit) OCR read
+        of a two-digit number.
+
+        Examples that return True (not an identity switch):
+          33 <-> 3   (only one '3' digit was visible)
+          14 <-> 1   (only the tens digit was visible)
+          14 <-> 4   (only the units digit was visible)
+
+        Both directions are checked, so this handles the case where we first
+        see the partial read and then the full number, or vice versa.
+        """
+        s_a = str(int(jersey_a))
+        s_b = str(int(jersey_b))
+        if len(s_a) == 1 and len(s_b) == 2:
+            return s_a in s_b
+        if len(s_a) == 2 and len(s_b) == 1:
+            return s_b in s_a
+        return False
 
 
     def is_valid_number(self, value, entropy):

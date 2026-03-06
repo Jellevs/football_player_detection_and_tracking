@@ -13,7 +13,8 @@ from tracklets.split_tracklets import split_tracklets
 from tracklets.tracklet_merger import TrackletMerger
 from tracklets.soccer_aware_merger import SoccerAwareMerger
 from tracklets.splitters.gta_splitter import split_tracklets as split_tracklets_gta, merge_tracklets as merge_tracklets_gta
-
+from tracklets.splitters.temporal_reid_splitter import TemporalReIDSplitter
+from tracklets.simple_tracklet_merger import  SimpleTrackletMerger
 
 def main(sequence, tracker_cfg, jersey_cfg, splitter_cfg, merger_cfg, device, method_name):
 
@@ -39,32 +40,25 @@ def main(sequence, tracker_cfg, jersey_cfg, splitter_cfg, merger_cfg, device, me
 
     # Organize detections into tracklets
     tracklets = organize_detections_by_track(tracked_detections)
+    
+    
+    # Split at temporal gaps where ReID embeddings indicate different identities
+    # TODO: if no cache run this, if cache don't coz already incorporated in attributes tracklets
+    temporal_splitter = TemporalReIDSplitter(min_gap_frames=10, reid_threshold=0.25)
+    pre_split_tracklets = temporal_splitter.split_all(tracklets)
 
     # Predict attributes for each tracklet
-    attributes_tracklets = predict_attributes(images, tracklets, paths, jersey_cfg, device)
+    attributes_tracklets = predict_attributes(images, pre_split_tracklets, paths, jersey_cfg, device)
 
     # # Split tracklets based 
-    
-    # using GTA
-    # gta_splitted_tracklets = split_tracklets_gta(attributes_tracklets, eps=0.6, max_k=3, min_samples=5, len_thres=100)
+    splitted_tracklets = split_tracklets(attributes_tracklets, splitter_cfg)
 
+    # Merge tracklets
+    # soccer_aware_merger = SoccerAwareMerger(merge_threshold=0.4, spatial_factor=1.0)
+    # merged_tracklets = soccer_aware_merger.merge(splitted_tracklets)
 
-    # Using attribute splitting
-    # splitted_tracklets = split_tracklets(attributes_tracklets, splitter_cfg)
-
-    # print(f"normal {len(attributes_tracklets)}")
-    # print(f"normal {len(gta_splitted_tracklets)}")
-    # print(f"normal {len(splitted_tracklets)}")
-
-    # # Merge tracklets
-
-    #  using GTA
-    # merged_tracklets = merge_tracklets_gta(
-    #     splitted_tracklets, dict(), seq_name=sequence, merge_dist_thres=0.4)
-
-    # using attribute merging
-    soccer_aware_merger = SoccerAwareMerger(merge_threshold=0.4, spatial_factor=1.0)
-    merged_tracklets = soccer_aware_merger.merge(attributes_tracklets)
+    tracklet_merger = SimpleTrackletMerger()
+    merged_tracklets = tracklet_merger.merge(splitted_tracklets)
 
 
     # Save tracklets in MOT format
@@ -77,13 +71,28 @@ def main(sequence, tracker_cfg, jersey_cfg, splitter_cfg, merger_cfg, device, me
 
     # visualize_tracklets(
     #     images=images,
-    #     tracklets_dict=attributes_tracklets,
-    #     output_path=paths.output_path / "videos" / f"{sequence}_{method_name}.mp4",
+    #     tracklets_dict=merged_tracklets,
+    #     output_path=paths.output_path / "videos" / f"{sequence}_merged.mp4",
     #     title="blablabbla",
     # )
 
+    # visualize_tracklets(
+    #     images=images,
+    #     tracklets_dict=splitted_tracklets,
+    #     output_path=paths.output_path / "videos" / f"{sequence}_split.mp4",
+    #     title="blablabbla",
+    # )   
+    
+    # visualize_tracklets(
+    #     images=images,
+    #     tracklets_dict=attributes_tracklets,
+    #     output_path=paths.output_path / "videos" / f"{sequence}_baseline.mp4",
+    #     title="blablabbla",
+    # )
+    
+
     # from utils.diagnose_jersey_filtering import diagnose_filtering
-    # diagnose_filtering(images, tracklets, paths, jersey_cfg, device, max_tracklets=10)
+    # diagnose_filtering(images, tracklets, paths, jersey_cfg, device, max_tracklets=100)
 
     # from utils.visualize_jerseys import visualize_jersey_predictions
     # visualize_jersey_predictions(images, attributes_tracklets, paths.output_path / sequence, max_tracklets=30)

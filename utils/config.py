@@ -143,12 +143,11 @@ class SplitterConfig:
     jersey_min_fragment: int = 20
     jersey_min_persistence: int = 5 
     jersey_lookahead: int = 20
-    jersey_lookback: int = 50
-    jersey_min_pixel_jump: int = 10
     jersey_entropy_threshold: float = 0.2
 
     # Team splitter
     team_min_persistence: int = 5
+    team_min_persistence_ratio: float = 0.8
     team_min_fragment: int = 10
     team_lookahead: int = 50
 
