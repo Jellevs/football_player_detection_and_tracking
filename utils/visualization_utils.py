@@ -21,12 +21,12 @@ def visualize_tracklets(images, tracklets_dict, output_path, title="tracklets"):
     
     bbox_annotator = sv.BoxAnnotator(
         color_lookup=sv.ColorLookup.TRACK,
-        thickness=1
+        thickness=2
     )
     
     label_annotator = sv.LabelAnnotator(
         color_lookup=sv.ColorLookup.TRACK,
-        text_scale=0.25,
+        text_scale=0.4,
         text_thickness=1,
         text_padding=1,
         border_radius=1
@@ -72,8 +72,9 @@ def visualize_tracklets(images, tracklets_dict, output_path, title="tracklets"):
             pred_team_confidence = detection.get('pred_jersey_entropies')
             pred_team_confidence = f"{pred_team_confidence:.4g}" if pred_team_confidence is not None else "X"
             
-            label = f"{tracker_id}|{pred_team_frame}|{pred_jersey_frame}:{pred_team_confidence}"
-                                   
+            label = f"TrackID:{tracker_id}|TeamID:{pred_team_frame}|JerseyNR:#{pred_jersey_frame}"
+            # label = f"{tracker_id}"
+
             labels.append(label)
 
         annotated = bbox_annotator.annotate(image.copy(), detections)

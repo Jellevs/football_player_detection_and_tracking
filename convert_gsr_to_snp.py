@@ -449,24 +449,24 @@ def main():
     )
     parser.add_argument(
         "--gsr_root",
-        required=True,
+        default=r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\data\soccernet\data\SoccerNetGS",
         help="Path to SoccerNetGS root directory (containing train/valid/test folders)"
     )
     parser.add_argument(
         "--output_root",
-        required=True,
+        default=r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\data\soccernet\soccernet-player-tracking",
         help="Path to output SoccerNet-Players root directory"
     )
     parser.add_argument(
         "--copy_images",
         action="store_true",
-        default=False,
+        default=True,
         help="Copy img1 image folders into the output dataset (requires significant disk space)"
     )
     parser.add_argument(
         "--split",
         choices=["train", "valid", "test", "all"],
-        default="all",
+        default="valid",
         help="Which split to convert (default: all)"
     )
     args = parser.parse_args()

@@ -141,15 +141,22 @@ class JerseyPredictorConfig:
 class SplitterConfig:
     # Jersey splitter
     jersey_min_fragment: int = 20
-    jersey_min_persistence: int = 5 
+    jersey_min_persistence: int = 5
     jersey_lookahead: int = 20
     jersey_entropy_threshold: float = 0.2
+    jersey_min_persistence_ratio: float = 0.8
 
     # Team splitter
     team_min_persistence: int = 5
     team_min_persistence_ratio: float = 0.8
     team_min_fragment: int = 10
     team_lookahead: int = 50
+    team_confidence_threshold: float = 0.6  # ignore team predictions below this confidence
+
+    # Unified splitter — joint persistence thresholds (counts across both signals)
+    unified_persistence_both: int = 10    # both jersey and team agree on switch
+    unified_persistence_jersey: int = 20  # only jersey changes (team stable/missing)
+    unified_persistence_team: int = 15    # only team changes (jersey stable/missing)
 
 
 @dataclass

@@ -10,11 +10,28 @@ from detect_and_track.detect_and_track import detect_and_track
 from detect_and_track.trackers.Deep_EIoU import DeepEIOUTracker
 from attributes.attributes import predict_attributes
 from tracklets.split_tracklets import split_tracklets
-from tracklets.tracklet_merger import TrackletMerger
-from tracklets.soccer_aware_merger import SoccerAwareMerger
 from tracklets.splitters.gta_splitter import split_tracklets as split_tracklets_gta, merge_tracklets as merge_tracklets_gta
 from tracklets.splitters.temporal_reid_splitter import TemporalReIDSplitter
 from tracklets.simple_tracklet_merger import  SimpleTrackletMerger
+from tracklets.xgboost_merger import XGBoostMerger
+from tracklets.transformer_merger import TransformerMerger
+from tracklets.transformer_merger_extended_pw import TransformerMergerExtendedPW
+
+
+# TODO: remove team_min_persistence, only keep the ratio
+# TODO: add kmeans confidence
+# from sklearn.metrics import pairwise_distances
+
+# centers = cluster_model.cluster_centers_  # (2, 3)
+# dists = pairwise_distances(all_projections, centers)  # (N, 2)
+
+# # Distance to assigned cluster and other cluster
+# assigned_dist = dists[np.arange(len(predictions)), predictions]
+# other_dist    = dists[np.arange(len(predictions)), 1 - predictions]
+
+# # Confidence: how much closer are we to assigned vs other
+# confidence = other_dist / (assigned_dist + other_dist + 1e-6)
+
 
 def main(sequence, tracker_cfg, jersey_cfg, splitter_cfg, merger_cfg, device, method_name):
 
@@ -44,26 +61,43 @@ def main(sequence, tracker_cfg, jersey_cfg, splitter_cfg, merger_cfg, device, me
     
     # Split at temporal gaps where ReID embeddings indicate different identities
     # TODO: if no cache run this, if cache don't coz already incorporated in attributes tracklets
-    temporal_splitter = TemporalReIDSplitter(min_gap_frames=10, reid_threshold=0.25)
+    temporal_splitter = TemporalReIDSplitter(min_gap_frames=5, reid_threshold=0.15)
     pre_split_tracklets = temporal_splitter.split_all(tracklets)
 
     # Predict attributes for each tracklet
-    attributes_tracklets = predict_attributes(images, pre_split_tracklets, paths, jersey_cfg, device)
+    # attributes_tracklets = predict_attributes(images, pre_split_tracklets, paths, jersey_cfg, device)
 
     # # Split tracklets based 
-    splitted_tracklets = split_tracklets(attributes_tracklets, splitter_cfg)
+    # splitted_tracklets = split_tracklets(attributes_tracklets, splitter_cfg)
 
-    # Merge tracklets
-    # soccer_aware_merger = SoccerAwareMerger(merge_threshold=0.4, spatial_factor=1.0)
-    # merged_tracklets = soccer_aware_merger.merge(splitted_tracklets)
+    # tracklet_merger = XGBoostMerger(
+    #     model_path=r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\weights\xgboost\xgboost_merger.json",
+    #     meta_path=r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\weights\xgboost\xgboost_merger_meta.json",
+    #     merge_threshold=0.5,
+    # )
 
-    tracklet_merger = SimpleTrackletMerger()
-    merged_tracklets = tracklet_merger.merge(splitted_tracklets)
+    # merged_tracklets = tracklet_merger.merge(splitted_tracklets)
+
+    
+    # transformer_merger = TransformerMerger(
+    #     model_path=r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\weights\transformer\best_model.pt",
+    #     meta_path=r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\weights\transformer\transformer_merger_meta.json",
+    #     merge_threshold=0.5,
+    #     linkage_method="average",
+    #     jersey_entropy_threshold=0.15,
+    #     team_consistency_threshold=0.9,
+    #     device=None)
+    
+    # merged_tracklets = transformer_merger.merge(splitted_tracklets)
+
+
+    # tracklet_merger = SimpleTrackletMerger()
+    # merged_tracklets = tracklet_merger.merge(splitted_tracklets)
 
 
     # Save tracklets in MOT format
     save_mot_file_for_sn_trackeval(
-        tracklets_dict=merged_tracklets,
+        tracklets_dict=pre_split_tracklets,
         output_path=paths.evaluation_path,
         sequence_name=sequence,
         method_name=method_name

@@ -1,35 +1,42 @@
-from .splitters.jersey_splitter import JerseySplitter
-from .splitters.team_splitter import TeamSplitter
+from .splitters.unified_splitter import UnifiedSplitter
 from .splitters.trajectory_splitter import TrajectorySplitter
 from .splitters.bbox_anomaly_splitter import BboxAnomalySplitter
 
 
 def split_tracklets(tracklets, splitter_cfg):
     """
-    Split tracklets in two stages:
-    1. First by jersey number changes
-    2. Then by team changes
+    Split tracklets in a single simultaneous pass evaluating jersey and team
+    signals together. Either signal can trigger a split independently using
+    the same persistence logic as the individual splitters.
     """
-
-    # Stage 1: Split by jersey numbers
-    print("\n=== Stage 1: Splitting by jersey numbers ===")
-    jersey_splitter = JerseySplitter(splitter_cfg) 
-    tracklets_after_jersey = split_by_jersey(tracklets, jersey_splitter)
+    print("\n=== Splitting by unified jersey+team signal ===")
+    splitter = UnifiedSplitter(splitter_cfg)
+    return split_by_unified(tracklets, splitter)
 
 
-    # Stage 2: Split by team changes
-    # print("\n=== Stage 2: Splitting by team changes ===")
-    team_splitter = TeamSplitter(splitter_cfg)
-    tracklets_after_team = split_by_team(tracklets_after_jersey, team_splitter)
 
-    # trajectory_splitter = TrajectorySplitter(splitter_cfg)
-    # tracklets_after_trajectory = trajectory_splitter.split_all_tracklets(tracklets_after_team)
+def split_by_unified(tracklets, splitter):
+    """Split tracklets using the unified jersey+team splitter."""
+    max_existing_id  = max(tracklets.keys()) if tracklets else 0
+    next_available_id = max_existing_id + 1
 
-    # bbox_anomaly_splitter = BboxAnomalySplitter(splitter_cfg)
-    # tracklets_after_bbox_anomaly = split_by_bbox_velocity(tracklets_after_jersey, bbox_anomaly_splitter)
+    new_tracklets = {}
+    split_count   = 0
 
-    return tracklets_after_team
+    for track_id, tracklet in tracklets.items():
+        fragments = splitter.split_tracklet(tracklet, next_available_id)
 
+        if fragments:
+            split_count += 1
+            print(f"  Tracklet {track_id} split into {len(fragments)} fragments (unified)")
+            for fragment in fragments:
+                new_tracklets[fragment.track_id] = fragment
+                next_available_id = max(next_available_id, fragment.track_id + 1)
+        else:
+            new_tracklets[tracklet.track_id] = tracklet
+
+    print(f"Unified splitting: {split_count}/{len(tracklets)} tracklets split")
+    return new_tracklets
 
 
 def split_by_bbox_velocity(tracklets, bbox_splitter):

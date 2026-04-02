@@ -56,7 +56,7 @@ def predict_attributes(images, tracklets, paths, jersey_cfg, device):
 
     # Phase 2: Team classification — fit on all ReID-filtered torso crops
     print(f"Phase 2: Team classification ({len(all_team_crops)} crops)...")
-    team_predictions, siglip_embeddings = team_classifier.fit_predict_all(all_team_crops)
+    team_predictions, siglip_embeddings, team_confidences = team_classifier.fit_predict_all(all_team_crops)
     # team_predictions = team_classifier.fit_predict_all(all_team_crops)
 
     # Phase 3: Map predictions back to tracklets
@@ -70,18 +70,21 @@ def predict_attributes(images, tracklets, paths, jersey_cfg, device):
         indices = tracklet_team_indices[track_id]
         num_frames = len(tracklet.frames)
 
-        teams_full = [np.nan] * num_frames
-        siglip_full = [np.zeros(768)] * num_frames
+        teams_full      = [np.nan] * num_frames
+        team_confs_full = [np.nan] * num_frames
+        siglip_full     = [np.zeros(768)] * num_frames
 
         n_crops = len(tracklet_team_crops[track_id])
         for local_idx in range(n_crops):
             tracklet_idx = indices[local_idx]
 
             global_idx = global_idx_lookup[(track_id, local_idx)]
-            siglip_full[tracklet_idx] = siglip_embeddings[global_idx]
-            teams_full[tracklet_idx] = team_predictions[global_idx]
+            siglip_full[tracklet_idx]     = siglip_embeddings[global_idx]
+            teams_full[tracklet_idx]      = team_predictions[global_idx]
+            team_confs_full[tracklet_idx] = float(team_confidences[global_idx])
 
-        tracklet.pred_attributes['teams'] = teams_full
+        tracklet.pred_attributes['teams']      = teams_full
+        tracklet.pred_attributes['team_confs'] = team_confs_full
         tracklet.pred_attributes['siglip_embeddings'] = siglip_full
 
     print("Attribute prediction finished!")

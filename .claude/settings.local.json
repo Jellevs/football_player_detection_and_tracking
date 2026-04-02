@@ -2,7 +2,15 @@
   "permissions": {
     "allow": [
       "Bash(python -c:*)",
-      "Bash(ls -la /c/Users/jelle/Documents/TUEindhoven/Master/Thesis/development/tracklet_splitter_scratch/gta*)"
+      "Bash(ls -la /c/Users/jelle/Documents/TUEindhoven/Master/Thesis/development/tracklet_splitter_scratch/gta*)",
+      "Bash(ls \"c:/Users/jelle/Documents/TUEindhoven/Master/Thesis/development/tracklet_splitter_scratch/output/cache/cache_attributes_\"*.pkl)",
+      "Bash(python -c \":*)",
+      "Bash(wc -l /c/Users/jelle/Documents/TUEindhoven/Master/Thesis/development/tracklet_splitter_scratch/train_data/transformer_data/*.csv)",
+      "Bash(grep -r \"split_count\\\\|split_tracklets\\\\|statistics\\\\|stats\" '/c/Users/jelle/Documents/TUEindhoven/Master/Thesis/development/tracklet_splitter_scratch' --include=\"*.py\" -not -path \"*/.venv/*\")",
+      "Bash(wc -l /c/Users/jelle/Documents/TUEindhoven/Master/Thesis/development/tracklet_splitter_scratch/train_data/training_data/*.csv)",
+      "Bash(python3:*)",
+      "Bash(find /c/Users/jelle/Documents/TUEindhoven/Master/Thesis/development/tracklet_splitter_scratch -type f \\\\\\(-name *.csv -o -name *.json -o -name *.log -o -name events.out.tfevents.* \\\\\\))",
+      "Bash(find /c/Users/jelle/Documents/TUEindhoven/Master/Thesis/development/tracklet_splitter_scratch -type f -name *.log)"
     ]
   }
 }

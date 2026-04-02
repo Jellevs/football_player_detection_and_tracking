@@ -94,10 +94,17 @@ class TeamClassifier:
         all_projections = reducer.fit_transform(all_features)
 
         if len(all_projections) < 2:
-            return np.zeros(len(all_crops), dtype=int), all_features
+            return np.zeros(len(all_crops), dtype=int), all_features, np.zeros(len(all_crops))
 
         # KMeans clustering into 2 teams
         cluster_model = KMeans(n_clusters=2, random_state=42, n_init=10)
         predictions = cluster_model.fit_predict(all_projections)
 
-        return predictions, all_features
+        # Distance-based confidence: how much closer is the point to its own
+        # centroid vs the other centroid.  Range [0, 1]; 0.5 = equidistant.
+        distances = cluster_model.transform(all_projections)   # (N, 2)
+        own_dist   = distances[np.arange(len(predictions)), predictions]
+        other_dist = distances[np.arange(len(predictions)), 1 - predictions]
+        confidences = 1.0 - own_dist / (own_dist + other_dist + 1e-8)
+
+        return predictions, all_features, confidences
