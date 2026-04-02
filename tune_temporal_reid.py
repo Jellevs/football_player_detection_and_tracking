@@ -160,7 +160,8 @@ def main():
 
         # Evaluate
         try:
-            metrics = run_evaluation_capture(method_name)
+            from utils.run_evaluation import run_evaluation
+            metrics = run_evaluation(method_name, eval_split='valid')
             print(metrics)
             hota = metrics.get("HOTA", 0.0)
             print(hota)
