@@ -41,11 +41,13 @@ class XGBoostMerger:
         linkage_method: str = "average",
         jersey_entropy_threshold: float = 0.15,
         team_consistency_threshold: float = 0.9,
+        team_confidence_threshold: float = 0.6,
     ):
         self.merge_threshold            = merge_threshold
         self.linkage_method             = linkage_method
         self.jersey_entropy_threshold   = jersey_entropy_threshold
         self.team_consistency_threshold = team_consistency_threshold
+        self.team_confidence_threshold  = team_confidence_threshold
 
         # Load model
         self.model = XGBClassifier()
@@ -184,16 +186,38 @@ class XGBoostMerger:
             fa["jersey_coverage"]     = 0.0
 
         # Team
-        teams = [t for t in tracklet.pred_attributes.get("teams", []) if not (isinstance(t, float) and np.isnan(t))]
-        if teams:
-            mode = max(set(teams), key=teams.count)
+        teams_raw  = tracklet.pred_attributes.get("teams", [])
+        team_confs = tracklet.pred_attributes.get("team_confs", [])
+
+        valid_team_confs = [
+            team_confs[i] for i in range(len(teams_raw))
+            if teams_raw[i] is not None
+            and not (isinstance(teams_raw[i], float) and np.isnan(teams_raw[i]))
+            and i < len(team_confs)
+            and team_confs[i] is not None
+            and not (isinstance(team_confs[i], float) and np.isnan(team_confs[i]))
+        ]
+        teams_confident = [
+            teams_raw[i] for i in range(len(teams_raw))
+            if teams_raw[i] is not None
+            and not (isinstance(teams_raw[i], float) and np.isnan(teams_raw[i]))
+            and i < len(team_confs)
+            and team_confs[i] is not None
+            and not (isinstance(team_confs[i], float) and np.isnan(team_confs[i]))
+            and team_confs[i] >= self.team_confidence_threshold
+        ]
+
+        if teams_confident:
+            mode = max(set(teams_confident), key=teams_confident.count)
             fa["team_mode"]        = float(mode)
-            fa["team_consistency"] = teams.count(mode) / len(teams)
-            fa["team_coverage"]    = len(teams) / max(len(frames), 1)
+            fa["team_consistency"] = teams_confident.count(mode) / len(teams_confident)
+            fa["team_coverage"]    = len(teams_confident) / max(len(frames), 1)
         else:
             fa["team_mode"]        = np.nan
             fa["team_consistency"] = 0.0
             fa["team_coverage"]    = 0.0
+
+        fa["team_conf_mean"] = float(np.mean(valid_team_confs)) if valid_team_confs else 0.0
 
         # Temporal / spatial
         def cx_cy(bbox):
@@ -311,10 +335,18 @@ class XGBoostMerger:
         mode = max(set(js), key=js.count)
         return mode, float(np.mean([e for j, e in zip(js, es) if j == mode]))
 
-    @staticmethod
-    def _team_stats(tracklet):
-        teams = [t for t in tracklet.pred_attributes.get("teams", [])
-                 if not (isinstance(t, float) and np.isnan(t))]
+    def _team_stats(self, tracklet):
+        teams_raw  = tracklet.pred_attributes.get("teams", [])
+        team_confs = tracklet.pred_attributes.get("team_confs", [])
+        teams = [
+            teams_raw[i] for i in range(len(teams_raw))
+            if teams_raw[i] is not None
+            and not (isinstance(teams_raw[i], float) and np.isnan(teams_raw[i]))
+            and i < len(team_confs)
+            and team_confs[i] is not None
+            and not (isinstance(team_confs[i], float) and np.isnan(team_confs[i]))
+            and team_confs[i] >= self.team_confidence_threshold
+        ]
         if not teams:
             return None, 0.0
         mode = max(set(teams), key=teams.count)

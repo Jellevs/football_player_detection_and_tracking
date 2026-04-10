@@ -52,8 +52,8 @@ def main(sequence, tracker_cfg, jersey_cfg, splitter_cfg, merger_cfg, device, me
     # Predict attributes for each tracklet
     attributes_tracklets = predict_attributes(images, pre_split_tracklets, paths, jersey_cfg, device)
 
-    # # Split tracklets based 
-    # splitted_tracklets = split_tracklets(attributes_tracklets, splitter_cfg)
+    # Split tracklets based 
+    splitted_tracklets = split_tracklets(attributes_tracklets, splitter_cfg)
 
     # tracklet_merger = XGBoostMerger(
     #     model_path=r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\weights\xgboost\xgboost_merger.json",
@@ -79,14 +79,17 @@ def main(sequence, tracker_cfg, jersey_cfg, splitter_cfg, merger_cfg, device, me
     # tracklet_merger = SimpleTrackletMerger()
     # merged_tracklets = tracklet_merger.merge(splitted_tracklets)
 
+    from tracklets.decision_merger import DecisionMerger
+    tracklet_merger = DecisionMerger(reid_threshold=0.4)
+    merged_tracklets = tracklet_merger.merge(splitted_tracklets)
 
     # Save tracklets in MOT format
-    # save_mot_file_for_sn_trackeval(
-    #     tracklets_dict=pre_split_tracklets,
-    #     output_path=paths.evaluation_path,
-    #     sequence_name=sequence,
-    #     method_name=method_name
-    # )
+    save_mot_file_for_sn_trackeval(
+        tracklets_dict=merged_tracklets,
+        output_path=paths.evaluation_path,
+        sequence_name=sequence,
+        method_name=method_name
+    )
 
     # visualize_tracklets(
     #     images=images,
@@ -134,4 +137,4 @@ if __name__ == "__main__":
             method_name=settings.METHOD_NAME
         )
 
-    # run_evaluation(settings.METHOD_NAME, settings.EVAL_SPLIT)
+    run_evaluation(settings.METHOD_NAME, settings.EVAL_SPLIT)

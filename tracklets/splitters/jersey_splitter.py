@@ -1,176 +1,30 @@
-import numpy as np
-from collections import Counter
-from utils.config import SplitterConfig
+from .unified_splitter import UnifiedSplitter
 
 
-class JerseySplitter():
-    """ 
-    Splitting tracklet into multiple subtracklets when a jersey number switch is detected:
-    - Uses entropy threshold to only use jerseys with a entropy below 0.2 
-    - Checks for earlier split point by checking for abnormal fast moving bounding boxes 
+class JerseySplitter(UnifiedSplitter):
     """
-    def __init__(self, config=None):
-        """ Initialize JerseySplitter with configuration """
-        self.config = config if config else SplitterConfig()
+    Jersey-only splitter.
 
+    Reuses all logic from UnifiedSplitter but only activates the jersey signal
+    by supplying null teams, so the team signal reference is never established.
+    """
 
     def split_tracklet(self, tracklet, next_available_id):
-        """ Split tracklet at persistent jersey number switches """
+        jerseys   = tracklet.pred_attributes.get("jerseys", [])
+        entropies = tracklet.pred_attributes.get("jersey_entropies", [])
 
-        jerseys = tracklet.pred_attributes.get('jerseys', [])
-        entropies = tracklet.pred_attributes.get('jersey_entropies', [])
-
-        if not jerseys or len(jerseys) == 0:
+        n = len(tracklet.frames)
+        if n == 0:
             return None
 
-        # Detect switch points
-        switch_indices = self.detect_id_switch(jerseys, entropies)
+        jerseys   = list(jerseys)   + [None] * max(0, n - len(jerseys))
+        entropies = list(entropies) + [1.0]  * max(0, n - len(entropies))
+        teams      = [None] * n
+        team_confs = [0.0]  * n
+
+        switch_indices = self._detect_switches(jerseys, entropies, teams, team_confs)
 
         if not switch_indices:
             return None
-        
-        # Create fragment boundaries
-        boundaries = [0] + switch_indices + [len(jerseys)]
 
-        fragments = []
-        current_id = next_available_id
-
-        for i in range(len(boundaries) - 1):
-            start = boundaries[i]
-            end = boundaries[i + 1] - 1
-
-            # Check minimum fragment size
-            fragment_length = end - start + 1
-            if fragment_length < self.config.jersey_min_fragment:
-                # Skip fragments that are too short
-                continue
-
-            # Extract sub-tracklet
-            fragment = tracklet.extract(start, end)
-            fragment.track_id = current_id
-            fragment.parent_id = tracklet.parent_id
-
-            fragments.append(fragment)
-            current_id += 1
-
-        # If filtering removed all fragments, return None
-        if len(fragments) == 0:
-            return None
-
-        # If only one fragment remains, no split occurred
-        if len(fragments) == 1:
-            return None
-
-        return fragments
-
-    
-    def detect_id_switch(self, jerseys, entropies):
-        """ Detect switch points where jersey identity changes persistently """
-        switch_points = []
-        n = len(jerseys)
-
-        current_jersey = None
-
-        i = 0
-        while i < n:
-            if self.is_valid_number(jerseys[i], entropies[i]):
-                candidate = jerseys[i]
-
-                # Check if first value is actually persistent and not noise
-                if self.is_persistent_switch(jerseys, entropies, i, candidate):
-                    current_jersey = candidate
-                    break
-
-            i += 1
-
-        if current_jersey is None:
-            return []
-
-        # Scan through predictions
-        while i < n:
-            if not self.is_valid_number(jerseys[i], entropies[i]):
-                i += 1
-                continue
-
-            # Check if this is a different number
-            if jerseys[i] != current_jersey:
-                candidate = jerseys[i]
-
-                # Skip if the new read is a partial digit read of the current jersey
-                # (e.g. reading "3" when the player wears "33", or "1"/"4" for "14").
-                # A one-digit number that is a substring of a two-digit number (or
-                # vice-versa) is almost certainly an OCR miss, not an identity switch.
-                if self.are_digit_compatible(candidate, current_jersey):
-                    i += 1
-                    continue
-
-                # Verify persistence using a window
-                if self.is_persistent_switch(jerseys, entropies, i, candidate):
-                    switch_points.append(i)
-                    current_jersey = candidate
-
-            i += 1
-
-        return switch_points
-
-
-    @staticmethod
-    def are_digit_compatible(jersey_a, jersey_b):
-        """
-        Return True if one number is likely a partial (single-digit) OCR read
-        of a two-digit number.
-
-        Examples that return True (not an identity switch):
-          33 <-> 3   (only one '3' digit was visible)
-          14 <-> 1   (only the tens digit was visible)
-          14 <-> 4   (only the units digit was visible)
-
-        Both directions are checked, so this handles the case where we first
-        see the partial read and then the full number, or vice versa.
-        """
-        s_a = str(int(jersey_a))
-        s_b = str(int(jersey_b))
-        if len(s_a) == 1 and len(s_b) == 2:
-            return s_a in s_b
-        if len(s_a) == 2 and len(s_b) == 1:
-            return s_b in s_a
-        return False
-
-
-    def is_valid_number(self, value, entropy):
-        """ Check if jersey value is valid and confident """
-        if value is None:
-            return False
-        if isinstance(value, float) and np.isnan(value):
-            return False
-        if entropy > self.config.jersey_entropy_threshold:
-            return False
-        return True
-
-
-    def is_persistent_switch(self, jerseys, entropies, start_idx, new_jersey):
-        """ Check if new jersey persists in the lookahead window """
-        lookahead = self.config.jersey_lookahead
-        min_persistence = self.config.jersey_min_persistence
-
-        # Extract window
-        window_end = min(start_idx + lookahead, len(jerseys))
-        window = [
-            j for i, j in enumerate(jerseys[start_idx:window_end])
-            if self.is_valid_number(j, entropies[start_idx + i])
-        ]
-
-        # Count occurrences of new jersey
-        new_count = sum(1 for j in window if j == new_jersey)
-
-        # Must appear at least min_persistence times
-        if new_count < min_persistence:
-            return False
-
-        # Should be the dominant value in the window (filters out noise)
-        if len(window) > 0:
-            counts = Counter(window)
-            most_common_jersey = counts.most_common(1)[0][0]
-            return most_common_jersey == new_jersey
-
-        return new_count >= min_persistence
+        return self._create_fragments(tracklet, switch_indices, n, next_available_id)

@@ -193,14 +193,22 @@ def compute_pairwise_features(tracklet_a, tracklet_b) -> np.ndarray:
     pw[8]  = float(both_j and j_a != j_b)               # jersey_conflict
     pw[9]  = float(both_j and e_a < 0.15 and e_b < 0.15)  # jersey_both_confident
 
-    # Helper: team stats
+    # Helper: team stats (only count predictions with sufficient confidence)
     def team_stats(t):
-        ts = [x for x in t.pred_attributes.get("teams", [])
-              if not (isinstance(x, float) and np.isnan(x))]
-        if not ts:
+        ts  = t.pred_attributes.get("teams", [])
+        tcs = t.pred_attributes.get("team_confs", [])
+        valid = [
+            ts[i] for i in range(len(ts))
+            if not (isinstance(ts[i], float) and np.isnan(ts[i]))
+            and i < len(tcs)
+            and tcs[i] is not None
+            and not (isinstance(tcs[i], float) and np.isnan(tcs[i]))
+            and float(tcs[i]) >= _TEAM_CONF_THR
+        ]
+        if not valid:
             return None, 0.0
-        mode = max(set(ts), key=ts.count)
-        return mode, ts.count(mode) / len(ts)
+        mode = max(set(valid), key=valid.count)
+        return mode, valid.count(mode) / len(valid)
 
     t_a, c_a = team_stats(fa)
     t_b, c_b = team_stats(fb)
@@ -386,6 +394,8 @@ _JERSEY    = SCALAR_START + 0   # jersey value
 
 # Entropy threshold below which a jersey prediction is considered reliable
 _JERSEY_ENTROPY_THR = 0.2
+# Minimum confidence for a team prediction to be considered reliable
+_TEAM_CONF_THR = 0.6
 
 # Number of per-tracklet stats (must match _tracklet_stats output length)
 TRACKLET_STATS_DIM = 11

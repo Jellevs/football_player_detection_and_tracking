@@ -36,21 +36,22 @@ from typing import Dict, List, Optional, Tuple
 # Paths — adjust to your environment
 # ---------------------------------------------------------------------------
 DATA_ROOT   = Path(r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\data\soccernet\soccernet-player-tracking")
-OUTPUT_ROOT = Path(r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\train_data")
+OUTPUT_ROOT = Path(r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\train_data\new_xgboost")
 CACHE_ROOT  = Path(r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\output\cache")
 
 # Which SoccerNetGS split folders to include.  Each may contain many sequences.
-SPLITS_TO_PROCESS = ["valid"]   # do NOT include "test" until final evaluation
+SPLITS_TO_PROCESS = ["train"]   # do NOT include "test" until final evaluation
 
-SPLIT_OUTPUT_NAME = "valid"             # the label used in the output filename
+SPLIT_OUTPUT_NAME = "train"             # the label used in the output filename
                                          # run again with SPLITS_TO_PROCESS=["valid"] and
                                          # SPLIT_OUTPUT_NAME="valid", etc.
 
-MAX_TEMPORAL_GAP   = None                 # frames; pairs further apart are skipped
-NEGATIVE_RATIO     = None                # neg/pos sampling ratio (None = keep all, 2.0 = old default)
-MIN_TRACKLET_LEN   = 5                   # frames; shorter tracklets are discarded
-REID_DIM           = 512                 # OSNet x1_0 embedding dimension
-SIGLIP_DIM         = 768                 # SigLIP embedding dimension
+MAX_TEMPORAL_GAP        = None   # frames; pairs further apart are skipped
+NEGATIVE_RATIO          = None   # neg/pos sampling ratio (None = keep all, 2.0 = old default)
+MIN_TRACKLET_LEN        = 5      # frames; shorter tracklets are discarded
+REID_DIM                = 512    # OSNet x1_0 embedding dimension
+SIGLIP_DIM              = 768    # SigLIP embedding dimension
+TEAM_CONFIDENCE_THRESHOLD = 0.6  # min KMeans confidence to count a team prediction as reliable
 
 
 # ---------------------------------------------------------------------------
@@ -123,17 +124,41 @@ def aggregate_tracklet(tracklet, track_id: int) -> Optional[dict]:
         feats["jersey_coverage"]    = 0.0
 
     # ---- Team ----
-    teams      = [t for t in tracklet.pred_attributes.get("teams", []) if not np.isnan(t)]
-    if teams:
-        mode_team   = max(set(teams), key=teams.count)
-        consistency = teams.count(mode_team) / len(teams)
+    # Compute mode/consistency on confident predictions only (clean signal),
+    # but also expose mean confidence so the model can learn to weight it.
+    teams_raw  = tracklet.pred_attributes.get("teams", [])
+    team_confs = tracklet.pred_attributes.get("team_confs", [])
+
+    valid_team_confs = [
+        team_confs[i] for i in range(len(teams_raw))
+        if teams_raw[i] is not None
+        and not (isinstance(teams_raw[i], float) and np.isnan(teams_raw[i]))
+        and i < len(team_confs)
+        and team_confs[i] is not None
+        and not (isinstance(team_confs[i], float) and np.isnan(team_confs[i]))
+    ]
+    teams_confident = [
+        teams_raw[i] for i in range(len(teams_raw))
+        if teams_raw[i] is not None
+        and not (isinstance(teams_raw[i], float) and np.isnan(teams_raw[i]))
+        and i < len(team_confs)
+        and team_confs[i] is not None
+        and not (isinstance(team_confs[i], float) and np.isnan(team_confs[i]))
+        and team_confs[i] >= TEAM_CONFIDENCE_THRESHOLD
+    ]
+
+    if teams_confident:
+        mode_team   = max(set(teams_confident), key=teams_confident.count)
+        consistency = teams_confident.count(mode_team) / len(teams_confident)
         feats["team_mode"]        = float(mode_team)
         feats["team_consistency"] = float(consistency)
-        feats["team_coverage"]    = len(teams) / max(len(frames), 1)
+        feats["team_coverage"]    = len(teams_confident) / max(len(frames), 1)
     else:
         feats["team_mode"]        = np.nan
         feats["team_consistency"] = 0.0
         feats["team_coverage"]    = 0.0
+
+    feats["team_conf_mean"] = float(np.mean(valid_team_confs)) if valid_team_confs else 0.0
 
     # ---- Temporal / spatial ----
     feats["start_frame"] = float(frames[0])
@@ -363,7 +388,7 @@ def load_cached_tracklets(sequence: str, split: str) -> Optional[dict]:
 # ---------------------------------------------------------------------------
 
 def main():
-    output_dir = OUTPUT_ROOT / "training_data"
+    output_dir = OUTPUT_ROOT
     output_dir.mkdir(parents=True, exist_ok=True)
 
     all_dfs    = []

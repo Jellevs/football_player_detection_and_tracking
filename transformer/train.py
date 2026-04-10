@@ -32,7 +32,7 @@ from transformer.dataset import SequencePairDataset
 # ---------------------------------------------------------------------------
 DATA_DIR  = Path(r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\train_data\transformer_data")
 CACHE_ROOT = Path(r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\output\cache")
-SAVE_DIR  = Path(r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\weights\transformer")
+SAVE_DIR  = Path(r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\weights\transformer_w_team")
 
 
 # ---------------------------------------------------------------------------

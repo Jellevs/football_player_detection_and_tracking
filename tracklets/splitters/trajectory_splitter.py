@@ -15,10 +15,10 @@ class TrajectorySplitter:
         # Velocity analysis - VERY HIGH thresholds
         self.velocity_window = 5       # frames before/after to calculate velocity
         self.min_velocity_change = 30.0 # pixels/frame - minimum speed change (was 20.0)
-        self.direction_change_threshold = 90  # degrees - minimum direction change (was 90)
+        self.direction_change_threshold = 120  # degrees - minimum direction change (was 90)
 
         # Trajectory swap detection - VERY STRICT: only obvious swaps
-        self.swap_similarity_threshold = 0.85  # cosine similarity for velocity swap (was 0.75)
+        self.swap_similarity_threshold = 0.95  # cosine similarity for velocity swap (was 0.75)
 
         # Fragment filtering - keep detections but require valid splits
         self.min_fragment_length = 10  # frames (increased to avoid spurious tiny splits)
@@ -168,7 +168,7 @@ class TrajectorySplitter:
 
         # Velocity swap is the PRIMARY indicator - give it more weight
         if swap_score > self.swap_similarity_threshold:
-            score += 4  # Increased from 3
+            score += 2  # Increased from 3
             reasons.append(f"velocity swap (score={swap_score:.2f})")
 
         # Speed changes require BOTH tracklets to change significantly
@@ -182,7 +182,7 @@ class TrajectorySplitter:
 
         # Only count if BOTH tracklets have speed changes
         if speed_changes == 2:
-            score += 2
+            score += 1
 
         # Direction changes require BOTH tracklets to change direction
         direction_changes = 0
@@ -195,7 +195,7 @@ class TrajectorySplitter:
 
         # Only count if BOTH tracklets have direction changes
         if direction_changes == 2:
-            score += 2
+            score += 4
 
         # VERY STRICT: Require either strong velocity swap OR multiple other signals
         # Option 1: Very strong velocity swap alone (score 4)

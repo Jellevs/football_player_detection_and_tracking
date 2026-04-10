@@ -37,10 +37,10 @@ OUTPUT_ROOT = Path(r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\developm
 # ---------------------------------------------------------------------------
 # Settings — run this script once per split
 # ---------------------------------------------------------------------------
-SPLITS_TO_PROCESS = ["valid"]     # change to ["valid"] or ["test"] per run
-SPLIT_OUTPUT_NAME = "valid"       # change to "valid" or "test" per run
+SPLITS_TO_PROCESS = ["train"]     # change to ["valid"] or ["test"] per run
+SPLIT_OUTPUT_NAME = "train"       # change to "valid" or "test" per run
 
-NEGATIVE_RATIO    = None          # keep all negatives for max training data
+NEGATIVE_RATIO    = 3          # keep all negatives for max training data
 MIN_TRACKLET_LEN  = 5
 MAX_TEMPORAL_GAP  = None          # frames; None = no limit
 

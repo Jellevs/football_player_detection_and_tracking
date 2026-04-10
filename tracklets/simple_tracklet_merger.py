@@ -12,10 +12,13 @@ class SimpleTrackletMerger:
     """
     # 87.806
     def __init__(self, reid_threshold=0.4, jersey_entropy_threshold=0.2,
-                 team_consistency_threshold=0.9):
+                 team_consistency_threshold=0.9, team_confidence_threshold=0.6,
+                 min_jersey_predictions=5):
         self.reid_threshold = reid_threshold
         self.jersey_entropy_threshold = jersey_entropy_threshold
         self.team_consistency_threshold = team_consistency_threshold
+        self.team_confidence_threshold = team_confidence_threshold
+        self.min_jersey_predictions = min_jersey_predictions
 
     def merge(self, tracklets: Dict) -> Dict:
         if len(tracklets) < 2:
@@ -29,7 +32,7 @@ class SimpleTrackletMerger:
             jersey, entropy = self._get_jersey_stats(tracklet)
             team, consistency = self._get_team_stats(tracklet)
 
-            has_confident_jersey = jersey is not None and entropy < self.jersey_entropy_threshold
+            has_confident_jersey = jersey is not None
             has_team = team is not None
 
             if has_confident_jersey and has_team:
@@ -100,14 +103,11 @@ class SimpleTrackletMerger:
                     dist = self._reid_distance(ti, tj)
 
                     # Bonus: if both have matching jersey+team, reduce distance
-                    j1, e1 = self._get_jersey_stats(ti)
-                    j2, e2 = self._get_jersey_stats(tj)
+                    j1, _ = self._get_jersey_stats(ti)
+                    j2, _ = self._get_jersey_stats(tj)
                     t1, _ = self._get_team_stats(ti)
                     t2, _ = self._get_team_stats(tj)
-                    both_confident = (j1 is not None and j2 is not None
-                                     and e1 < self.jersey_entropy_threshold
-                                     and e2 < self.jersey_entropy_threshold)
-                    if both_confident and j1 == j2 and t1 == t2:
+                    if j1 is not None and j2 is not None and j1 == j2 and t1 == t2:
                         dist = 0.05  # guaranteed merge for exact identity
 
                     if dist < best_dist:
@@ -132,14 +132,9 @@ class SimpleTrackletMerger:
 
     def _jersey_conflict(self, t1, t2) -> bool:
         """True if both have confident jerseys that differ."""
-        j1, e1 = self._get_jersey_stats(t1)
-        j2, e2 = self._get_jersey_stats(t2)
-
-        both_confident = (j1 is not None and j2 is not None
-                         and e1 < self.jersey_entropy_threshold
-                         and e2 < self.jersey_entropy_threshold)
-
-        return both_confident and j1 != j2
+        j1, _ = self._get_jersey_stats(t1)
+        j2, _ = self._get_jersey_stats(t2)
+        return j1 is not None and j2 is not None and j1 != j2
 
     def _team_conflict(self, t1, t2) -> bool:
         """True if both have consistent teams that differ."""
@@ -162,32 +157,46 @@ class SimpleTrackletMerger:
         cos_sim = (feat1 @ feat2.T) / (norms1 @ norms2.T)
         return float(1.0 - cos_sim.mean())
 
-    @staticmethod
-    def _get_jersey_stats(tracklet) -> Tuple[Optional[float], float]:
-        """Get mode jersey number and its mean entropy."""
-        jerseys = tracklet.pred_attributes.get('jerseys', [])
+    def _get_jersey_stats(self, tracklet) -> Tuple[Optional[float], float]:
+        """Get mode jersey number and its consistency, using only low-entropy predictions."""
+        jerseys   = tracklet.pred_attributes.get('jerseys', [])
         entropies = tracklet.pred_attributes.get('jersey_entropies', [])
 
-        valid = [(j, entropies[i] if i < len(entropies) else 1.0)
-                 for i, j in enumerate(jerseys) if not np.isnan(j)]
+        valid = [
+            jerseys[i] for i in range(len(jerseys))
+            if jerseys[i] is not None
+            and not (isinstance(jerseys[i], float) and np.isnan(jerseys[i]))
+            and i < len(entropies)
+            and entropies[i] <= self.jersey_entropy_threshold
+        ]
+
+        # if not valid:
+        #     return None, 0.0
+        if len(valid) < self.min_jersey_predictions:
+            return None, 0.0
+        mode = max(set(valid), key=valid.count)
+        consistency = valid.count(mode) / len(valid)
+        return mode, consistency
+
+    def _get_team_stats(self, tracklet) -> Tuple[Optional[float], float]:
+        """Get mode team and its consistency, using only confident predictions."""
+        teams      = tracklet.pred_attributes.get('teams', [])
+        team_confs = tracklet.pred_attributes.get('team_confs', [])
+
+        valid = [
+            teams[i] for i in range(len(teams))
+            if teams[i] is not None
+            and not (isinstance(teams[i], float) and np.isnan(teams[i]))
+            and i < len(team_confs)
+            and team_confs[i] is not None
+            and not (isinstance(team_confs[i], float) and np.isnan(team_confs[i]))
+            and team_confs[i] >= self.team_confidence_threshold
+        ]
 
         if not valid:
-            return None, 1.0
-
-        js, es = zip(*valid)
-        mode = max(set(js), key=js.count)
-        mode_entropies = [e for j, e in zip(js, es) if j == mode]
-        return mode, float(np.mean(mode_entropies))
-
-    @staticmethod
-    def _get_team_stats(tracklet) -> Tuple[Optional[float], float]:
-        """Get mode team and its consistency (fraction of predictions matching mode)."""
-        teams = [t for t in tracklet.pred_attributes.get('teams', [])
-                 if not np.isnan(t)]
-        if not teams:
             return None, 0.0
-        mode = max(set(teams), key=teams.count)
-        consistency = teams.count(mode) / len(teams)
+        mode = max(set(valid), key=valid.count)
+        consistency = valid.count(mode) / len(valid)
         return mode, consistency
 
     def _merge_group(self, tracklets, member_ids):

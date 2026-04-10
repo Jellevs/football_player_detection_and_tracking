@@ -1,8 +1,8 @@
 from pathlib import Path
 
 # Evaluation
-METHOD_NAME = "reid_split_5_15"
-EVAL_SPLIT = "valid"  # "train" or "test"
+METHOD_NAME = "simple_merger"
+EVAL_SPLIT = "test"  # "train" or "test"
 
 # Paths
 DATA_ROOT = Path(rf"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\data\soccernet\soccernet-player-tracking\{EVAL_SPLIT}")  # Path to the folder with the images
@@ -37,28 +37,16 @@ JERSEY = dict(
     reid_threshold=3.5,
 )
 
-
-# 86.715 HOTA
-# SPLITTER = dict(
-#     jersey_min_fragment=20,
-#     jersey_min_persistence=20,
-#     jersey_lookahead=100,
-#     jersey_entropy_threshold=0.01,
-#     team_min_persistence=5,
-#     team_min_fragment=10,
-#     team_lookahead=50,
-# )
-
 SPLITTER = dict(
-    jersey_min_fragment=20,
     jersey_min_persistence=20,
     jersey_lookahead=100,
     jersey_min_persistence_ratio=0.8,
     jersey_entropy_threshold=0.01,
     team_min_persistence=5,
     team_min_persistence_ratio=0.8,
-    team_min_fragment=10,
     team_lookahead=100,
+    team_confidence_threshold=0.6, 
+    min_fragment_length=20,
 )
 
 

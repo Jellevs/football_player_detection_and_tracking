@@ -39,12 +39,14 @@ class TransformerMerger:
         linkage_method: str = "average",
         jersey_entropy_threshold: float = 0.15,
         team_consistency_threshold: float = 0.9,
+        team_confidence_threshold: float = 0.6,
         device: str = None,
     ):
         self.merge_threshold = merge_threshold
         self.linkage_method = linkage_method
         self.jersey_entropy_threshold = jersey_entropy_threshold
         self.team_consistency_threshold = team_consistency_threshold
+        self.team_confidence_threshold = team_confidence_threshold
 
         # Device
         if device is None:
@@ -246,14 +248,21 @@ class TransformerMerger:
         mode = max(set(js), key=js.count)
         return mode, float(np.mean([e for j, e in zip(js, es) if j == mode]))
 
-    @staticmethod
-    def _team_stats(tracklet):
-        teams = [t for t in tracklet.pred_attributes.get("teams", [])
-                 if not (isinstance(t, float) and np.isnan(t))]
-        if not teams:
+    def _team_stats(self, tracklet):
+        teams      = tracklet.pred_attributes.get("teams", [])
+        team_confs = tracklet.pred_attributes.get("team_confs", [])
+        valid = [
+            teams[i] for i in range(len(teams))
+            if not (isinstance(teams[i], float) and np.isnan(teams[i]))
+            and i < len(team_confs)
+            and team_confs[i] is not None
+            and not (isinstance(team_confs[i], float) and np.isnan(team_confs[i]))
+            and float(team_confs[i]) >= self.team_confidence_threshold
+        ]
+        if not valid:
             return None, 0.0
-        mode = max(set(teams), key=teams.count)
-        return mode, teams.count(mode) / len(teams)
+        mode = max(set(valid), key=valid.count)
+        return mode, valid.count(mode) / len(valid)
 
     # ------------------------------------------------------------------
     # Merge application (identical to XGBoostMerger)

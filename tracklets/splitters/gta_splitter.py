@@ -10,7 +10,7 @@ from scipy.spatial.distance import cdist
 from tracklets.tracklet import Tracklet
 
 
-def split_tracklets(tmp_trklets, eps=None, max_k=None, min_samples=None, len_thres=None):
+def split_tracklets(tmp_trklets, eps=0.7, max_k=3, min_samples=10, len_thres=100):
     """
     Splits each tracklet into multiple tracklets based on an internal distance threshold.
 

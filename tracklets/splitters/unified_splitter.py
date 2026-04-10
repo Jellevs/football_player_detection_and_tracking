@@ -48,6 +48,9 @@ class UnifiedSplitter:
         if not switch_indices:
             return None
 
+        return self._create_fragments(tracklet, switch_indices, n, next_available_id)
+
+    def _create_fragments(self, tracklet, switch_indices, n, next_available_id):
         boundaries = [0] + switch_indices + [n]
         fragments  = []
         current_id = next_available_id
@@ -55,7 +58,7 @@ class UnifiedSplitter:
         for i in range(len(boundaries) - 1):
             start = boundaries[i]
             end   = boundaries[i + 1] - 1
-            if end - start + 1 < self.config.jersey_min_fragment:
+            if end - start + 1 < self.config.min_fragment_length:
                 continue
             fragment = tracklet.extract(start, end)
             fragment.track_id  = current_id

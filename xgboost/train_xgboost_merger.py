@@ -34,9 +34,9 @@ from sklearn.metrics import (
 # ---------------------------------------------------------------------------
 # Paths — adjust to your environment
 # ---------------------------------------------------------------------------
-OUTPUT_ROOT = Path(r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\train_data")
+OUTPUT_ROOT = Path(r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\train_data\new_xgboost")
 SAVE_DIR    = Path(r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\train_data\weights\xgboost")
-DATA_DIR    = OUTPUT_ROOT / "training_data"
+DATA_DIR    = OUTPUT_ROOT
 
 
 # ---------------------------------------------------------------------------

@@ -1,142 +1,30 @@
-import numpy as np
-from collections import Counter
-
-from utils.config import SplitterConfig
+from .unified_splitter import UnifiedSplitter
 
 
-class TeamSplitter():
-    """ 
-    Splitting tracklet into multiple subtracklets when a team ID switch is detected:
-    - Ignores very short team ID switches occuring by occlusion
+class TeamSplitter(UnifiedSplitter):
     """
-    def __init__(self, config=None):
-        """ Initialize TeamSplitter with configuration """
-        self.config = config if config else SplitterConfig()
+    Team-only splitter.
 
+    Reuses all logic from UnifiedSplitter but only activates the team signal
+    by supplying null jerseys, so the jersey signal reference is never established.
+    """
 
     def split_tracklet(self, tracklet, next_available_id):
-        """ Split tracklet at persistent team id switches """
+        teams      = tracklet.pred_attributes.get("teams", [])
+        team_confs = tracklet.pred_attributes.get("team_confs", [])
 
-        teams = tracklet.pred_attributes.get('teams', [])
-
-        if not teams or len(teams) == 0:
+        n = len(tracklet.frames)
+        if n == 0:
             return None
 
-        # Detect switch points
-        switch_indices = self.detect_id_switch(teams)
+        jerseys    = [None] * n
+        entropies  = [1.0]  * n
+        teams      = list(teams)      + [None] * max(0, n - len(teams))
+        team_confs = list(team_confs) + [0.0]  * max(0, n - len(team_confs))
+
+        switch_indices = self._detect_switches(jerseys, entropies, teams, team_confs)
 
         if not switch_indices:
             return None
-        
-        # Create fragment boundaries
-        boundaries = [0] + switch_indices + [len(teams)]
 
-        fragments = []
-        current_id = next_available_id
-
-        for i in range(len(boundaries) - 1):
-            start = boundaries[i]
-            end = boundaries[i + 1] - 1
-
-            # Check minimum fragment size
-            fragment_length = end - start + 1
-            if fragment_length < self.config.team_min_fragment:
-                # Skip fragments that are too short
-                continue
-
-            # Extract sub-tracklet
-            fragment = tracklet.extract(start, end)
-            fragment.track_id = current_id
-            fragment.parent_id = tracklet.parent_id
-
-            fragments.append(fragment)
-            current_id += 1
-
-        # If filtering removed all fragments, return None
-        if len(fragments) == 0:
-            return None
-
-        # If only one fragment remains, no split occurred
-        if len(fragments) == 1:
-            return None
-
-        return fragments
-    
-
-
-    def detect_id_switch(self, teams):
-        """ Detect switch points where team id changes persistently """
-        switch_points = []
-        n = len(teams)
-
-        current_team = None
-        i = 0
-        while i < n:
-            if self.is_valid_number(teams[i]):
-                candidate = teams[i]
-
-                # Check if first value is actually persistent and not noise
-                if self.is_persistent_switch(teams, i, candidate):
-                    current_team = candidate
-                    break
-
-            i += 1
-
-        if current_team is None:
-            return []
-
-        # Scan through predictions
-        while i < n:
-            if not self.is_valid_number(teams[i]):
-                i += 1
-                continue
-
-            # Check if this is a different number
-            if teams[i] != current_team:
-                candidate = teams[i]
-
-                # Verify persistence using a window
-                if self.is_persistent_switch(teams, i, candidate):
-                    switch_points.append(i)
-                    current_team = candidate
-
-            i += 1
-
-        return switch_points
-    
-
-    def is_persistent_switch(self, teams, start_idx, new_team):
-        """ Check if new team persists in the lookahead window """
-        lookahead = self.config.team_lookahead
-        min_persistence = self.config.team_min_persistence
-        min_ratio = self.config.team_min_persistence_ratio
-
-        # Extract window
-        window_end = min(start_idx + lookahead, len(teams))
-        window = [j for j in teams[start_idx:window_end] if self.is_valid_number(j)]
-
-        if len(window) == 0:
-            return False
-
-        # Count occurrences of new team
-        new_count = sum(1 for j in window if j == new_team)
-
-        # Must pass both absolute minimum AND ratio threshold
-        if new_count < min_persistence:
-            return False
-        if new_count / len(window) < min_ratio:
-            return False
-
-        # Should be the dominant value in the window (filters out noise)
-        counts = Counter(window)
-        most_common_team = counts.most_common(1)[0][0]
-        return most_common_team == new_team
-    
-
-    def is_valid_number(self, value):
-            """ Check if team value is valid """
-            if value is None:
-                return False
-            if isinstance(value, float) and np.isnan(value):
-                return False
-            return True
+        return self._create_fragments(tracklet, switch_indices, n, next_available_id)
