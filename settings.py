@@ -1,7 +1,7 @@
 from pathlib import Path
 
 # Evaluation
-METHOD_NAME = "simple_merger"
+METHOD_NAME = "transformer"
 EVAL_SPLIT = "test"  # "train" or "test"
 
 # Paths

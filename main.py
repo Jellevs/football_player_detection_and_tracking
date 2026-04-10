@@ -64,24 +64,24 @@ def main(sequence, tracker_cfg, jersey_cfg, splitter_cfg, merger_cfg, device, me
     # merged_tracklets = tracklet_merger.merge(splitted_tracklets)
 
     
-    # transformer_merger = TransformerMerger(
-    #     model_path=r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\weights\transformer\best_model.pt",
-    #     meta_path=r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\weights\transformer\transformer_merger_meta.json",
-    #     merge_threshold=0.5,
-    #     linkage_method="average",
-    #     jersey_entropy_threshold=0.15,
-    #     team_consistency_threshold=0.9,
-    #     device=None)
+    transformer_merger = TransformerMerger(
+        model_path=r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\weights\transformer\best_model.pt",
+        meta_path=r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\weights\transformer\transformer_merger_meta.json",
+        merge_threshold=0.5,
+        linkage_method="average",
+        jersey_entropy_threshold=0.15,
+        team_consistency_threshold=0.9,
+        device=None)
     
-    # merged_tracklets = transformer_merger.merge(splitted_tracklets)
+    merged_tracklets = transformer_merger.merge(splitted_tracklets)
 
 
     # tracklet_merger = SimpleTrackletMerger()
     # merged_tracklets = tracklet_merger.merge(splitted_tracklets)
 
-    from tracklets.decision_merger import DecisionMerger
-    tracklet_merger = DecisionMerger(reid_threshold=0.4)
-    merged_tracklets = tracklet_merger.merge(splitted_tracklets)
+    # from tracklets.decision_merger import DecisionMerger
+    # tracklet_merger = DecisionMerger(reid_threshold=0.4)
+    # merged_tracklets = tracklet_merger.merge(splitted_tracklets)
 
     # Save tracklets in MOT format
     save_mot_file_for_sn_trackeval(
