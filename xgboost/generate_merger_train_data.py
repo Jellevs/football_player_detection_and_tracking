@@ -36,18 +36,18 @@ from typing import Dict, List, Optional, Tuple
 # Paths — adjust to your environment
 # ---------------------------------------------------------------------------
 DATA_ROOT   = Path(r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\data\soccernet\soccernet-player-tracking")
-OUTPUT_ROOT = Path(r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\train_data\new_xgboost")
+OUTPUT_ROOT = Path(r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\train_data\xgboost_5_neg_ratio")
 CACHE_ROOT  = Path(r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\output\cache")
 
 # Which SoccerNetGS split folders to include.  Each may contain many sequences.
-SPLITS_TO_PROCESS = ["train"]   # do NOT include "test" until final evaluation
+SPLITS_TO_PROCESS = ["valid"]   # do NOT include "test" until final evaluation
 
-SPLIT_OUTPUT_NAME = "train"             # the label used in the output filename
+SPLIT_OUTPUT_NAME = "valid"             # the label used in the output filename
                                          # run again with SPLITS_TO_PROCESS=["valid"] and
                                          # SPLIT_OUTPUT_NAME="valid", etc.
 
 MAX_TEMPORAL_GAP        = None   # frames; pairs further apart are skipped
-NEGATIVE_RATIO          = None   # neg/pos sampling ratio (None = keep all, 2.0 = old default)
+NEGATIVE_RATIO          = 5   # neg/pos sampling ratio (None = keep all, 2.0 = old default)
 MIN_TRACKLET_LEN        = 5      # frames; shorter tracklets are discarded
 REID_DIM                = 512    # OSNet x1_0 embedding dimension
 SIGLIP_DIM              = 768    # SigLIP embedding dimension

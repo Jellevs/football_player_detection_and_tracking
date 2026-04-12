@@ -55,25 +55,25 @@ def main(sequence, tracker_cfg, jersey_cfg, splitter_cfg, merger_cfg, device, me
     # Split tracklets based 
     splitted_tracklets = split_tracklets(attributes_tracklets, splitter_cfg)
 
-    # tracklet_merger = XGBoostMerger(
-    #     model_path=r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\weights\xgboost\xgboost_merger.json",
-    #     meta_path=r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\weights\xgboost\xgboost_merger_meta.json",
-    #     merge_threshold=0.5,
-    # )
-
-    # merged_tracklets = tracklet_merger.merge(splitted_tracklets)
-
-    
-    transformer_merger = TransformerMerger(
-        model_path=r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\weights\transformer\best_model.pt",
-        meta_path=r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\weights\transformer\transformer_merger_meta.json",
+    tracklet_merger = XGBoostMerger(
+        model_path=r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\weights\xgboost_5_neg_ratio\xgboost_merger.json",
+        meta_path=r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\weights\xgboost_5_neg_ratio\xgboost_merger_meta.json",
         merge_threshold=0.5,
-        linkage_method="average",
-        jersey_entropy_threshold=0.15,
-        team_consistency_threshold=0.9,
-        device=None)
+    )
+
+    merged_tracklets = tracklet_merger.merge(splitted_tracklets)
+
     
-    merged_tracklets = transformer_merger.merge(splitted_tracklets)
+    # transformer_merger = TransformerMerger(
+    #     model_path=r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\weights\transformer\best_model.pt",
+    #     meta_path=r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\weights\transformer\transformer_merger_meta.json",
+    #     merge_threshold=0.5,
+    #     linkage_method="average",
+    #     jersey_entropy_threshold=0.15,
+    #     team_consistency_threshold=0.9,
+    #     device=None)
+    
+    # merged_tracklets = transformer_merger.merge(splitted_tracklets)
 
 
     # tracklet_merger = SimpleTrackletMerger()
