@@ -77,9 +77,9 @@ python sn-trackeval/scripts/run_mot_challenge.py `
 ### Run evaluation with new dataset SNPT
 python sn-trackeval/scripts/run_mot_challenge.py `
 --BENCHMARK SNMOT `
---SPLIT_TO_EVAL SNMOT-test `
+--SPLIT_TO_EVAL SNPT-test `
 --GT_FOLDER "C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\data\soccernet\soccernet-player-tracking\test" `
---TRACKERS_FOLDER C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\evaluation\SNPT\gta_baseline_tracklets `
+--TRACKERS_FOLDER C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\evaluation\SNPT\final_baseline_tracklets `
 --TRACKERS_TO_EVAL DeepEIoU_soccernet_Split+Connect_eps0.6_minSamples5_K3_mergeDist0.4_spatial0.7 `
 --SEQMAP_FILE C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\evaluation\seqmaps\SNPT-test.txt `
 --METRICS HOTA CLEAR Identity `

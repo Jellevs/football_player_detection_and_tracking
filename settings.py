@@ -1,7 +1,7 @@
 from pathlib import Path
 
 # Evaluation
-METHOD_NAME = "xgboost_5_neg_ratio"
+METHOD_NAME = "final_baseline_tracklets"
 EVAL_SPLIT = "test"  # "train" or "test"
 
 # Paths
