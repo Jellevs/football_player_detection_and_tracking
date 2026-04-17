@@ -53,15 +53,15 @@ def main(sequence, tracker_cfg, jersey_cfg, splitter_cfg, merger_cfg, device, me
     attributes_tracklets = predict_attributes(images, pre_split_tracklets, paths, jersey_cfg, device)
 
     # Split tracklets based 
-    splitted_tracklets = split_tracklets(attributes_tracklets, splitter_cfg)
+    # splitted_tracklets = split_tracklets(attributes_tracklets, splitter_cfg)
 
-    tracklet_merger = XGBoostMerger(
-        model_path=r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\weights\xgboost_5_neg_ratio\xgboost_merger.json",
-        meta_path=r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\weights\xgboost_5_neg_ratio\xgboost_merger_meta.json",
-        merge_threshold=0.5,
-    )
+    # tracklet_merger = XGBoostMerger(
+    #     model_path=r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\weights\xgboost_5_neg_ratio\xgboost_merger.json",
+    #     meta_path=r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\weights\xgboost_5_neg_ratio\xgboost_merger_meta.json",
+    #     merge_threshold=0.5,
+    # )
 
-    merged_tracklets = tracklet_merger.merge(splitted_tracklets)
+    # merged_tracklets = tracklet_merger.merge(splitted_tracklets)
 
     
     # transformer_merger = TransformerMerger(
@@ -84,19 +84,19 @@ def main(sequence, tracker_cfg, jersey_cfg, splitter_cfg, merger_cfg, device, me
     # merged_tracklets = tracklet_merger.merge(splitted_tracklets)
 
     # Save tracklets in MOT format
-    save_mot_file_for_sn_trackeval(
-        tracklets_dict=merged_tracklets,
-        output_path=paths.evaluation_path,
-        sequence_name=sequence,
-        method_name=method_name
-    )
-
-    # visualize_tracklets(
-    #     images=images,
+    # save_mot_file_for_sn_trackeval(
     #     tracklets_dict=merged_tracklets,
-    #     output_path=paths.output_path / "videos" / f"{sequence}_merged.mp4",
-    #     title="blablabbla",
+    #     output_path=paths.evaluation_path,
+    #     sequence_name=sequence,
+    #     method_name=method_name
     # )
+
+    visualize_tracklets(
+        images=images,
+        tracklets_dict=attributes_tracklets,
+        output_path=paths.output_path / "videos" / f"{sequence}_ATTRIBUTES.mp4",
+        title="blablabbla",
+    )
 
     # visualize_tracklets(
     #     images=images,

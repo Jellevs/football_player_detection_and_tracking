@@ -3,3 +3,6 @@ output/
 evaluation/
 trackeval_lite/
 test_parseq.py
+
+
+*.jpg
