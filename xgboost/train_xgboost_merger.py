@@ -34,9 +34,11 @@ from sklearn.metrics import (
 # ---------------------------------------------------------------------------
 # Paths — adjust to your environment
 # ---------------------------------------------------------------------------
-OUTPUT_ROOT = Path(r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\weights\xgboost_5_neg_ratio")
-SAVE_DIR    = Path(r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\weights\xgboost_5_neg_ratio")
-DATA_DIR    = Path(r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\train_data\xgboost_5_neg_ratio")
+neg_ratio = 5
+
+OUTPUT_ROOT = Path(fr"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\weights\xgboost_{neg_ratio}_neg_ratio_no_main_subj_filt_SPLITTED")
+SAVE_DIR    = Path(fr"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\weights\xgboost_{neg_ratio}_neg_ratio_no_main_subj_filt_SPLITTED")
+DATA_DIR    = Path(fr"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\train_data\xgboost_{neg_ratio}_neg_ratio_no_main_subj_filt_SPLITTED")
 
 
 # ---------------------------------------------------------------------------

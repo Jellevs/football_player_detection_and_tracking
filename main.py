@@ -43,25 +43,32 @@ def main(sequence, tracker_cfg, jersey_cfg, splitter_cfg, merger_cfg, device, me
     # Organize detections into tracklets
     tracklets = organize_detections_by_track(tracked_detections)
     
+    visualize_tracklets(
+        images=images,
+        tracklets_dict=attributes_tracklets,
+        output_path=paths.output_path / "videos" / f"{sequence}_pre-split.mp4",
+        title="blablabbla",
+    )
+
     
     # Split at temporal gaps where ReID embeddings indicate different identities
     # TODO: if no cache run this, if cache don't coz already incorporated in attributes tracklets
-    # temporal_splitter = TemporalReIDSplitter(min_gap_frames=5, reid_threshold=0.15)
-    # pre_split_tracklets = temporal_splitter.split_all(tracklets)
+    temporal_splitter = TemporalReIDSplitter(min_gap_frames=5, reid_threshold=0.15)
+    pre_split_tracklets = temporal_splitter.split_all(tracklets)
 
     # Predict attributes for each tracklet
-    # attributes_tracklets = predict_attributes(images, pre_split_tracklets, paths, jersey_cfg, device)
+    attributes_tracklets = predict_attributes(images, pre_split_tracklets, paths, jersey_cfg, device)
 
     # Split tracklets based 
-    # splitted_tracklets = split_tracklets(attributes_tracklets, splitter_cfg)
+    splitted_tracklets = split_tracklets(attributes_tracklets, splitter_cfg)
 
-    # tracklet_merger = XGBoostMerger(
-    #     model_path=r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\weights\xgboost_5_neg_ratio\xgboost_merger.json",
-    #     meta_path=r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\weights\xgboost_5_neg_ratio\xgboost_merger_meta.json",
-    #     merge_threshold=0.5,
-    # )
+    tracklet_merger = XGBoostMerger(
+        model_path=r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\weights\xgboost_5_neg_ratio_no_main_subj_filt_SPLITTED\xgboost_merger.json",
+        meta_path=r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\weights\xgboost_5_neg_ratio_no_main_subj_filt_SPLITTED\xgboost_merger_meta.json",
+        merge_threshold=0.5,
+    )
 
-    # merged_tracklets = tracklet_merger.merge(splitted_tracklets)
+    merged_tracklets = tracklet_merger.merge(splitted_tracklets)
 
     
     # transformer_merger = TransformerMerger(
@@ -85,7 +92,7 @@ def main(sequence, tracker_cfg, jersey_cfg, splitter_cfg, merger_cfg, device, me
 
     # Save tracklets in MOT format
     save_mot_file_for_sn_trackeval(
-        tracklets_dict=tracklets,
+        tracklets_dict=merged_tracklets,
         output_path=paths.evaluation_path,
         sequence_name=sequence,
         method_name=method_name

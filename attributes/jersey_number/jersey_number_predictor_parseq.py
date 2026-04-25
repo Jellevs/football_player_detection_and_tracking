@@ -46,10 +46,10 @@ class JerseyNumberPredictorParseq:
             return [], [], np.full(num_frames, np.nan), np.zeros(num_frames), np.ones(num_frames)
 
         # Stage 1: ReID outlier filtering (extracts its own Centroid-ReID embeddings)
-        if self.reid_filter:
-            [full_crops, torso_crops], indices = self.reid_filter.filter(
-                [full_crops, torso_crops], indices
-            )
+        # if self.reid_filter:
+        #     [full_crops, torso_crops], indices = self.reid_filter.filter(
+        #         [full_crops, torso_crops], indices
+        #     )
 
         # Keep ReID-filtered torso crops for team classification (before legibility)
         torso_crops_for_teams = torso_crops.copy()
@@ -107,17 +107,17 @@ class JerseyNumberPredictorParseq:
                 
             full_crop_rgb = cv2.cvtColor(full_crop, cv2.COLOR_BGR2RGB)
 
-            # Get torso crop using pose estimation or fallback to heuristic
+            # Get torso crop using pose estimation; discard frames where pose
+            # confidence is too low, since these crops tend to be unreliable
+            # (occlusion, non-torso-visible pose) and the legibility classifier
+            # may have slipped a bad crop through.
             if self.pose_cropper:
                 result = self.pose_cropper.get_torso_crop(image, bbox, return_keypoints=True)
-                if result[0] is not None:
-                    torso_crop, (keypoints, scores) = result
-                    all_keypoints.append(keypoints)
-                    all_scores.append(scores)
-                else:
-                    torso_crop = self.simple_torso_crop(full_crop_rgb)
-                    all_keypoints.append(None)
-                    all_scores.append(None)
+                if result[0] is None:
+                    continue
+                torso_crop, (keypoints, scores) = result
+                all_keypoints.append(keypoints)
+                all_scores.append(scores)
             else:
                 torso_crop = self.simple_torso_crop(full_crop_rgb)
                 all_keypoints.append(None)

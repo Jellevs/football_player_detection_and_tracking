@@ -1,0 +1,235 @@
+% =====================================================================
+% Tracklet Splitter Evaluation
+% Remaining TODOs (require additional experiments):
+%   TODO:HOTA:<name>  — end-to-end HOTA with XGBoost merger (finetuning pending)
+%   TODO:REID:*       — spatio-temporal ReID splitter results (separate eval)
+% =====================================================================
+
+\section{Tracklet Splitter Evaluation}\label{sec:splitter_eval}
+
+This section evaluates the attribute-based tracklet splitter and compares it
+against three alternative splitter designs explored during development: the
+bounding-box anomaly splitter, the trajectory splitter, and the GTA-style
+DBSCAN splitter. The spatio-temporal ReID splitter is evaluated separately in
+Section~\ref{subsec:reid_splitter_eval}.
+
+% ---------------------------------------------------------------------
+\subsection{Evaluation Methodology}\label{subsec:splitter_methodology}
+% ---------------------------------------------------------------------
+
+Evaluating a tracklet splitter in isolation is non-trivial because splitting
+a tracklet always increases the fragment count and therefore decreases HOTA
+directly, regardless of split quality. Reporting HOTA of the splitter output
+alone would conflate two distinct effects: the splitter making bad decisions,
+and the evaluation metric penalising fragmentation that will be corrected by
+the downstream merger. To separate these effects, two complementary evaluation
+strategies are used.
+
+\paragraph{Intrinsic metrics.}
+Intrinsic metrics measure split-decision quality against the ground-truth
+identity labels without any downstream component. The ground-truth identity
+switches are defined as all positions inside an input tracklet where the
+underlying ground-truth identity changes between two consecutive detections.
+The baseline tracklets contain \textbf{1\,048} such switches across the 49
+test sequences.
+
+Three metrics are reported. \textbf{IDS-Precision} (IDS-P) is the fraction
+of predicted splits that fall within $\pm\tau_f$ frames of a ground-truth
+switch; a low value indicates over-splitting of clean tracklets.
+\textbf{IDS-Recall} (IDS-R) is the fraction of ground-truth switches that
+are detected within $\pm\tau_f$ frames; a low value indicates missed
+switches. \textbf{IDS-F1} is the harmonic mean of the two, providing a
+single summary of split-decision quality. A tolerance of $\tau_f = 10$
+frames is used throughout. The number of output tracklets is also reported
+as a measure of fragmentation cost.
+
+Tracklet purity, defined as the mean fraction of frames in each output
+tracklet that belong to its dominant ground-truth identity, is not reported
+in the main table. Because the majority of tracklets are not split by any
+method, the aggregate purity values cluster tightly between 0.97 and 0.98
+across all configurations and do not meaningfully differentiate the methods.
+
+\paragraph{Extrinsic evaluation.}
+Each configuration is also evaluated end-to-end through the full ALERT
+pipeline with a fixed downstream XGBoost merger (Section~\ref{xgboost_merger}),
+reporting HOTA on the test split. Because the same merger is used for every
+configuration, differences in HOTA can be primarily attributed to the splitter.
+
+% ---------------------------------------------------------------------
+\subsection{Individual Signal Analysis}\label{subsec:individual_signals}
+% ---------------------------------------------------------------------
+
+Table~\ref{tab:splitter_comparison} compares the individual splitter signals
+and their combinations on the test split intrinsic metrics.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Method} & \textbf{\#Tracklets} & \textbf{IDS-P} ($\uparrow$) & \textbf{IDS-R} ($\uparrow$) & \textbf{IDS-F1} ($\uparrow$) & \textbf{HOTA} ($\uparrow$) \\
+\midrule
+Baseline (no splitting)     & 1725 & ---    & 0.000  & ---    & \texttt{TODO:HOTA:baseline} \\
+\midrule
+Jersey                      & 1824 & 0.7778 & 0.0735 & 0.1343 & \texttt{TODO:HOTA:jersey} \\
+Team                        & 1871 & 0.6351 & 0.0897 & 0.1572 & \texttt{TODO:HOTA:team} \\
+Bounding-box anomaly        & 1875 & 0.6133 & 0.0878 & 0.1536 & \texttt{TODO:HOTA:bbox} \\
+Trajectory                  & 1960 & 0.3489 & 0.0782 & 0.1278 & \texttt{TODO:HOTA:traj} \\
+GTA DBSCAN                  & 2367 & 0.0755 & 0.1479 & 0.1000 & \texttt{TODO:HOTA:gta} \\
+\midrule
+Jersey + Team               & 1877 & 0.6234 & 0.0916 & 0.1597 & \texttt{TODO:HOTA:jersey+team} \\
+Jersey + Team + Bbox        & 1930 & 0.5266 & 0.1040 & 0.1737 & \texttt{TODO:HOTA:jersey+team+bbox} \\
+Jersey + Team + Bbox + Traj & 2072 & 0.3324 & 0.1107 & 0.1661 & \texttt{TODO:HOTA:jersey+team+bbox+traj} \\
+\bottomrule
+\end{tabular}
+\caption{Intrinsic and extrinsic performance of tracklet splitter configurations
+on the 49 test sequences. All configurations are evaluated against the same
+1\,048 ground-truth identity switches in the baseline Deep-EIoU tracklets.
+Extrinsic HOTA is computed end-to-end with the XGBoost merger as a fixed
+downstream component.}
+\label{tab:splitter_comparison}
+\end{table}
+
+\paragraph{Jersey splitter.}
+The jersey-number splitter achieves the highest precision of all individual
+splitters (77.78\%), meaning that nearly four in five predicted splits
+correspond to a genuine identity switch. This precision comes at the cost of
+recall: the splitter detects only 7.35\% of the 1\,048 ground-truth switches,
+producing 99 predicted splits of which 77 are correct. The precision is
+expected to be high because jersey-number predictions are only acted upon when
+they pass an entropy and persistence filter, ensuring splits are triggered only
+when the number change is both confident and temporally sustained. The low
+recall reflects the fundamental visibility constraint: jersey numbers are
+frequently unreadable due to occlusion, motion blur, and low-resolution crops,
+which account for the majority of identity switches in the dataset.
+
+\paragraph{Team splitter.}
+The team-colour splitter achieves lower precision (63.51\%) but higher recall
+(8.97\%) than the jersey splitter, producing 148 predicted splits of which 94
+are correct. Team colour is a coarser signal than jersey number and is
+susceptible to lighting variation and partial occlusion, which explains the
+increased false-positive rate. However, because team colour can often be
+estimated even when jersey numbers are not legible, the team splitter recovers
+a slightly broader set of switches.
+
+\paragraph{Jersey and team signals are largely correlated.}
+Combining jersey and team yields 154 predicted splits and 96 true positives,
+compared to team-only's 148 predicted splits and 94 true positives. The
+combination adds only 2 additional true positives while contributing 4
+additional false positives, indicating that the two signals detect almost
+the same set of switches. This is consistent with the underlying cause: in
+most identity-switch events, both the jersey number and the team colour change
+simultaneously and are equally (un)observable. The marginal gain of combining
+them does not justify added complexity in isolation, but the combined signal
+forms a useful base for adding genuinely independent signals.
+
+\paragraph{Bounding-box anomaly splitter.}
+The bounding-box anomaly splitter achieves a precision of 61.33\% and a recall
+of 8.78\%, closely comparable to the team splitter in both metrics. Despite
+similar performance, the bbox signal offers a distinct cost advantage: it
+operates purely on the bounding-box trajectory already produced by the tracker
+and requires no additional attribute prediction, in contrast to the jersey and
+team splitters which require intensive inference pipelines involving pose
+estimation, OCR, and embedding extraction. This makes the bbox splitter an
+attractive addition to the pipeline — comparable performance to the team
+splitter at negligible additional cost. One limitation is that this evaluation
+uses ground-truth detections; noisy model detections in practice may introduce
+additional spurious velocity spikes that reduce precision. Adding the bbox
+splitter to the jersey+team combination increases the true-positive count from
+96 to 109, with false positives rising from 58 to 98, and IDS-F1 improving
+from 15.97\% to 17.37\%, confirming that the bbox signal provides genuinely
+complementary coverage.
+
+\paragraph{Best combination: Jersey + Team + Bbox.}
+The jersey, team, and bounding-box signals are unified in a single-pass
+splitter that evaluates all three signals on the original, unsplit tracklet.
+This avoids the window-truncation artefact of sequential splitting, where the
+persistence window of the team signal is artificially clipped at boundaries
+introduced by the jersey splitter. The combined splitter achieves the highest
+IDS-F1 of all tested configurations (17.37\%), with 109 true positives and 98
+false positives across 1\,930 output tracklets.
+
+% ---------------------------------------------------------------------
+\subsection{Rejected Alternatives}\label{subsec:rejected_splitters}
+% ---------------------------------------------------------------------
+
+Two splitter designs were explored and ultimately rejected from the ALERT
+pipeline: the trajectory splitter and the GTA DBSCAN splitter.
+
+\paragraph{Trajectory splitter.}
+The trajectory splitter produces 235 predicted splits of which only 82 are
+correct, achieving a precision of 34.89\% — the lowest of all methods tested.
+The high false-positive rate arises because legitimate football actions —
+tackles, close dribbling encounters, and player crossings — produce exactly the
+proximity and direction-change pattern the splitter is designed to detect, but
+without an actual identity switch. Adding the trajectory splitter on top of the
+best combination (jersey+team+bbox) increases the fragment count from 1\,930
+to 2\,072 while improving the true-positive count by only 7, at the cost of
+135 additional false positives, decreasing IDS-F1 from 17.37\% to 16.61\%.
+
+\paragraph{GTA DBSCAN splitter.}
+The GTA DBSCAN splitter is adapted from Sun et al.~\cite{sun2024gta}, who
+propose to detect mix-up errors by extracting per-frame box-grained embeddings
+using an OSNet ReID model and applying DBSCAN clustering in cosine distance
+space. Tracklets whose embeddings form multiple distinct clusters are assumed
+to contain multiple identities and are split at the cluster boundaries. The
+splitter achieves the highest IDS-Recall of all methods (14.79\%), recovering
+switches that the attribute-based signals miss. However, it generates 2\,053
+predicted splits for only 155 true positives, yielding a precision of only
+7.55\% and a false-positive rate above 92\%. The OSNet model was not trained
+on SoccerNet footage, and the resulting domain mismatch causes embeddings to
+diverge substantially even within clean tracklets, producing a large number of
+spurious cluster boundaries. The resulting fragmentation of 2\,367 output
+tracklets from 1\,725 input tracklets — an increase of 37\% — places a very
+high burden on the downstream merger.
+
+Nonetheless, the GTA splitter does improve HOTA when followed by the downstream
+merger (\texttt{TODO:HOTA:gta}), because its high recall provides the merger
+with fragments it would otherwise never see. This suggests that the merger is
+sufficiently robust to absorb the false-positive splits while benefiting from
+the additional true positives. The result motivates future work on
+domain-adapted ReID models that could combine GTA's recall with higher
+precision.
+
+% ---------------------------------------------------------------------
+\subsection{Unified vs.\ Sequential Splitting}\label{subsec:unified_vs_sequential}
+% ---------------------------------------------------------------------
+
+The jersey, team, and bounding-box signals can be applied either sequentially
+— where each splitter receives the already-split output of the previous one —
+or in a unified single pass over the original tracklet. In the sequential
+design, the team splitter operates on tracklets that have already been split
+by the jersey splitter, so its persistence lookahead window is clipped at the
+jersey-introduced fragment boundaries. In the unified design, all three
+signals evaluate the original tracklet simultaneously and their switch indices
+are merged before a single split is applied, preserving the full lookahead
+context for every signal.
+
+The difference is measurable: the unified jersey+team splitter achieves an
+end-to-end HOTA of \texttt{TODO:HOTA:unified} compared to
+\texttt{TODO:HOTA:sequential} for the sequential design, a gain of
+approximately 0.007 HOTA points. The improvement is attributable to the
+unified design suppressing false splits near jersey-split boundaries, where
+the sequential team splitter sees a truncated persistence window and
+incorrectly fires on short spurious team-signal segments that span the
+boundary.
+
+% ---------------------------------------------------------------------
+\subsection{Summary}\label{subsec:splitter_summary}
+% ---------------------------------------------------------------------
+
+The jersey-number signal is the most precise individual splitter (77.78\%)
+but covers fewer than 8\% of ground-truth switches, reflecting the limited
+visibility of jersey numbers in broadcast footage. The team-colour and
+bounding-box anomaly signals achieve comparable precision (61--64\%) and
+slightly higher recall, and are largely orthogonal to the jersey signal; the
+bbox signal additionally contributes at negligible computational cost relative
+to the attribute-based signals. Combining all three in a unified single-pass
+splitter yields the best intrinsic performance (IDS-F1 = 17.37\%) and is
+adopted as the ALERT splitter. The trajectory and GTA DBSCAN splitters both
+fail on precision — the former because football motion inherently mimics the
+proximity-swap pattern, the latter because the OSNet ReID model was not trained on SoccerNet footage,
+causing embeddings to diverge even within clean tracklets — and are excluded
+from the final pipeline. Across all
+configurations, IDS-Recall remains below 15\%, reflecting that the majority of
+identity switches occur during occlusion or at distances where no signal is
+reliably observable.

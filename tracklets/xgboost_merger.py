@@ -26,7 +26,7 @@ bridged by average-linkage chaining.
 import json
 import numpy as np
 from pathlib import Path
-from typing import Dict
+from typing import Dict, List, Union
 from scipy.cluster.hierarchy import linkage, fcluster
 from scipy.spatial.distance import squareform
 from xgboost import XGBClassifier
@@ -35,7 +35,7 @@ from xgboost import XGBClassifier
 class XGBoostMerger:
     def __init__(
         self,
-        model_path: Path,
+        model_path: Union[Path, str, List[Union[Path, str]]],
         meta_path: Path,
         merge_threshold: float = 0.5,
         linkage_method: str = "average",
@@ -49,9 +49,18 @@ class XGBoostMerger:
         self.team_consistency_threshold = team_consistency_threshold
         self.team_confidence_threshold  = team_confidence_threshold
 
-        # Load model
-        self.model = XGBClassifier()
-        self.model.load_model(str(model_path))
+        # Load model(s) — single path or list of paths for ensemble averaging
+        if isinstance(model_path, (list, tuple)):
+            paths = list(model_path)
+        else:
+            paths = [model_path]
+        self.models = []
+        for p in paths:
+            m = XGBClassifier()
+            m.load_model(str(p))
+            self.models.append(m)
+        # Back-compat alias for any caller that still references .model
+        self.model = self.models[0]
 
         # Load metadata (column order + threshold)
         with open(meta_path) as f:
@@ -121,7 +130,10 @@ class XGBoostMerger:
         if pair_rows:
             import pandas as pd
             X      = pd.DataFrame(pair_rows, columns=self.feature_cols).fillna(0).values
-            probs  = self.model.predict_proba(X)[:, 1]
+            probs_per_model = np.stack(
+                [m.predict_proba(X)[:, 1] for m in self.models], axis=0
+            )
+            probs = probs_per_model.mean(axis=0)
             for (i, j), p in zip(pair_indices, probs):
                 d = float(1.0 - p)
                 dist_matrix[i, j] = dist_matrix[j, i] = d

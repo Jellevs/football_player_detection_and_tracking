@@ -89,3 +89,17 @@ python sn-trackeval/scripts/run_mot_challenge.py `
 --SKIP_SPLIT_FOL True
 
 
+python sn-trackeval/scripts/run_mot_challenge.py `
+--BENCHMARK SNMOT `
+--SPLIT_TO_EVAL SNPT-test `
+--GT_FOLDER "C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\data\soccernet\soccernet-player-tracking\test" `
+--TRACKERS_FOLDER C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\evaluation\SNPT\splitters\test `
+--TRACKERS_TO_EVAL splitter_gta `
+--SEQMAP_FILE C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\evaluation\seqmaps\SNPT-test.txt `
+--METRICS HOTA CLEAR Identity `
+--DO_PREPROC False `
+--USE_PARALLEL False `
+--TRACKER_SUB_FOLDER data `
+--SKIP_SPLIT_FOL True
+
+

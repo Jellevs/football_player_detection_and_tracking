@@ -2,9 +2,14 @@
 generate_merger_training_data.py
 
 Generates pairwise training data for the XGBoost tracklet merger.
-Reads cached attribute tracklets (the output of predict_attributes + split_tracklets),
-aggregates each tracklet into a fixed-length feature vector, then constructs
-all valid pairs with a ground-truth merge label derived from gt_track_id.
+Reads cached attribute tracklets (the output of predict_attributes), applies
+the splitter to match the exact distribution the merger sees at inference time,
+then aggregates each post-split tracklet into a fixed-length feature vector and
+constructs all valid pairs with a ground-truth merge label derived from gt_track_id.
+
+Split tracklets are cached to CACHE_SPLIT_ROOT so the splitter only runs once.
+Delete the split cache files to force a re-split (e.g. after changing SIGNALS in
+split_tracklets.py).
 
 No PCA / dimensionality reduction is applied.  The full raw feature set is kept
 so that the XGBoost model can decide for itself which signals matter.
@@ -31,18 +36,18 @@ from pathlib import Path
 from tqdm import tqdm
 from typing import Dict, List, Optional, Tuple
 
+from tracklets.split_tracklets import split_tracklets
+from utils.config import SplitterConfig
+
 
 # ---------------------------------------------------------------------------
 # Paths — adjust to your environment
 # ---------------------------------------------------------------------------
-DATA_ROOT   = Path(r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\data\soccernet\soccernet-player-tracking")
-OUTPUT_ROOT = Path(r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\train_data\xgboost_5_neg_ratio")
-CACHE_ROOT  = Path(r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\output\cache")
 
 # Which SoccerNetGS split folders to include.  Each may contain many sequences.
-SPLITS_TO_PROCESS = ["valid"]   # do NOT include "test" until final evaluation
+SPLITS_TO_PROCESS = ["train"]   # do NOT include "test" until final evaluation
 
-SPLIT_OUTPUT_NAME = "valid"             # the label used in the output filename
+SPLIT_OUTPUT_NAME = "train"             # the label used in the output filename
                                          # run again with SPLITS_TO_PROCESS=["valid"] and
                                          # SPLIT_OUTPUT_NAME="valid", etc.
 
@@ -52,6 +57,14 @@ MIN_TRACKLET_LEN        = 5      # frames; shorter tracklets are discarded
 REID_DIM                = 512    # OSNet x1_0 embedding dimension
 SIGLIP_DIM              = 768    # SigLIP embedding dimension
 TEAM_CONFIDENCE_THRESHOLD = 0.6  # min KMeans confidence to count a team prediction as reliable
+
+DATA_ROOT        = Path(r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\data\soccernet\soccernet-player-tracking")
+OUTPUT_ROOT      = Path(fr"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\train_data\xgboost_{5}_neg_ratio_no_main_subj_filt_SPLITTED")
+CACHE_ROOT       = Path(r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\output\cache")
+CACHE_SPLIT_ROOT = Path(r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\output\cache_split")
+
+# Splitter config — must match the settings used during inference (settings.py SPLITTER dict)
+SPLITTER_CFG = SplitterConfig()
 
 
 # ---------------------------------------------------------------------------
@@ -361,26 +374,58 @@ def generate_pairs_for_sequence(
 
 
 # ---------------------------------------------------------------------------
-# 4.  Cache loading
+# 4.  Cache loading (pre-split attributes) + splitting + split-cache
 # ---------------------------------------------------------------------------
 
-def load_cached_tracklets(sequence: str, split: str) -> Optional[dict]:
+def load_presplit_tracklets(sequence: str) -> Optional[dict]:
     """
-    Load the attributes-enriched tracklets from the pickle cache produced by
-    predict_attributes().  Expected filename: attributes_<sequence>.pkl
-    inside CACHE_ROOT / split.
+    Load the attributes-enriched tracklets produced by predict_attributes().
+    These are the raw (pre-split) tracklets.
     """
-    # Try split-specific subdirectory first, then flat cache root
-    candidates = [
-        CACHE_ROOT / f"cache_attributes_{sequence}.pkl",
-    ]
-
-    for path in candidates:
-        if path.exists():
-            with open(path, "rb") as f:
-                return pickle.load(f)
-    print(f"  [WARN] No cache found for {sequence} (tried: {candidates})")
+    path = CACHE_ROOT / f"cache_attributes_{sequence}.pkl"
+    if path.exists():
+        with open(path, "rb") as f:
+            return pickle.load(f)
+    print(f"  [WARN] No attributes cache found for {sequence} (tried: {path})")
     return None
+
+
+def load_or_compute_split_tracklets(sequence: str) -> Optional[dict]:
+    """
+    Return post-split tracklets for *sequence*, using a cache so the splitter
+    only runs once per sequence.
+
+    Cache hit  → load CACHE_SPLIT_ROOT/cache_split_{sequence}.pkl
+    Cache miss → load pre-split attributes cache, run split_tracklets(),
+                 save result to split cache, return it.
+
+    Delete the split cache files to force a re-split (e.g. after changing
+    SIGNALS in tracklets/split_tracklets.py).
+    """
+    CACHE_SPLIT_ROOT.mkdir(parents=True, exist_ok=True)
+    split_cache_path = CACHE_SPLIT_ROOT / f"cache_split_{sequence}.pkl"
+
+    if split_cache_path.exists():
+        tqdm.write(f"  {sequence}: loading split cache")
+        with open(split_cache_path, "rb") as f:
+            return pickle.load(f)
+
+    # Cache miss — load pre-split tracklets and run the splitter
+    tqdm.write(f"  {sequence}: no split cache found, running splitter …")
+    tracklets = load_presplit_tracklets(sequence)
+    if tracklets is None:
+        return None
+
+    n_before   = len(tracklets)
+    tracklets  = split_tracklets(tracklets, SPLITTER_CFG)
+    n_after    = len(tracklets)
+    tqdm.write(f"  {sequence}: {n_before} → {n_after} tracklets after splitting")
+
+    with open(split_cache_path, "wb") as f:
+        pickle.dump(tracklets, f)
+    tqdm.write(f"  {sequence}: split cache saved → {split_cache_path}")
+
+    return tracklets
 
 
 # ---------------------------------------------------------------------------
@@ -407,7 +452,7 @@ def main():
         print(f"{'='*70}")
 
         for seq in tqdm(sequences, desc=split):
-            tracklets = load_cached_tracklets(seq, split)
+            tracklets = load_or_compute_split_tracklets(seq)
             if tracklets is None:
                 continue
 

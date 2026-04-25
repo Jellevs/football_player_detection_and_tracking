@@ -1,0 +1,105 @@
+% =====================================================================
+% Experimental Setup section for chapters/experiments.tex
+% Drop this in place of or above the current placeholder content in
+% chapters/experiments.tex.
+%
+% Placeholders to replace (search for the string "TODO"):
+%   - Dataset statistics table (TODO:STAT:*)
+%   - Deep-EIoU hyperparameter table (TODO:DEIOU:*)
+%   - Hardware / software versions (TODO:HW:*)
+%   - Number of training seeds (TODO:SEEDS)
+%   - Bibliography keys that may need adding: idf1, trackeval
+% =====================================================================
+
+\section{Experimental Setup}\label{sec:experimental_setup}
+
+This section describes the experimental protocol used to evaluate the ALERT framework.
+Section~\ref{subsec:dataset} summarizes the SoccerNet Player-Tracking dataset.
+Section~\ref{subsec:metrics} introduces the evaluation metrics.
+Section~\ref{subsec:baselines} describes the baselines against which ALERT is compared.
+Section~\ref{subsec:protocol} details the training and evaluation protocol.
+Section~\ref{subsec:implementation} covers implementation details.
+
+\subsection{Dataset}\label{subsec:dataset}
+
+All experiments are performed on the newly constructed SoccerNet Player-Tracking (SNPT) dataset, described in detail in Section~\ref{dataset_construction}. Each sequence contains 30~seconds of broadcast football footage recorded at 25~frames per second with a resolution of $1920\times1080$. Annotations cover only players and goalkeepers; referees, staff, and the ball are removed during the conversion from the SoccerNet Game State Reconstruction \cite{soccernetgsr} source format. The dataset is divided into train, validation and test splits containing 57, 58, and 49 sequences, respectively. Relevant statistics for each split are reported in Table~\ref{tab:dataset_stats}.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lccc}
+\toprule
+\textbf{Statistic} & \textbf{Train} & \textbf{Validation} & \textbf{Test} \\
+\midrule
+Sequences                              & 57 & 58 & 49 \\
+Total frames                           & \texttt{TODO:STAT:FRAMES}   & \texttt{TODO:STAT:FRAMES}   & \texttt{TODO:STAT:FRAMES}   \\
+Unique player identities               & \texttt{TODO:STAT:IDS}      & \texttt{TODO:STAT:IDS}      & \texttt{TODO:STAT:IDS}      \\
+Avg.\ players per sequence             & \texttt{TODO:STAT:PPS}      & \texttt{TODO:STAT:PPS}      & \texttt{TODO:STAT:PPS}      \\
+Total player detections                & \texttt{TODO:STAT:DETS}     & \texttt{TODO:STAT:DETS}     & \texttt{TODO:STAT:DETS}     \\
+Avg.\ tracklet length (frames)         & \texttt{TODO:STAT:TLEN}     & \texttt{TODO:STAT:TLEN}     & \texttt{TODO:STAT:TLEN}     \\
+\bottomrule
+\end{tabular}
+\caption{Statistics of the SoccerNet Player-Tracking dataset per split. Tracklet length is measured on the ground-truth annotations.}
+\label{tab:dataset_stats}
+\end{table}
+
+The three splits serve distinct roles throughout the experiments. The train split is used to fit the learning-based mergers (XGBoost and transformer). The validation split is used to tune all hyperparameters through grid search and to perform early stopping during training of the learning-based mergers. The test split is held out and used exclusively to report the final results, preventing overfitting to the validation data.
+
+\subsection{Evaluation Metrics}\label{subsec:metrics}
+
+Following the SoccerNet-tracking benchmark \cite{cioppa2022soccernet}, the primary evaluation metric is HOTA \cite{hota}. HOTA measures tracking quality by combining detection accuracy (DetA) and association accuracy (AssA) into a single score:
+\begin{equation}
+    \text{HOTA} = \sqrt{\text{DetA} \cdot \text{AssA}}.
+\end{equation}
+Because all experiments use ground-truth detections (Section~\ref{detection_and_tracking}), DetA is approximately constant across methods and HOTA is driven almost entirely by AssA. AssA measures how consistently tracks preserve identities over time, which is precisely what the refinement framework seeks to improve, and is therefore reported separately to isolate the association gains attributable to the framework.
+
+In addition to HOTA and AssA, IDF1 \cite{idf1} and the number of identity switches (IDSW) are reported. IDF1 is an identity-based F1 metric that emphasizes long, consistent tracks. IDSW counts the absolute number of identity switches detected by the evaluator, and is included as an intuitive complement to the aggregated HOTA score.
+
+All metrics are computed with the TrackEval toolkit \cite{trackeval} configured for the SoccerNet-tracking protocol, and are reported both as the mean across test sequences and as the set-level score as defined by the TrackEval SoccerNet evaluator.
+
+\subsection{Baselines}\label{subsec:baselines}
+
+ALERT is compared against three baselines that each isolate a different aspect of the contribution:
+
+\begin{itemize}
+    \item \textbf{Deep-EIoU (no refinement).} The tracklets produced by Deep-EIoU \cite{deep-eiou} on ground-truth detections, without any post-processing. This baseline quantifies the upper bound of online tracking alone and serves as the starting point on top of which every refinement method is applied.
+
+    \item \textbf{Deep-EIoU + spatio-temporal ReID splitter.} An intermediate baseline that applies only the pre-attribute splitter described in Section~\ref{reid_spatio_temporal_splitter} to the Deep-EIoU tracklets. This baseline isolates the contribution of the pre-attribute splitter from the attribute-augmented refinement stages that follow.
+
+    \item \textbf{GTA \cite{gta}.} The state-of-the-art plug-and-play refinement method for sports tracking. GTA applies DBSCAN-based tracklet splitting and hierarchical-clustering-based tracklet connection using only ReID embeddings and spatio-temporal information, and is the closest competitor to ALERT. Comparing against GTA on identical Deep-EIoU tracklets isolates the contribution of domain-specific attributes to refinement quality.
+\end{itemize}
+
+GTA is reproduced using the public implementation released by Sun et al.\cite{gta}. Its hyperparameters are re-tuned on the SNPT validation split rather than re-using the original SoccerNet-tracking values, to prevent the baseline from being disadvantaged by a distribution shift between the two benchmarks.
+
+\subsection{Training and Evaluation Protocol}\label{subsec:protocol}
+
+\paragraph{Hyperparameter tuning.} All hyperparameters, including the Deep-EIoU tracker parameters, the spatio-temporal ReID splitter thresholds, the attribute-based splitter thresholds, the rule-based merger thresholds, and the merge-distance thresholds of the learning-based mergers, are tuned via grid search on the validation split using HOTA as the selection metric. Selected values are reported in the relevant sub-sections of this chapter and summarized in Appendix~\ref{appendix:hyperparameters}. When multiple configurations tie on HOTA, the configuration with the lower IDSW is preferred.
+
+\paragraph{Learning-based merger training.} The XGBoost and transformer mergers additionally use validation-set AUC for early stopping during training. To account for stochastic variation in training, the learning-based mergers are trained with \texttt{TODO:SEEDS} different random seeds, and test-set results are reported as mean $\pm$ standard deviation over these runs. All other components are deterministic and are evaluated once.
+
+\paragraph{Reporting.} Unless stated otherwise, quantitative results are reported on the test split with the validation-selected hyperparameters. Ablation studies that compare framework variants are also performed on the test split, but use the best validation hyperparameters identified for the full framework to avoid introducing an additional tuning step per ablation variant.
+
+\subsection{Implementation Details}\label{subsec:implementation}
+
+\paragraph{Hardware.} All experiments are conducted on a single \texttt{TODO:HW:GPU} (\texttt{TODO:HW:VRAM}~GB VRAM). CPU-only stages such as TrackEval evaluation, XGBoost training, and hierarchical clustering are executed on \texttt{TODO:HW:CPU}.
+
+\paragraph{Software.} The pipeline is implemented in Python~\texttt{TODO:HW:PY}, using PyTorch~\texttt{TODO:HW:TORCH}, XGBoost~\texttt{TODO:HW:XGB}, and \texttt{scikit-learn}~\texttt{TODO:HW:SKL} for the KMeans team clustering and agglomerative clustering steps. ReID embeddings are extracted with OSNet~x1.0 \cite{osnet} trained on SportsMOT, matching the configuration used by Sun et al.\ \cite{gta}. Team-identity features use SigLIP embeddings projected to two dimensions with UMAP before KMeans clustering. Pose estimation uses ViTPose \cite{vitpose} and scene text recognition uses PARSeq \cite{parseq}, both following the framework of Koshkina et al.\ \cite{jersey-prediction}.
+
+\paragraph{Tracker configuration.} Deep-EIoU is configured with OSNet~x1.0 ReID features and the default association weights reported in the original paper \cite{deep-eiou}. The detection threshold and track-buffer length are tuned on the SNPT validation split through grid search. The selected values are reported in Table~\ref{tab:deepeiou_hparams}.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lc}
+\toprule
+\textbf{Parameter} & \textbf{Value} \\
+\midrule
+Detection threshold      & \texttt{TODO:DEIOU:DET}   \\
+Track buffer             & \texttt{TODO:DEIOU:BUF}   \\
+Matching threshold       & \texttt{TODO:DEIOU:MATCH} \\
+ReID weight              & \texttt{TODO:DEIOU:REIDW} \\
+\bottomrule
+\end{tabular}
+\caption{Deep-EIoU tracker hyperparameters after validation-split tuning.}
+\label{tab:deepeiou_hparams}
+\end{table}
+
+\paragraph{Reproducibility.} All random seeds are fixed during training. The source code, trained merger models, and the SNPT conversion script will be made publicly available upon submission.

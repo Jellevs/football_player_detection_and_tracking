@@ -1,8 +1,8 @@
 from pathlib import Path
 
 # Evaluation
-METHOD_NAME = "final_baseline_tracklets"
-EVAL_SPLIT = "test"  # "train" or "test"
+METHOD_NAME = "splitted_jersey"
+EVAL_SPLIT = "valid"  # "train" or "test"
 
 # Paths
 DATA_ROOT = Path(rf"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\data\soccernet\soccernet-player-tracking\{EVAL_SPLIT}")  # Path to the folder with the images
