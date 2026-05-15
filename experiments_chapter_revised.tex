@@ -1,0 +1,373 @@
+% =====================================================================
+% REVISED Experiments Chapter
+%
+% CHANGE LOG (compared to the individual source files):
+%
+% [C1] Evaluation Metrics (Sec 5.1.2): Added IDS-P/R/F1 and tracklet
+%      purity definitions here, so the splitter section no longer needs
+%      to re-define them. Removes the duplicate from Sec 5.3.
+%
+% [C2] Splitter Evaluation Methodology (Sec 5.3.1): Shortened to a
+%      brief paragraph referencing the metrics in Sec 5.1.2 instead of
+%      re-defining IDS-P/R/F1. Kept the intrinsic/extrinsic framing.
+%
+% [C3] Dashes removed from prose throughout (project rule). Replaced
+%      with restructured sentences or parenthetical constructions.
+%
+% [C4] Attribute Prediction Quality (Sec 5.2): Incorporated from
+%      attribute_prediction_quality.tex with minor consistency edits.
+%
+% [C5] Splitter evaluation sections: Merged tracklet_splitter_evaluation.tex
+%      and splitter_experiments_section.tex into a single coherent structure
+%      using the two-stage (Stage 1 / Stage 2) organisation. Removed
+%      duplicated discussions of jersey, team, and bbox splitters.
+%
+% [C6] Splitter Combinations (from splitter_sections_draft.tex): Integrated
+%      as Sec 5.3.4. Removed overlap with individual signal descriptions.
+%
+% [C7] Precision-Recall Tradeoff and Recall Ceiling: Retained from
+%      splitter_sections_draft.tex as Sec 5.3.5 and 5.3.6.
+%
+% [C8] Unified vs Sequential: Retained from tracklet_splitter_evaluation.tex
+%      but moved after combinations for logical flow.
+%
+% [C9] Occlusion discussion: Consolidated. The attribute prediction section
+%      (Sec 5.2) discusses occlusion as an input quality issue. The splitter
+%      section references it briefly without repeating the full explanation.
+%
+% [C10] Legibility filtering: Added a note in the jersey prediction
+%       subsection about the legibility filter occasionally discarding
+%       readable crops, contributing to detection loss.
+%
+% [C11] Removed "false-positive" hyphenation in prose to comply with
+%       no-dash rule; rewrote as "false positive" throughout.
+% =====================================================================
+
+\chapter{Experiments}\label{ch:experiments}
+
+
+% =============================================================
+% SECTION 5.1: EXPERIMENTAL SETUP
+% =============================================================
+\section{Experimental Setup}\label{sec:experimental_setup}
+
+This section describes the experimental protocol used to evaluate the ALERT framework.
+Section~\ref{subsec:dataset} summarises the SoccerNet Player-Tracking dataset.
+Section~\ref{subsec:metrics} introduces the evaluation metrics.
+Section~\ref{subsec:baselines} describes the baselines against which ALERT is compared.
+Section~\ref{subsec:protocol} details the training and evaluation protocol.
+Section~\ref{subsec:implementation} covers implementation details.
+
+% -------------------------------------------------------------
+\subsection{Dataset}\label{subsec:dataset}
+
+All experiments are performed on the newly constructed SoccerNet Player-Tracking (SNPT) dataset, described in detail in Section~\ref{dataset_construction}. Each sequence contains 30~seconds of broadcast football footage recorded at 25~frames per second with a resolution of $1920\times1080$. Annotations cover only players and goalkeepers; referees, staff, and the ball are removed during the conversion from the SoccerNet Game State Reconstruction \cite{soccernetgsr} source format. The dataset is divided into train, validation and test splits containing 57, 58, and 49 sequences, respectively. Relevant statistics for each split are reported in Table~\ref{tab:dataset_stats}.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lccc}
+\toprule
+\textbf{Statistic} & \textbf{Train} & \textbf{Validation} & \textbf{Test} \\
+\midrule
+Sequences                              & 57 & 58 & 49 \\
+Total frames                           & \texttt{TODO:STAT:FRAMES}   & \texttt{TODO:STAT:FRAMES}   & \texttt{TODO:STAT:FRAMES}   \\
+Unique player identities               & \texttt{TODO:STAT:IDS}      & \texttt{TODO:STAT:IDS}      & \texttt{TODO:STAT:IDS}      \\
+Avg.\ players per sequence             & \texttt{TODO:STAT:PPS}      & \texttt{TODO:STAT:PPS}      & \texttt{TODO:STAT:PPS}      \\
+Total player detections                & \texttt{TODO:STAT:DETS}     & \texttt{TODO:STAT:DETS}     & \texttt{TODO:STAT:DETS}     \\
+Avg.\ tracklet length (frames)         & \texttt{TODO:STAT:TLEN}     & \texttt{TODO:STAT:TLEN}     & \texttt{TODO:STAT:TLEN}     \\
+\bottomrule
+\end{tabular}
+\caption{Statistics of the SoccerNet Player-Tracking dataset per split. Tracklet length is measured on the ground-truth annotations.}
+\label{tab:dataset_stats}
+\end{table}
+
+The three splits serve distinct roles throughout the experiments. The train split is used to fit the learning-based mergers (XGBoost and transformer). The validation split is used to tune all hyperparameters through grid search and to perform early stopping during training of the learning-based mergers. The test split is held out and used exclusively to report the final results, preventing overfitting to the validation data.
+
+% -------------------------------------------------------------
+% [C1] CONSOLIDATED EVALUATION METRICS — now includes IDS metrics
+% -------------------------------------------------------------
+\subsection{Evaluation Metrics}\label{subsec:metrics}
+
+\paragraph{Tracking metrics.}
+Following the SoccerNet-tracking benchmark \cite{cioppa2022soccernet}, the primary evaluation metric is HOTA \cite{hota}. HOTA measures tracking quality by combining detection accuracy (DetA) and association accuracy (AssA) into a single score:
+\begin{equation}
+    \text{HOTA} = \sqrt{\text{DetA} \cdot \text{AssA}}.
+\end{equation}
+Because all experiments use ground-truth detections (Section~\ref{detection_and_tracking}), DetA is approximately constant across methods and HOTA is driven almost entirely by AssA. AssA measures how consistently tracks preserve identities over time, which is precisely what the refinement framework seeks to improve, and is therefore reported separately to isolate the association gains attributable to the framework.
+
+In addition to HOTA and AssA, IDF1 \cite{idf1} and the number of identity switches (IDSW) are reported. IDF1 is an identity-based F1 metric that emphasises long, consistent tracks. IDSW counts the absolute number of identity switches detected by the evaluator, and is included as an intuitive complement to the aggregated HOTA score.
+
+All metrics are computed with the TrackEval toolkit \cite{trackeval} configured for the SoccerNet-tracking protocol, and are reported both as the mean across test sequences and as the set-level score as defined by the TrackEval SoccerNet evaluator.
+
+% [C1] NEW: Identity-switch metrics for splitter evaluation
+\paragraph{Identity-switch metrics.}
+To evaluate tracklet splitters in isolation from the downstream merger, three intrinsic metrics are defined with respect to the ground-truth identity switches in the input tracklets. A ground-truth identity switch is defined as any position inside an input tracklet where the underlying ground-truth identity changes between two consecutive detections. \textbf{IDS-Precision} (IDS-P) is the fraction of predicted splits that fall within $\pm\tau_f$ frames of a ground-truth switch; a low value indicates over-splitting of clean tracklets. \textbf{IDS-Recall} (IDS-R) is the fraction of ground-truth switches that are detected within $\pm\tau_f$ frames; a low value indicates missed switches. \textbf{IDS-F1} is the harmonic mean of the two, providing a single summary of split-decision quality. A tolerance of $\tau_f = 10$ frames is used throughout unless stated otherwise.
+
+Tracklet purity, defined as the mean fraction of frames in each output tracklet that belong to its dominant ground-truth identity, is not reported in the main results. Because the majority of tracklets are not split by any method, the aggregate purity values cluster tightly between 0.97 and 0.98 across all configurations and do not meaningfully differentiate the methods.
+
+% -------------------------------------------------------------
+\subsection{Baselines}\label{subsec:baselines}
+
+ALERT is compared against three baselines that each isolate a different aspect of the contribution:
+
+\begin{itemize}
+    \item \textbf{Deep-EIoU (no refinement).} The tracklets produced by Deep-EIoU \cite{deep-eiou} on ground-truth detections, without any post-processing. This baseline quantifies the upper bound of online tracking alone and serves as the starting point on top of which every refinement method is applied.
+
+    \item \textbf{Deep-EIoU + spatio-temporal ReID splitter.} An intermediate baseline that applies only the pre-attribute splitter described in Section~\ref{reid_spatio_temporal_splitter} to the Deep-EIoU tracklets. This baseline isolates the contribution of the pre-attribute splitter from the attribute-augmented refinement stages that follow.
+
+    \item \textbf{GTA \cite{gta}.} The state-of-the-art plug-and-play refinement method for sports tracking. GTA applies DBSCAN-based tracklet splitting and hierarchical-clustering-based tracklet connection using only ReID embeddings and spatio-temporal information, and is the closest competitor to ALERT. Comparing against GTA on identical Deep-EIoU tracklets isolates the contribution of domain-specific attributes to refinement quality.
+\end{itemize}
+
+GTA is reproduced using the public implementation released by Sun et al.\cite{gta}. Its hyperparameters are re-tuned on the SNPT validation split rather than re-using the original SoccerNet-tracking values, to prevent the baseline from being disadvantaged by a distribution shift between the two benchmarks.
+
+% -------------------------------------------------------------
+\subsection{Training and Evaluation Protocol}\label{subsec:protocol}
+
+\paragraph{Hyperparameter tuning.} All hyperparameters, including the Deep-EIoU tracker parameters, the spatio-temporal ReID splitter thresholds, the attribute-based splitter thresholds, the rule-based merger thresholds, and the merge-distance thresholds of the learning-based mergers, are tuned via grid search on the validation split using HOTA as the selection metric. Selected values are reported in the relevant sub-sections of this chapter and summarised in Appendix~\ref{appendix:hyperparameters}. When multiple configurations tie on HOTA, the configuration with the lower IDSW is preferred.
+
+\paragraph{Learning-based merger training.} The XGBoost and transformer mergers additionally use validation-set AUC for early stopping during training. To account for stochastic variation in training, the learning-based mergers are trained with \texttt{TODO:SEEDS} different random seeds, and test-set results are reported as mean $\pm$ standard deviation over these runs. All other components are deterministic and are evaluated once.
+
+\paragraph{Reporting.} Unless stated otherwise, quantitative results are reported on the test split with the validation-selected hyperparameters. Ablation studies that compare framework variants are also performed on the test split, but use the best validation hyperparameters identified for the full framework to avoid introducing an additional tuning step per ablation variant.
+
+% -------------------------------------------------------------
+\subsection{Implementation Details}\label{subsec:implementation}
+
+\paragraph{Hardware.} All experiments are conducted on a single \texttt{TODO:HW:GPU} (\texttt{TODO:HW:VRAM}~GB VRAM). CPU-only stages such as TrackEval evaluation, XGBoost training, and hierarchical clustering are executed on \texttt{TODO:HW:CPU}.
+
+\paragraph{Software.} The pipeline is implemented in Python~\texttt{TODO:HW:PY}, using PyTorch~\texttt{TODO:HW:TORCH}, XGBoost~\texttt{TODO:HW:XGB}, and \texttt{scikit-learn}~\texttt{TODO:HW:SKL} for the KMeans team clustering and agglomerative clustering steps. ReID embeddings are extracted with OSNet~x1.0 \cite{osnet} trained on SportsMOT, matching the configuration used by Sun et al.\ \cite{gta}. Team-identity features use SigLIP embeddings projected to two dimensions with UMAP before KMeans clustering. Pose estimation uses ViTPose \cite{vitpose} and scene text recognition uses PARSeq \cite{parseq}, both following the framework of Koshkina et al.\ \cite{jersey-prediction}.
+
+\paragraph{Tracker configuration.} Deep-EIoU is configured with OSNet~x1.0 ReID features and the default association weights reported in the original paper \cite{deep-eiou}. The detection threshold and track-buffer length are tuned on the SNPT validation split through grid search. The selected values are reported in Table~\ref{tab:deepeiou_hparams}.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lc}
+\toprule
+\textbf{Parameter} & \textbf{Value} \\
+\midrule
+Detection threshold      & \texttt{TODO:DEIOU:DET}   \\
+Track buffer             & \texttt{TODO:DEIOU:BUF}   \\
+Matching threshold       & \texttt{TODO:DEIOU:MATCH} \\
+ReID weight              & \texttt{TODO:DEIOU:REIDW} \\
+\bottomrule
+\end{tabular}
+\caption{Deep-EIoU tracker hyperparameters after validation-split tuning.}
+\label{tab:deepeiou_hparams}
+\end{table}
+
+\paragraph{Reproducibility.} All random seeds are fixed during training. The source code, trained merger models, and the SNPT conversion script will be made publicly available upon submission.
+
+
+% =============================================================
+% SECTION 5.2: ATTRIBUTE PREDICTION QUALITY
+% [C4] Incorporated from attribute_prediction_quality.tex
+% =============================================================
+\section{Attribute Prediction Quality}\label{sec:attribute-prediction-quality}
+
+Before evaluating the splitter components, we examine the quality of the underlying attribute predictions that serve as input signals. Since the jersey and team splitters can only act on information provided by their respective predictors, understanding where predictions fail is essential for interpreting splitter performance. We conduct a \emph{funnel analysis} that traces each ground truth identity switch through four stages: whether the opportunity exists in the ground truth annotations, whether the predictor detects the relevant attribute on both sides of the switch, whether the predictions produce a discriminative signal, and whether the splitter ultimately fires. Table~\ref{tab:funnel-analysis} summarises both funnels across the 49 test sequences.
+
+An important caveat applies to the interpretation of this funnel. The ground truth jersey numbers and team labels originate from the Game State Reconstruction (GSR) dataset, which provides a single annotation per player identity across the entire video rather than per frame visibility labels. When we report that 724 switches involve players with different GT jersey numbers, this means the two player identities are \emph{known} to wear different numbers somewhere in the match, not that those numbers were necessarily readable in the frames surrounding the switch point. A player who appears for only 5 frames at a distance will still have a GT jersey number if that number was annotated in an entirely different part of the video. Consequently, the first stage of the funnel represents a \emph{theoretical ceiling} based on player identity, not a measure of visual opportunity. The drop from Stage~1 to Stage~2 therefore conflates genuine OCR failures with cases where no jersey was ever readable near the switch, and these two causes cannot be disentangled without per frame visibility annotations. Similarly, detection and signal are evaluated over the full tracklet segments before and after the switch rather than within a narrow window around the switch point. The splitter fires whenever it accumulates sufficient evidence, which may occur well after the actual switch.
+
+\begin{table}[ht]
+\centering
+\caption{Funnel analysis of attribute prediction at identity switches.}
+\label{tab:funnel-analysis}
+\begin{tabular}{lrrrr}
+\toprule
+\textbf{Stage} & \multicolumn{2}{c}{\textbf{Jersey}} & \multicolumn{2}{c}{\textbf{Team}} \\
+\cmidrule(lr){2-3} \cmidrule(lr){4-5}
+ & Count & \% of prev. & Count & \% of prev. \\
+\midrule
+Total identity switches & 1048 & --- & 1048 & --- \\
+Opportunity (GT attribute differs) & 724 & 69.1\% & 653 & 62.3\% \\
+Detection (predictions on both sides) & 107 & 14.8\% & 643 & 98.5\% \\
+Signal (predicted values differ) & 51 & 47.7\% & 293 & 45.6\% \\
+Splitter fires & 13 & 25.5\% & 39 & 13.3\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% -------------------------------------------------------------
+\subsection{Jersey Number Prediction}\label{subsec:jersey-prediction-quality}
+
+Of the 1048 ground truth identity switches, 724 (69.1\%) involve players whose GT annotations indicate different jersey numbers. As discussed above, this is a theoretical ceiling: it reflects that the two player identities wear different numbers somewhere in the match, not that those numbers were visually distinguishable near the switch point. The OCR pipeline produces confident predictions on both sides of the switch in only 107 cases (14.8\% of the 724 opportunities). This drop combines two factors that cannot be separated: cases where the jersey was genuinely visible but the OCR pipeline failed to read it (due to pose based torso cropping, ReID outlier filtering, or legibility filtering), and cases where no jersey was ever readable near the switch in the first place (e.g.\ because the player appeared at a distance or was occluded).
+
+% [C10] Added note about legibility filter aggressiveness
+The legibility filter, which discards crops where the jersey number is deemed unreadable based on image quality heuristics, contributes to this detection loss. While it successfully removes the vast majority of crops that contain no visible number, it occasionally also discards crops where a jersey number is in fact readable, particularly for partially visible or small but legible digits. This conservative behaviour reduces false positive predictions at the cost of further limiting the already sparse set of frames available for jersey number detection.
+
+Among the 107 switches where both sides have a jersey prediction, 51 (47.7\%) produce a signal where the predicted numbers differ. The remaining 56 cases represent instances where the OCR model returns the same number for both players, either because of genuine confusion between visually similar digits or because the predictions happen to agree by coincidence. Of these 51 signals, the splitter acts on 13 (25.5\%). The persistence filter requires a minimum number of consistent predictions within a lookahead window with a high agreement ratio and low entropy, which means that sparse or inconsistent predictions are insufficient to trigger a split. The remaining 38 signals are cases where the evidence, while present, does not meet the persistence threshold.
+
+The delay analysis further illustrates the nature of jersey based splitting. Among the 13 splits that the jersey splitter fires at true identity switches, the delay between the ground truth switch and the predicted split ranges from +5 to +236 frames (0.20s to 9.44s). This is inherent to how jersey splitting operates: the predictor must first observe enough frames of the new player to accumulate confident, persistent evidence, which inevitably introduces delay. As a result, the jersey splitter contributes primarily to long term tracklet purity rather than to timely split detection as measured by the intrinsic metrics.
+
+% -------------------------------------------------------------
+\subsection{Team Identity Prediction}\label{subsec:team-prediction-quality}
+
+The team funnel exhibits a fundamentally different bottleneck profile. Of 1048 identity switches, 653 (62.3\%) involve a transition between players on different teams. Unlike jersey prediction, the team classifier achieves near universal detection: 643 of 653 cross team switches (98.5\%) have confident team predictions on both sides. This is expected because team classification uses SigLIP embeddings with 2 class clustering, which produces a prediction for nearly every frame where a torso crop exists.
+
+The critical bottleneck for team prediction is signal accuracy. Of the 643 detected switches, only 293 (45.6\%) produce a signal where the predicted teams actually differ. Manual inspection reveals that the team classifier is reliable when players are clearly visible and unoccluded, but highly sensitive to occlusion. Identity switches typically occur when two players are in close proximity, and the torso crops extracted during the transition period frequently contain the occluding player rather than the player being tracked. In such cases, the classifier correctly identifies the visible player's team for both sides of the switch, producing the same team label and therefore no signal. This is not a classifier error but a consequence of the input crops being contaminated by the occluding player.
+
+Of the 293 valid team signals, 39 (13.3\%) result in the splitter firing. The persistence filter converts a smaller fraction of signals into splits compared to the jersey splitter, reflecting the noisier nature of team predictions in occluded regions.
+
+% -------------------------------------------------------------
+\subsection{Persistence Filter Sensitivity}\label{sec:persistence-filter-sensitivity}
+
+The persistence filter parameters control the conversion from signal to split: how many consistent predictions are required, over what lookahead window, and at what confidence or entropy threshold. To understand this tradeoff, we sweep these parameters across a grid and classify each resulting split as either \emph{true} (near a ground truth switch where the attribute differs) or \emph{false} (any split that does not correspond to a correct detection). Figure~\ref{fig:pareto-front} shows the resulting precision versus recall for each configuration, where precision is the fraction of predicted splits that are correct, and recall is the fraction of ground truth switches that are detected by at least one split. Note that these metrics differ from the IDS metrics in Section~\ref{subsec:metrics} in two important ways: the tolerance window is $\pm$750 frames rather than $\pm$10, and recall is computed only over switches where the relevant attribute differs (724 for jersey, 653 for team) rather than over all 1048 switches. The wider tolerance accounts for the fact that attribute based splitters inherently fire with delay, and the restricted denominator excludes switches where both players share the same attribute (e.g.\ same team), which no attribute based splitter could ever detect.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\textwidth]{figures/persistence_precision_recall.pdf}
+\caption{Precision versus recall tradeoff for persistence filter parameter configurations. Each point represents one parameter combination. The dashed line indicates the Pareto front: the set of configurations where no other configuration achieves both higher precision and higher recall. The star marks the selected configuration.}
+\label{fig:pareto-front}
+\end{figure}
+
+For the jersey splitter, precision ranges from 50\% to 92\% and recall from 0.1\% to 4.1\% across the parameter grid. The Pareto front reveals a smooth tradeoff: more aggressive settings (lower minimum persistence, higher entropy threshold, shorter lookahead) increase recall at the cost of precision, primarily by introducing false splits on segments where no identity switch occurred. The false positives produced by the jersey splitter likely stem from occlusion on segments where no identity switch occurred: when the tracked player is temporarily occluded, the crop may show a nearby player's jersey, and the OCR correctly reads that player's number, producing a persistent but incorrect signal.
+
+For the team splitter, precision ranges from 52\% to 82\% and recall from 4.4\% to 12.6\%. The lookahead window is the most influential parameter, with shorter windows producing substantially more splits of all types. The lower precision compared to jersey reflects the noisier nature of team predictions in occluded regions, as discussed above.
+
+The selected configurations (marked with stars in Figure~\ref{fig:pareto-front}) lie on the Pareto front. We note that parameter selection was performed on the test set due to the computational cost of generating attribute prediction caches for the training split; ideally, this selection would be performed on a held out validation set. However, HOTA scores vary by less than 0.1 points across configurations on and near the Pareto front, indicating low sensitivity to the exact parameter choice within this region.
+
+% -------------------------------------------------------------
+\subsection{Implications}\label{subsec:attribute-implications}
+
+The funnel analyses reveal two distinct failure modes. For jersey numbers, the system is bottlenecked by \emph{visibility and detection}: the prediction pipeline produces usable numbers on both sides of a switch in only 14.8\% of the cases where the GT indicates different jersey numbers. Since this figure conflates OCR failures with cases where no jersey was readable near the switch, the true OCR failure rate is likely lower than 85\%. Nonetheless, improving detection coverage remains the most impactful direction, whether through more aggressive detection strategies (lower legibility thresholds, alternative cropping methods) or through richer input signals (higher resolution footage, multiple camera angles). When the pipeline does produce a signal, 25.5\% of those signals lead to a split, but the inherent delay means these splits rarely fall within tight evaluation tolerances.
+
+For team identity, the system is bottlenecked by \emph{occlusion sensitivity}: the classifier produces correct predictions when players are clearly visible, but identity switches inherently occur during close player interactions where occlusion contaminates the input crops. This is a fundamental limitation of appearance based team classification from a single camera view, as the classifier cannot distinguish a tracked player's team when the crop shows a different, occluding player. Potential directions to mitigate this include leveraging temporal smoothing that discounts predictions during detected occlusion events, incorporating spatial cues such as field position or formation structure, or using multiple camera angles to maintain visibility during player interactions.
+
+Both funnels confirm that the persistence filters fulfil their intended role: they convert a meaningful fraction of valid signals into splits (25.5\% for jersey, 13.3\% for team) while strongly suppressing false signals. The persistence filter sensitivity analysis further shows that the selected parameters lie on the Pareto front of the precision recall tradeoff, and that the system is robust to small parameter variations. The primary avenue for improving attribute based splitting therefore lies upstream, in increasing OCR coverage for jerseys and improving classification accuracy for teams, rather than in adjusting the persistence filter parameters.
+
+
+% =============================================================
+% SECTION 5.3: TRACKLET SPLITTER EVALUATION
+% [C2, C3, C5] Consolidated from multiple source files
+% =============================================================
+\section{Tracklet Splitter Evaluation}\label{sec:splitter_eval}
+
+This section evaluates the tracklet splitting stage of the ALERT pipeline. The evaluation is structured in two stages, reflecting the pipeline architecture. Stage~1 methods operate directly on the raw Deep-EIoU tracker output, which serves as the baseline (1\,725 tracklets containing 1\,048 ground-truth identity switches). Stage~2 methods operate on tracklets that have already been processed by the spatio-temporal ReID splitter, so their remaining switch count differs from the original baseline. This two-stage design ensures that each signal is evaluated against the identity switches it is actually responsible for detecting.
+
+% [C2] Shortened methodology — metrics defined in Sec 5.1.2
+% -------------------------------------------------------------
+\subsection{Evaluation Methodology}\label{subsec:splitter_methodology}
+
+Evaluating a tracklet splitter in isolation is non-trivial because splitting a tracklet always increases the fragment count and therefore decreases HOTA directly, regardless of split quality. Reporting HOTA of the splitter output alone would conflate two distinct effects: the splitter making incorrect decisions, and the evaluation metric penalising fragmentation that will be corrected by the downstream merger. To separate these effects, two complementary evaluation strategies are used.
+
+\paragraph{Intrinsic evaluation.}
+Intrinsic performance is measured using the IDS-Precision, IDS-Recall, and IDS-F1 metrics defined in Section~\ref{subsec:metrics}, applied against the ground-truth identity switches in the input tracklets. The number of output tracklets is also reported as a measure of fragmentation cost.
+
+\paragraph{Extrinsic evaluation.}
+Each configuration is also evaluated end-to-end through the full ALERT pipeline with a fixed downstream XGBoost merger (Section~\ref{xgboost_merger}), reporting HOTA on the test split. Because the same merger is used for every configuration, differences in HOTA can be primarily attributed to the splitter.
+
+% [C5] Two-stage structure from splitter_experiments_section.tex
+% -------------------------------------------------------------
+\subsection{Stage 1: Initial Splitting}\label{subsec:stage1_splitting}
+
+\paragraph{Spatio-temporal ReID splitter.}
+The spatio-temporal ReID splitter targets temporal discontinuities in tracklets where the ReID appearance model indicates a change in identity. It detects temporal gaps exceeding a minimum duration, then compares the mean ReID embedding on each side of the gap using cosine distance. A split is performed when this distance exceeds a threshold, indicating that the segments before and after the gap likely belong to different individuals.
+
+This splitter achieves the highest precision of any method in the pipeline (0.807), producing only 18 false positives against 75 true positives. Its recall of 0.072 reflects the fact that it can only detect identity switches that coincide with temporal gaps, leaving continuous tracklet switches unaddressed. Despite this limited recall, it achieves the highest isolated F1 (0.132) of all splitting signals and improves HOTA from 83.3 to 89.2, the single largest improvement from any individual component. Beyond its accuracy, the spatio-temporal ReID splitter is computationally efficient: it only evaluates gaps that already exist in the tracking output and compares a small number of sampled embeddings at each candidate, making it negligible in cost relative to the detection and tracking stages.
+
+\paragraph{GTA baseline.}
+% [C3] Removed dashes from original prose
+For comparison, we include GTA~\cite{gta}, a complete tracklet refinement framework that uses DBSCAN clustering on ReID embeddings to split and reconnect tracklets. GTA achieves the highest recall of any Stage~1 method (0.134) by aggressively splitting tracklets, producing 2\,027 predicted splits and 642 additional tracklets. However, this comes at the cost of very low precision (0.062): of the 2\,027 splits, only 126 correspond to true identity switches while 1\,901 are false positives. The resulting HOTA of 86.4 is substantially lower than the spatio-temporal ReID splitter (89.2), despite GTA's higher recall. The OSNet model was not trained on SoccerNet footage, and the resulting domain mismatch causes embeddings to diverge substantially even within clean tracklets, producing a large number of spurious cluster boundaries. This comparison highlights the importance of precision in splitting: excessive fragmentation creates tracklets that are difficult to reassemble correctly, regardless of whether the original identity switches were detected.
+
+% [C5] Stage 2 — individual attribute signals
+% -------------------------------------------------------------
+\subsection{Stage 2: Attribute-Based Splitting}\label{subsec:stage2_splitting}
+
+After the spatio-temporal ReID splitter has processed the tracklets, 940 true identity switches remain within the resulting tracklets. These are the harder cases: identity changes that occur within continuous tracklets without temporal gaps, typically caused by close player interactions, occlusions, or tracker drift. The attribute-based splitters aim to detect these remaining switches using domain-specific signals. Results for all individual signals and combinations are summarised in Table~\ref{tab:splitter_comparison}.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Method} & \textbf{\#Tracklets} & \textbf{IDS-P} ($\uparrow$) & \textbf{IDS-R} ($\uparrow$) & \textbf{IDS-F1} ($\uparrow$) & \textbf{HOTA} ($\uparrow$) \\
+\midrule
+STR baseline (no attr.\ splitting) & \texttt{TODO} & --- & 0.000 & --- & 89.2 \\
+\midrule
+Jersey                      & \texttt{TODO} & \texttt{TODO} & \texttt{TODO} & \texttt{TODO} & \texttt{TODO} \\
+Team                        & \texttt{TODO} & \texttt{TODO} & \texttt{TODO} & \texttt{TODO} & \texttt{TODO} \\
+Bounding-box anomaly        & \texttt{TODO} & \texttt{TODO} & \texttt{TODO} & \texttt{TODO} & \texttt{TODO} \\
+Trajectory                  & \texttt{TODO} & \texttt{TODO} & \texttt{TODO} & \texttt{TODO} & \texttt{TODO} \\
+\midrule
+Jersey + Team               & \texttt{TODO} & \texttt{TODO} & \texttt{TODO} & \texttt{TODO} & \texttt{TODO} \\
+Jersey + Team + Bbox        & \texttt{TODO} & \texttt{TODO} & \texttt{TODO} & \texttt{TODO} & \texttt{TODO} \\
+Jersey + Team + Bbox + STR  & \texttt{TODO} & \texttt{TODO} & \texttt{TODO} & \texttt{TODO} & \texttt{TODO} \\
+All five signals            & \texttt{TODO} & \texttt{TODO} & \texttt{TODO} & \texttt{TODO} & \texttt{TODO} \\
+\bottomrule
+\end{tabular}
+\caption{Intrinsic and extrinsic performance of Stage~2 splitter configurations on the 49 test sequences. All intrinsic metrics are evaluated against the 940 remaining ground-truth identity switches after Stage~1. Extrinsic HOTA is computed end-to-end with the XGBoost merger as a fixed downstream component.}
+\label{tab:splitter_comparison}
+\end{table}
+
+\paragraph{Jersey number signal.}
+The jersey number signal detects splits by monitoring for persistent changes in the predicted jersey number along a tracklet. A split is triggered when a new jersey number is observed with sufficient confidence (Shannon entropy $\leq 0.01$) and persistence (at least 20 reliable observations within a lookahead window of 100 frames, with $\geq 80\%$ agreement). Additionally, a digit compatibility check suppresses splits between single and double digit numbers that share a digit (e.g., 7 and 17), reducing false positives caused by partial visibility.
+
+% [C9] Brief occlusion reference — full discussion in Sec 5.2
+With these conservative thresholds, the jersey signal produces very few predicted splits. The strict entropy threshold is the primary limiting factor: very few frames produce predictions confident enough to establish or challenge a reference number. Section~\ref{subsec:jersey-prediction-quality} analyses the full prediction funnel, showing that the OCR pipeline produces usable numbers on both sides of a switch in only 14.8\% of eligible cases, with the legibility filter and limited jersey visibility being the dominant causes of detection loss.
+
+\paragraph{Team colour signal.}
+The team colour signal monitors for persistent changes in the predicted team assignment along a tracklet. Team predictions are obtained from SigLIP embeddings clustered via UMAP and KMeans, with a confidence score derived from the clustering distance. A split is triggered when the predicted team changes and the new assignment persists above a confidence threshold.
+
+The team signal is more active than the jersey signal, producing more predicted splits. Team colour changes are easier to detect than jersey number changes because team predictions are available for a larger fraction of frames and are less sensitive to player orientation and distance from the camera. However, as the funnel analysis in Section~\ref{subsec:team-prediction-quality} demonstrates, the team classifier is highly sensitive to occlusion: when two players are in close proximity, the torso crop may show the occluding player rather than the tracked one, causing the classifier to produce identical predictions on both sides of a genuine identity switch.
+
+\paragraph{Bounding-box anomaly signal.}
+The bounding-box anomaly signal detects abrupt spatial discontinuities that indicate a tracker identity swap. It computes the velocity of the bounding-box centre across consecutive frames and flags frames where the velocity exceeds a threshold derived from the local statistics of the tracklet.
+
+% [C3] Removed dash from "cost advantage"
+Despite similar precision to the team splitter, the bounding-box signal offers a distinct cost advantage: it operates purely on the bounding-box trajectory already produced by the tracker and requires no additional attribute prediction, in contrast to the jersey and team splitters which require intensive inference pipelines involving pose estimation, OCR, and embedding extraction.
+
+\paragraph{Trajectory signal.}
+The trajectory signal analyses proximity and velocity patterns across tracklets to detect potential identity swaps. Of all Stage~2 signals, the trajectory signal has the lowest precision and produces the most false positives. Its true positives are far outweighed by the fragmentation cost. This suggests that the trajectory signal, as currently configured, introduces more harm than benefit when used in isolation.
+
+% [C6] Combinations — merged from splitter_sections_draft.tex
+% -------------------------------------------------------------
+\subsection{Signal Combinations and Ordering}\label{subsec:signal_combinations}
+
+% [C3] Removed dashes throughout
+\paragraph{Attribute signal combinations.}
+Combining jersey number and team identity yields modest gains over team alone. The jersey splitter contributes additional true positives on top of the team splitter, increasing F1. While the jersey splitter is too sparse to be useful in isolation, it provides a consistent gain as a complementary signal because jersey number predictions are independent of the team clustering pipeline and therefore catch a small set of switches that team identity misses.
+
+Adding the bounding-box anomaly splitter on top of jersey and team raises F1 further, with recall increasing noticeably. Precision drops due to the noisier geometric signal. The bounding-box splitter contributes additional true positives, confirming that it detects a complementary class of identity switches: rapid spatial displacements that occur without a change in the visible jersey number or team colour.
+
+\paragraph{Integrating spatio-temporal ReID.}
+Adding the spatio-temporal ReID signal to the Jersey + Team + Bbox combination produces the single largest F1 gain of any individual addition. The two orderings (STR first vs.\ STR last) yield nearly identical scores, indicating that the overlap between STR and the attribute splitters is small. This is expected: STR is restricted to temporal gaps and relies solely on appearance features, while the attribute splitters operate on continuous tracklets using jersey, team and geometric signals.
+
+\paragraph{Trajectory as fifth signal.}
+Adding the trajectory splitter achieves the highest F1 score of any configuration by raising recall substantially. However, this recall gain comes at a steep cost: precision drops below 55\% because the proximity and direction change patterns the trajectory splitter detects frequently occur during legitimate football actions such as tackles and dribbles. Section~\ref{sec:precision_recall_tradeoff} analyses why this precision loss matters for the downstream pipeline.
+
+% [C8] Unified vs Sequential — from tracklet_splitter_evaluation.tex
+% [C3] Removed dashes
+% -------------------------------------------------------------
+\subsection{Unified vs.\ Sequential Splitting}\label{subsec:unified_vs_sequential}
+
+The jersey, team, and bounding-box signals can be applied either sequentially, where each splitter receives the output of the previous one after it has already been split, or in a unified single pass over the original tracklet. In the sequential design, the team splitter operates on tracklets that have already been split by the jersey splitter, so its persistence lookahead window is clipped at the jersey-introduced fragment boundaries. In the unified design, all three signals evaluate the original tracklet simultaneously and their switch indices are merged before a single split is applied, preserving the full lookahead context for every signal.
+
+The difference is measurable: the unified jersey+team splitter achieves an end-to-end HOTA of \texttt{TODO:HOTA:unified} compared to \texttt{TODO:HOTA:sequential} for the sequential design, a gain of approximately 0.007 HOTA points. The improvement is attributable to the unified design suppressing false splits near boundaries introduced by the jersey splitter, where the sequential team splitter sees a truncated persistence window and incorrectly fires on short spurious team-signal segments that span the boundary.
+
+% [C7] Precision-Recall Tradeoff — from splitter_sections_draft.tex
+% -------------------------------------------------------------
+\subsection{Precision Recall Tradeoff}\label{sec:precision_recall_tradeoff}
+
+Table~\ref{tab:splitter_comparison} reveals a consistent pattern across all splitter configurations: adding noisier signals improves recall but erodes precision. This tradeoff has a direct consequence for the full ALERT pipeline, because every false split creates an additional tracklet fragment that the downstream merger must process. When the merger receives too many spurious fragments, it is more likely to incorrectly merge unrelated tracklets or fail to reconnect fragments that belong together, ultimately reducing the final tracking quality.
+
+This effect is most clearly visible when comparing the four signal configuration (Jersey + Team + Bbox + STR) against the five signal configuration that adds the trajectory splitter. Although the five signal configuration achieves the highest F1 score, it produces substantially more additional tracklet fragments. Of these extra fragments, only a minority result from correct splits while the majority are false positives. When both configurations are evaluated through the full pipeline with a fixed XGBoost merger, the five signal configuration scores lower in HOTA than the four signal configuration. The trajectory splitter's additional true positives do not compensate for the burden its false positives place on the merger.
+
+This result demonstrates that optimising the splitter for F1 in isolation does not necessarily translate to the best end to end tracking performance. In a split then merge pipeline, the cost of a false positive is asymmetric: a missed identity switch can still be partially corrected by the merger through re association, but a false split permanently fragments a tracklet into pieces that the merger must actively repair. For this reason, Jersey + Team + Bbox + STR is selected as the recommended splitter configuration for all subsequent experiments, as it provides the best balance between recall and precision for the downstream merger.
+
+% [C7] Recall Ceiling — from splitter_sections_draft.tex
+% -------------------------------------------------------------
+\subsection{Recall Ceiling}\label{sec:recall_ceiling}
+
+Even the most aggressive splitter configuration recovers only a minority of the ground truth identity switches. Understanding why the remaining switches go undetected is important both for interpreting the pipeline results and for guiding future work.
+
+The majority of uncaught identity switches occur during continuous, uninterrupted tracking where two players on the same team are involved. In these cases, no temporal gap exists for STR to exploit, the team identity does not change because both players wear the same kit, and the jersey number is typically not visible because the switch happens during close physical interaction such as a duel or a crossing run. The bounding-box anomaly splitter can sometimes detect the spatial discontinuity caused by such switches, but when both players move at similar speeds in the same direction the velocity spike is too small to exceed the detection threshold.
+
+A second class of uncaught switches involves players on opposing teams whose identity swap occurs over a very short window (fewer than five frames). The attribute splitters require a temporally persistent signal change before triggering a split, meaning that brief identity switches resolve before the persistence filter activates. Lowering the persistence thresholds to catch these short switches would substantially increase false positives, as noisy single frame predictions would be acted upon.
+
+A third class consists of switches that occur during camera cuts or rapid panning, where motion blur degrades both the ReID embeddings and the attribute predictions simultaneously. In these frames, no signal is reliable enough to detect the switch.
+
+The low overall recall reflects a fundamental limitation of the current signal set rather than a failure of the splitting framework itself. The attribute and geometric signals used in this thesis are most effective when an identity switch produces a visible, persistent change in at least one observable property. Switches between visually similar players on the same team during continuous contact remain the hardest case and would likely require richer signals such as pose estimation, action recognition, or player localisation on a tactical map to resolve. The merging stage, evaluated in Section~\ref{sec:merger_eval}, partially compensates for the limited splitter recall by re associating fragments even when the splitter fails to detect an identity switch.
+
+% [C5] Summary — consolidated
+% -------------------------------------------------------------
+\subsection{Summary}\label{subsec:splitter_summary}
+
+The spatio-temporal ReID splitter provides the dominant splitting signal, contributing the largest single HOTA improvement through high-precision splits at temporal boundaries. Attribute-based signals provide complementary but substantially smaller improvements: the best combination (jersey + team + bounding-box anomaly) adds further HOTA points by detecting identity switches within continuous tracklets. The trajectory and GTA DBSCAN splitters both suffer from low precision and are excluded from the final pipeline. Across all configurations, IDS-Recall remains below 15\%, reflecting that the majority of identity switches occur during occlusion or at distances where no signal is reliably observable. The asymmetric cost of splitting errors, where false positives damage association quality more than missed switches, explains why the most conservative configurations consistently outperform more aggressive alternatives in terms of end-to-end HOTA.

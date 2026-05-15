@@ -44,15 +44,48 @@ NEGATIVE_RATIO    = 3          # keep all negatives for max training data
 MIN_TRACKLET_LEN  = 5
 MAX_TEMPORAL_GAP  = None          # frames; None = no limit
 
+# ---------------------------------------------------------------------------
+# Purity threshold for GT labeling
+#
+# Our splitter does not work perfectly, so a tracklet can contain frames from
+# more than one real player. If we naively take the majority GT ID and label
+# the pair based on that, we risk training on noisy examples:
+#   - A tracklet that is 55% player A and 45% player B gets called "player A",
+#     but its appearance features are a confusing mix of two people.
+#   - Two such impure tracklets may be labeled "should merge" even though
+#     merging them would make an identity-mixed tracklet even worse.
+#
+# Fix: only trust the majority GT ID when it is dominant enough. If fewer than
+# TRACKLET_PURITY_THRESHOLD of a tracklet's frames agree on the majority ID,
+# get_gt_id() returns None, and any pair involving that tracklet is skipped
+# during data generation. This reduces dataset size slightly but removes the
+# most misleading training examples.
+# ---------------------------------------------------------------------------
+TRACKLET_PURITY_THRESHOLD = 0.80  # at least 80% of frames must share the majority GT ID
+
 
 def get_gt_id(tracklet) -> Optional[int]:
-    """Extract majority ground-truth track ID from a tracklet."""
+    """
+    Extract the majority ground-truth track ID from a tracklet, but only if
+    the tracklet is sufficiently pure (i.e. not an identity-mixed fragment that
+    the splitter missed).
+
+    Returns None if:
+      - no valid GT IDs exist in this tracklet, OR
+      - the majority ID covers fewer than TRACKLET_PURITY_THRESHOLD of frames
+        (tracklet is too mixed to trust as a clean training example).
+    """
     gt_ids = tracklet.gt_attributes.get("track_ids", [])
     valid = [g for g in gt_ids
              if g is not None and not (isinstance(g, float) and np.isnan(g))]
     if not valid:
         return None
-    return max(set(valid), key=valid.count)
+    majority = max(set(valid), key=valid.count)
+    purity = valid.count(majority) / len(valid)
+    # Reject impure tracklets — their label would be unreliable noise
+    if purity < TRACKLET_PURITY_THRESHOLD:
+        return None
+    return majority
 
 
 def main():

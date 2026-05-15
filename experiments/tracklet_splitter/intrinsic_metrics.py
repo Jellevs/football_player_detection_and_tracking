@@ -390,9 +390,9 @@ def main() -> None:
     # passes --pred / --gt / --input / --seqmap / --out explicitly and those
     # values override the defaults below.
     DEFAULT_PRED = Path(r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\evaluation\SNPT\baseline\data")
-    DEFAULT_GT = Path(r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\data\soccernet\soccernet-player-tracking\valid")
+    DEFAULT_GT = Path(r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\data\soccernet\soccernet-player-tracking\test")
     DEFAULT_INPUT: Optional[Path] = None
-    DEFAULT_SEQMAP = Path(r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\evaluation\seqmaps\SNPT-valid.txt")
+    DEFAULT_SEQMAP = Path(r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\evaluation\seqmaps\SNPT-test.txt")
     DEFAULT_OUT = Path(r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\experiments\tracklet_splitter\output\output.csv")
 
     ap = argparse.ArgumentParser(description="Intrinsic tracklet splitter metrics.")

@@ -149,6 +149,9 @@ def default_xgboost_factory(
     jersey_entropy_threshold: float = 0.15,
     team_consistency_threshold: float = 0.9,
     team_confidence_threshold: float = 0.6,
+    disable_temporal_constraint: bool = False,
+    disable_jersey_constraint: bool = False,
+    disable_team_constraint: bool = False,
 ) -> MergerFactory:
     """
     Build a zero-arg factory producing a fresh XGBoostMerger. The factory is
@@ -167,6 +170,9 @@ def default_xgboost_factory(
             jersey_entropy_threshold=jersey_entropy_threshold,
             team_consistency_threshold=team_consistency_threshold,
             team_confidence_threshold=team_confidence_threshold,
+            disable_temporal_constraint=disable_temporal_constraint,
+            disable_jersey_constraint=disable_jersey_constraint,
+            disable_team_constraint=disable_team_constraint,
         )
     return _make
 

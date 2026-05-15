@@ -12,6 +12,7 @@ from attributes.attributes import predict_attributes
 from tracklets.split_tracklets import split_tracklets
 from tracklets.splitters.gta_splitter import split_tracklets as split_tracklets_gta, merge_tracklets as merge_tracklets_gta
 from tracklets.splitters.temporal_reid_splitter import TemporalReIDSplitter
+from tracklets.splitters.bbox_anomaly_splitter import BboxAnomalySplitter
 from tracklets.simple_tracklet_merger import  SimpleTrackletMerger
 from tracklets.xgboost_merger import XGBoostMerger
 from tracklets.transformer_merger import TransformerMerger
@@ -43,28 +44,26 @@ def main(sequence, tracker_cfg, jersey_cfg, splitter_cfg, merger_cfg, device, me
     # Organize detections into tracklets
     tracklets = organize_detections_by_track(tracked_detections)
     
-    visualize_tracklets(
-        images=images,
-        tracklets_dict=attributes_tracklets,
-        output_path=paths.output_path / "videos" / f"{sequence}_pre-split.mp4",
-        title="blablabbla",
-    )
-
-    
     # Split at temporal gaps where ReID embeddings indicate different identities
     # TODO: if no cache run this, if cache don't coz already incorporated in attributes tracklets
-    temporal_splitter = TemporalReIDSplitter(min_gap_frames=5, reid_threshold=0.15)
-    pre_split_tracklets = temporal_splitter.split_all(tracklets)
 
-    # Predict attributes for each tracklet
-    attributes_tracklets = predict_attributes(images, pre_split_tracklets, paths, jersey_cfg, device)
+    # temporal_splitter = TemporalReIDSplitter(min_gap_frames=5, reid_threshold=0.15)
+    # pre_split_tracklets = temporal_splitter.split_all(tracklets)
+
+    attributes_tracklets = predict_attributes(images, tracklets, paths, jersey_cfg, device)
 
     # Split tracklets based 
     splitted_tracklets = split_tracklets(attributes_tracklets, splitter_cfg)
 
+    # tracklet_merger = XGBoostMerger(
+    #     model_path=r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\weights\xgboost_5_neg_ratio_no_main_subj_filt\xgboost_merger.json",
+    #     meta_path=r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\weights\xgboost_5_neg_ratio_no_main_subj_filt\xgboost_merger_meta.json",
+    #     merge_threshold=0.5,
+    # )
+
     tracklet_merger = XGBoostMerger(
-        model_path=r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\weights\xgboost_5_neg_ratio_no_main_subj_filt_SPLITTED\xgboost_merger.json",
-        meta_path=r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\weights\xgboost_5_neg_ratio_no_main_subj_filt_SPLITTED\xgboost_merger_meta.json",
+        model_path=r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\experiments\tracklet_merger\xgboost\sweep_results\neg3_minlen10_purity1.0_splitFalse_BEST\xgboost_merger.json",
+        meta_path=r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\experiments\tracklet_merger\xgboost\sweep_results\neg3_minlen10_purity1.0_splitFalse_BEST\xgboost_merger_meta.json",
         merge_threshold=0.5,
     )
 
@@ -82,9 +81,6 @@ def main(sequence, tracker_cfg, jersey_cfg, splitter_cfg, merger_cfg, device, me
     
     # merged_tracklets = transformer_merger.merge(splitted_tracklets)
 
-
-    # tracklet_merger = SimpleTrackletMerger()
-    # merged_tracklets = tracklet_merger.merge(splitted_tracklets)
 
     # from tracklets.decision_merger import DecisionMerger
     # tracklet_merger = DecisionMerger(reid_threshold=0.4)
@@ -120,19 +116,12 @@ def main(sequence, tracker_cfg, jersey_cfg, splitter_cfg, merger_cfg, device, me
     # )
     
 
-    # from utils.diagnose_jersey_filtering import diagnose_filtering
-    # diagnose_filtering(images, tracklets, paths, jersey_cfg, device, max_tracklets=100)
-
-    # from utils.visualize_jerseys import visualize_jersey_predictions
-    # visualize_jersey_predictions(images, attributes_tracklets, paths.output_path / sequence, max_tracklets=30)
-
 
 if __name__ == "__main__":
     device, tracker_cfg, jersey_cfg, splitter_cfg, merger_cfg = build_configs()
 
     sequences = sorted([d.name for d in settings.DATA_ROOT.iterdir() if d.is_dir()])
-    
-    # Run pipeline on all sequences
+
     for sequence in tqdm(sequences, desc="Processing sequences"):
         main(
             sequence,
@@ -141,7 +130,7 @@ if __name__ == "__main__":
             splitter_cfg=splitter_cfg,
             merger_cfg=merger_cfg,
             device=device,
-            method_name=settings.METHOD_NAME
+            method_name=settings.METHOD_NAME,
         )
 
     run_evaluation(settings.METHOD_NAME, settings.EVAL_SPLIT)

@@ -42,12 +42,18 @@ class XGBoostMerger:
         jersey_entropy_threshold: float = 0.15,
         team_consistency_threshold: float = 0.9,
         team_confidence_threshold: float = 0.6,
+        disable_temporal_constraint: bool = False,
+        disable_jersey_constraint: bool = False,
+        disable_team_constraint: bool = False,
     ):
         self.merge_threshold            = merge_threshold
         self.linkage_method             = linkage_method
         self.jersey_entropy_threshold   = jersey_entropy_threshold
         self.team_consistency_threshold = team_consistency_threshold
         self.team_confidence_threshold  = team_confidence_threshold
+        self.disable_temporal_constraint = disable_temporal_constraint
+        self.disable_jersey_constraint   = disable_jersey_constraint
+        self.disable_team_constraint     = disable_team_constraint
 
         # Load model(s) — single path or list of paths for ensemble averaging
         if isinstance(model_path, (list, tuple)):
@@ -106,17 +112,17 @@ class XGBoostMerger:
                 t_b = tracklets[tracklet_ids[j]]
 
                 # Hard constraint: temporal overlap
-                if set(t_a.frames) & set(t_b.frames):
+                if not self.disable_temporal_constraint and set(t_a.frames) & set(t_b.frames):
                     dist_matrix[i, j] = dist_matrix[j, i] = 2.0
                     continue
 
                 # Hard constraint: confident jersey mismatch
-                if self._jersey_conflict(t_a, t_b):
+                if not self.disable_jersey_constraint and self._jersey_conflict(t_a, t_b):
                     dist_matrix[i, j] = dist_matrix[j, i] = 2.0
                     continue
 
                 # Hard constraint: consistent team mismatch
-                if self._team_conflict(t_a, t_b):
+                if not self.disable_team_constraint and self._team_conflict(t_a, t_b):
                     dist_matrix[i, j] = dist_matrix[j, i] = 2.0
                     continue
 

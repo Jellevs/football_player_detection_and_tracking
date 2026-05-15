@@ -16,26 +16,46 @@ import csv
 from pathlib import Path
 
 # ── paths ─────────────────────────────────────────────────────────────────────
+
+DATA_SPLIT = "test"
 REPO = Path(__file__).parent.parent.parent  # tracklet_splitter_scratch/
-GT_ROOT = Path(r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\data\soccernet\soccernet-player-tracking\valid")
+GT_ROOT = Path(fr"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\data\soccernet\soccernet-player-tracking\{DATA_SPLIT}")
 EVAL_ROOT = Path(r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\evaluation\SNPT")
-INPUT_DIR = EVAL_ROOT / "baseline" / "data"          # pre-split baseline tracklets
-SEQMAP   = REPO / "evaluation" / "seqmaps" / "SNPT-valid.txt"
+INPUT_DIR = EVAL_ROOT / "baseline" / "data"         # pre-split baseline tracklets
+# INPUT_DIR = EVAL_ROOT / "splitters" / "test" / "splitter_temporalreid" / "data"         # spatio temporal reid splitted tracklets
+
+SEQMAP   = REPO / "evaluation" / "seqmaps" / f"SNPT-{DATA_SPLIT}.txt"
 SCRIPT   = REPO / "experiments" / "tracklet_splitter" / "intrinsic_metrics.py"
-OUT_CSV  = REPO / "experiments" / "tracklet_splitter" / "output" / "splitter_comparison_jersey.csv"
+OUT_CSV  = REPO / "experiments" / "tracklet_splitter" / "output" / "gta_contiguous.csv"
 
 # ── splitters to evaluate ──────────────────────────────────────────────────────
 # Each tuple is (display_name, subdir relative to EVAL_ROOT).
 SPLITTERS = [
-    # ("jersey+team+bbox+traj",   "splitters/test/splitter_jersey+team+bbox+traj/data"),
-    # ("jersey+team+bbox",   "splitters/test/splitter_jersey+team+bbox/data"),
-    # ("baseline",      "baseline/data"),
-    ("jersey",        "splitters/test/splitter_jersey/data"),
-    # ("team",          "splitters/test/splitter_team/data"),
-    # ("jersey+team",   "splitters/test/splitter_jersey+team/data"),
-    # ("bbox",          "splitters/test/splitter_bbox/data"),
-    # ("trajectory",    "splitters/test/splitter_traj/data"),
-    # ("gta",         "splitters/test/splitter_gta/data"),
+    ('gta', "gta/DeepEIoU_soccernet_Split_contiguous_eps0.6_minSamples5_K3_minLen100")
+    # ("baseline",   "baseline/data" ),
+    # ("gta",        "splitters/test/splitter_gta/data"),
+    # ("temporalreid",        "splitters/test/splitter_temporalreid/data"),
+
+    # ("jersey",        "splitters/test/wo_reid_splitter/splitter_jersey/data"),
+    # ("team",        "splitters/test/wo_reid_splitter/splitter_team/data"),
+    # ("bbox",        "splitters/test/wo_reid_splitter/splitter_bbox/data"),
+    # ("trajectory",        "splitters/test/wo_reid_splitter/splitter_traj/data"),
+    # ("jersey+team",        "splitters/test/wo_reid_splitter/splitter_jersey_team/data"),
+    # ("jersey+team+bbox",        "splitters/test/wo_reid_splitter/splitter_jersey_team_bbox/data"),
+    # ("temporalreid+jersey+team+bbox",        "splitters/test/wo_reid_splitter/splitter_temporalreid_jersey_team_bbox/data"),
+    # ("jersey+team+bbox+trajectory",        "splitters/test/wo_reid_splitter/splitter_jersey_team_bbox_traj/data"),
+    # ("temporalreid_jersey_team_bbox_trajectory",   "splitters/test/wo_reid_splitter/splitter_temporalreid_jersey_team_bbox_traj/data" )
+
+
+
+    # ("jersey",        "splitters/test/w_reid_splitter/splitter_jersey/data"),
+    # ("team",        "splitters/test/w_reid_splitter/splitter_team/data"),
+    # ("bbox",        "splitters/test/w_reid_splitter/splitter_bbox/data"),
+    # ("trajectory",        "splitters/test/w_reid_splitter/splitter_traj/data"),
+    # ("jersey+team",        "splitters/test/w_reid_splitter/splitter_jersey_team/data"),
+    # ("jersey+team+bbox",        "splitters/test/w_reid_splitter/splitter_jersey_team_bbox/data"),
+    # ("jersey+team+bbox+trajectory",        "splitters/test/w_reid_splitter/splitter_jersey_team_bbox_traj/data"),
+
 ]
 
 TOLERANCE = 10   # frames

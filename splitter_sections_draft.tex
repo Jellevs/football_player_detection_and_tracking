@@ -1,0 +1,62 @@
+% ============================================================
+% 4.2.2  Splitter Combinations and Ordering  (rewrite)
+% ============================================================
+\subsubsection{Splitter Combinations and Ordering}\label{sec:splitter_combinations}
+
+The previous section evaluated each splitting signal in isolation. This section investigates how combining multiple signals affects splitting performance, addressing the complementarity aspect of RSQ1. The lower half of Table~\ref{tab:splitter_results_final} summarises every combination that was evaluated.
+
+\paragraph{Attribute signal combinations}
+Combining jersey number and team identity yields an F1 score of 11.60\% at 73.33\% precision and 6.30\% recall. The jersey splitter contributes 6 additional true positives and 3 false positives on top of the team splitter alone, increasing F1 by 0.97 percentage points. While the jersey splitter is too sparse to be useful in isolation, it provides a modest but consistent gain as a complementary signal because jersey number predictions are independent of the team clustering pipeline and therefore catch a small set of switches that team identity misses.
+
+\
+
+Adding the bounding box anomaly splitter on top of jersey and team raises F1 to 15.61\%, with recall increasing from 6.30\% to 8.97\%. Precision drops from 73.33\% to 60.26\% due to the noisier geometric signal. The bounding box splitter contributes 28 additional true positives, which confirms that it detects a complementary class of identity switches: rapid spatial displacements that occur without a change in the visible jersey number or team colour.
+
+\paragraph{Integrating Spatio Temporal ReID}
+Adding STR to the Jersey + Team + Bbox combination produces the single largest F1 gain of any individual addition, raising F1 from 15.61\% to over 21\%. STR is evaluated in two pipeline orderings. When STR runs first (STR + Jersey + Team + Bbox), it obtains 206 predicted splits with a precision of 65.05\% and recall of 12.79\% (F1 = 21.37\%). When STR runs last (Jersey + Team + Bbox + STR), it obtains 212 predicted splits with a precision of 64.15\% and recall of 12.98\% (F1 = 21.59\%). The two orderings yield nearly identical scores, indicating that the overlap between STR and the attribute splitters is small. This is expected: STR is restricted to temporal gaps and relies solely on appearance features, while the attribute splitters operate on continuous tracklets using jersey, team and geometric signals.
+
+\paragraph{Trajectory as fifth signal}
+Adding the trajectory splitter on top of Jersey + Team + Bbox + STR achieves the highest F1 score of any configuration at 25.64\% by raising recall from 12.98\% to 17.08\%. However, this recall gain comes at a steep cost: 43 additional true positives are accompanied by 93 additional false positives, and precision drops from 64.15\% to 51.44\%. The trajectory splitter is the only signal whose addition pushes precision below 55\%, because the proximity and direction change patterns it detects frequently occur during legitimate football actions such as tackles and dribbles. Section~\ref{sec:precision_recall_tradeoff} analyses why this precision loss matters for the downstream pipeline.
+
+\paragraph{Takeaway}
+Each signal type captures a partially distinct subset of identity switches, confirming that attribute, geometric, and ReID signals are complementary. The domain specific attributes (jersey number and team identity) contribute the highest precision signals, while the geometric signals (bounding box and trajectory) contribute broader recall at lower precision. STR provides the best balance of both. The recommended four signal configuration (Jersey + Team + Bbox + STR) achieves an F1 of 21.59\% at 64.15\% precision, capturing 136 of the 1048 ground truth identity switches.
+
+
+% ============================================================
+% 4.2.3  Precision Recall Tradeoff
+% ============================================================
+\subsubsection{Precision Recall Tradeoff}\label{sec:precision_recall_tradeoff}
+
+Table~\ref{tab:splitter_results_final} reveals a consistent pattern across all splitter configurations: adding noisier signals improves recall but erodes precision. This tradeoff has a direct consequence for the full ALERT pipeline, because every false split creates an additional tracklet fragment that the downstream merger must process. When the merger receives too many spurious fragments, it is more likely to incorrectly merge unrelated tracklets or fail to reconnect fragments that belong together, ultimately reducing the final tracking quality.
+
+\
+
+This effect is most clearly visible when comparing the four signal configuration (Jersey + Team + Bbox + STR) against the five signal configuration that adds the trajectory splitter. Although the five signal configuration achieves the highest F1 score (25.64\% vs 21.59\%), it produces 135 additional tracklet fragments (2071 vs 1936). Of these 135 extra fragments, only 43 result from correct splits while the remaining 93 are false positives. When both configurations are evaluated through the full pipeline with a fixed XGBoost merger, the five signal configuration scores 0.8 HOTA points lower than the four signal configuration. The trajectory splitter's additional true positives do not compensate for the burden its false positives place on the merger.
+
+\
+
+This result demonstrates that optimising the splitter for F1 in isolation does not necessarily translate to the best end to end tracking performance. In a split then merge pipeline, the cost of a false positive is asymmetric: a missed identity switch can still be partially corrected by the merger through re association, but a false split permanently fragments a tracklet into pieces that the merger must actively repair. For this reason, Jersey + Team + Bbox + STR is selected as the recommended splitter configuration for all subsequent experiments, as it provides the best balance between recall and precision for the downstream merger.
+
+
+% ============================================================
+% 4.2.4  Recall Ceiling
+% ============================================================
+\subsubsection{Recall Ceiling}\label{sec:recall_ceiling}
+
+Even the most aggressive splitter configuration recovers only 179 of the 1048 ground truth identity switches (17.08\%). Understanding why the remaining 82.92\% go undetected is important both for interpreting the pipeline results and for guiding future work.
+
+\
+
+The majority of uncaught identity switches occur during continuous, uninterrupted tracking where two players on the same team are involved. In these cases, no temporal gap exists for STR to exploit, the team identity does not change because both players wear the same kit, and the jersey number is typically not visible because the switch happens during close physical interaction such as a duel or a crossing run. The bounding box anomaly splitter can sometimes detect the spatial discontinuity caused by such switches, but when both players move at similar speeds in the same direction the velocity spike is too small to exceed the detection threshold.
+
+\
+
+A second class of uncaught switches involves players on opposing teams whose identity swap occurs over a very short window (fewer than five frames). The attribute splitters require a temporally persistent signal change before triggering a split, meaning that brief identity switches resolve before the persistence filter activates. Lowering the persistence thresholds to catch these short switches would substantially increase false positives, as noisy single frame predictions would be acted upon.
+
+\
+
+A third class consists of switches that occur during camera cuts or rapid panning, where motion blur degrades both the ReID embeddings and the attribute predictions simultaneously. In these frames, no signal is reliable enough to detect the switch.
+
+\
+
+The low overall recall reflects a fundamental limitation of the current signal set rather than a failure of the splitting framework itself. The attribute and geometric signals used in this thesis are most effective when an identity switch produces a visible, persistent change in at least one observable property. Switches between visually similar players on the same team during continuous contact remain the hardest case and would likely require richer signals such as pose estimation, action recognition, or player localisation on a tactical map to resolve. The merging stage, evaluated in Section~\ref{sec:merger_eval}, partially compensates for the limited splitter recall by re associating fragments even when the splitter fails to detect an identity switch.

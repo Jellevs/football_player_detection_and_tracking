@@ -17,16 +17,15 @@ class BboxAnomalySplitter:
     
     def __init__(self, config=None):
         self.config = config if config else SplitterConfig()
-        
-        # Velocity spike detection parameters
-        self.lookback_window = 20        # frames to analyze for baseline velocity
-        self.lookahead_window = 10       # frames to check after spike
-        self.std_threshold = 4         # sigma threshold for anomaly detection
-        self.min_spike_velocity = 35.0   # minimum pixels/frame to consider
-        self.min_fragment_length = 10    # minimum frames in a fragment
-        
-        # Spike must be SHORT (1-3 frames) - longer movements are likely real player motion
-        self.max_spike_duration = 3      # frames
+
+        # Velocity spike detection parameters — all sourced from config/settings.py
+        self.lookback_window = self.config.bbox_lookback_window
+        self.lookahead_window = self.config.bbox_lookahead_window
+        self.std_threshold = self.config.bbox_std_threshold
+        self.min_spike_velocity = self.config.bbox_min_spike_velocity
+        self.min_fragment_length = self.config.min_fragment_length
+        self.max_spike_duration = self.config.bbox_max_spike_duration
+
         
     
     def split_tracklet(self, tracklet, next_available_id):

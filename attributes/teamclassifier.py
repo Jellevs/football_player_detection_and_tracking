@@ -84,7 +84,8 @@ class TeamClassifier:
         No player_mask needed — dataset only contains players and goalkeepers.
         """
         if len(all_crops) == 0:
-            return np.array([]), np.array([])
+            print("no crops")
+            return np.array([]), np.array([]), np.array([])
 
         # Extract features for all crops
         all_features = self.extract_features(all_crops)
@@ -106,5 +107,20 @@ class TeamClassifier:
         own_dist   = distances[np.arange(len(predictions)), predictions]
         other_dist = distances[np.arange(len(predictions)), 1 - predictions]
         confidences = 1.0 - own_dist / (own_dist + other_dist + 1e-8)
+
+        # from sklearn.mixture import GaussianMixture
+
+        # gmm = GaussianMixture(
+        # n_components=2,
+        # random_state=42,
+        # n_init=5,
+        # covariance_type="full"
+        # )
+        # predictions = gmm.fit_predict(all_projections)
+        # probabilities = gmm.predict_proba(all_projections)
+        # confidences = probabilities.max(axis=1)
+        # print(predictions)
+        # print(probabilities)
+        # print(confidences)
 
         return predictions, all_features, confidences

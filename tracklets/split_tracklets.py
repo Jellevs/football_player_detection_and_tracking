@@ -6,55 +6,86 @@ per-tracklet signals is supported.  Cross-tracklet signals are opt-in via
 separate flags.
 
 Per-tracklet signals (unified — all see the full original tracklet):
-    'jersey'      jersey-number change
-    'team'        team-colour change
-    'bbox'        bounding-box velocity spike
+    'jersey'        jersey-number change
+    'team'          team-colour change
+    'bbox'          bounding-box velocity spike
 
 Cross-tracklet signals (run as separate passes):
-    'trajectory'  proximity + velocity-swap analysis (needs all tracklets)
-    'gta'         DBSCAN embedding clustering
+    'temporal_reid' ReID embedding comparison across temporal gaps
+    'trajectory'    proximity + velocity-swap analysis (needs all tracklets)
+    'gta'           DBSCAN embedding clustering
+
+Per-tracklet signals are always grouped into a single unified pass so they
+all see the full original tracklet before any split is applied.
+The position of 'temporal_reid' in the list controls whether it runs before
+or after the unified per-tracklet pass:
+    ['temporal_reid', 'jersey', 'team']  →  STR first, then jersey+team
+    ['jersey', 'team', 'temporal_reid']  →  jersey+team first, then STR
+'trajectory' and 'gta' always run last (after all other signals).
 
 Examples
 --------
-    SIGNALS = ['jersey', 'team']               # current production config
-    SIGNALS = ['jersey', 'team', 'bbox']       # add bbox anomaly
-    SIGNALS = ['jersey']                       # jersey only
-    SIGNALS = ['team', 'bbox']                 # team + bbox, no jersey
-    SIGNALS = ['jersey', 'team', 'trajectory'] # unified + cross-tracklet traj
+    SIGNALS = ['jersey', 'team']                        # attribute splitters only
+    SIGNALS = ['jersey', 'team', 'bbox']                # add bbox anomaly
+    SIGNALS = ['temporal_reid', 'jersey', 'team']       # STR first, then attributes
+    SIGNALS = ['jersey', 'team', 'temporal_reid']       # attributes first, then STR
+    SIGNALS = ['temporal_reid']                         # STR only
+    SIGNALS = ['jersey', 'team', 'trajectory']          # attributes + trajectory
 """
 
 from .splitters.modular_splitter import ModularSplitter
 from .splitters.trajectory_splitter import TrajectorySplitter
+from .splitters.temporal_reid_splitter import TemporalReIDSplitter
 from .splitters import gta_splitter
 
 # ── configure signals here ────────────────────────────────────────────────────
-# SIGNALS = ['jersey', 'bbox', 'team']
-
-SIGNALS = ['jersey']
+SIGNALS = ["temporal_reid", "jersey", "team", "bbox"]
+# SIGNALS = ['temporal_reid']
 # ─────────────────────────────────────────────────────────────────────────────
 
 _PER_TRACKLET   = {'jersey', 'team', 'bbox'}
-_CROSS_TRACKLET = {'trajectory', 'gta'}
+_CROSS_TRACKLET = {'trajectory', 'gta', 'temporal_reid'}
 
 
 def split_tracklets(tracklets, splitter_cfg):
-    signals        = [s.lower() for s in SIGNALS]
-    per_tracklet   = [s for s in signals if s in _PER_TRACKLET]
-    cross_tracklet = [s for s in signals if s in _CROSS_TRACKLET]
+    signals      = [s.lower() for s in SIGNALS]
+    per_tracklet = [s for s in signals if s in _PER_TRACKLET]
 
     label = '+'.join(signals) if signals else 'none'
     print(f"\n=== Splitting [{label}] ===")
+
+    # Determine whether temporal_reid runs before or after the per-tracklet
+    # unified pass based on its position in SIGNALS relative to any
+    # per-tracklet signal.  If no per-tracklet signals are present, position
+    # doesn't matter — temporal_reid just runs when encountered.
+    first_per_tracklet_idx = next(
+        (i for i, s in enumerate(signals) if s in _PER_TRACKLET), len(signals)
+    )
+    temporal_reid_idx = next(
+        (i for i, s in enumerate(signals) if s == 'temporal_reid'), None
+    )
+    temporal_reid_before = (
+        temporal_reid_idx is not None and temporal_reid_idx < first_per_tracklet_idx
+    )
+
+    # ── temporal reid BEFORE per-tracklet (if placed earlier in SIGNALS) ──
+    if 'temporal_reid' in signals and temporal_reid_before:
+        tracklets = split_by_temporal_reid(tracklets, splitter_cfg)
 
     # ── per-tracklet signals (all unified in one pass) ────────────────
     if per_tracklet:
         splitter  = ModularSplitter(splitter_cfg, signals=per_tracklet)
         tracklets = _split_by_modular(tracklets, splitter)
 
-    # ── cross-tracklet signals ────────────────────────────────────────
-    if 'trajectory' in cross_tracklet:
+    # ── temporal reid AFTER per-tracklet (if placed later in SIGNALS) ─
+    if 'temporal_reid' in signals and not temporal_reid_before:
+        tracklets = split_by_temporal_reid(tracklets, splitter_cfg)
+
+    # ── trajectory and gta always run last ───────────────────────────
+    if 'trajectory' in signals:
         tracklets = split_by_trajectory(tracklets, TrajectorySplitter(splitter_cfg))
 
-    if 'gta' in cross_tracklet:
+    if 'gta' in signals:
         tracklets = split_by_gta(tracklets)
 
     return tracklets
@@ -82,6 +113,19 @@ def _split_by_modular(tracklets, splitter):
             new_tracklets[tracklet.track_id] = tracklet
 
     print(f"  {split_count}/{len(tracklets)} tracklets split")
+    return new_tracklets
+
+
+def split_by_temporal_reid(tracklets, splitter_cfg):
+    splitter = TemporalReIDSplitter(
+        min_gap_frames=splitter_cfg.temporal_reid_min_gap_frames,
+        reid_threshold=splitter_cfg.temporal_reid_threshold,
+        min_segment_frames=splitter_cfg.temporal_reid_min_segment_frames,
+        n_samples=splitter_cfg.temporal_reid_n_samples,
+    )
+    n_before = len(tracklets)
+    new_tracklets = splitter.split_all(tracklets)
+    print(f"  {n_before} → {len(new_tracklets)} tracklets ({len(new_tracklets) - n_before} new)")
     return new_tracklets
 
 

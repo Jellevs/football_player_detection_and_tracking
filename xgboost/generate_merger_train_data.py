@@ -58,6 +58,26 @@ REID_DIM                = 512    # OSNet x1_0 embedding dimension
 SIGLIP_DIM              = 768    # SigLIP embedding dimension
 TEAM_CONFIDENCE_THRESHOLD = 0.6  # min KMeans confidence to count a team prediction as reliable
 
+# ---------------------------------------------------------------------------
+# Purity threshold for GT labeling
+#
+# Our splitter does not work perfectly, so a tracklet can contain frames from
+# more than one real player. If we naively take the majority GT ID and label
+# the pair based on that, we risk training on noisy examples:
+#   - A tracklet that is 55% player A and 45% player B gets called "player A",
+#     but its aggregated features (mean ReID, jersey mode, etc.) are a confusing
+#     mix of two people.
+#   - Two such impure tracklets may be labeled "should merge" even though
+#     merging them would make an identity-mixed tracklet even worse.
+#
+# Fix: only trust the majority GT ID when it is dominant enough. If fewer than
+# TRACKLET_PURITY_THRESHOLD of a tracklet's frames agree on the majority ID,
+# aggregate_tracklet() sets gt_id to None, and any pair involving that tracklet
+# is skipped during pair generation. This reduces dataset size slightly but
+# removes the most misleading training examples.
+# ---------------------------------------------------------------------------
+TRACKLET_PURITY_THRESHOLD = 0.80  # at least 80% of frames must share the majority GT ID
+
 DATA_ROOT        = Path(r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\data\soccernet\soccernet-player-tracking")
 OUTPUT_ROOT      = Path(fr"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\train_data\xgboost_{5}_neg_ratio_no_main_subj_filt_SPLITTED")
 CACHE_ROOT       = Path(r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\output\cache")
@@ -194,9 +214,18 @@ def aggregate_tracklet(tracklet, track_id: int) -> Optional[dict]:
     feats["mean_bbox_height"] = float(np.mean(heights))
 
     # ---- GT label (only for pair generation — NOT passed to model) ----
+    # We require the tracklet to be sufficiently pure before trusting its GT ID.
+    # A tracklet containing frames from multiple real players (because the splitter
+    # missed an identity switch) would produce a misleading label if we naively
+    # took the majority. See TRACKLET_PURITY_THRESHOLD at the top of this file.
     gt_ids = tracklet.gt_attributes.get("track_ids", [])
     valid_gt = [g for g in gt_ids if g is not None and not (isinstance(g, float) and np.isnan(g))]
-    gt_mode  = max(set(valid_gt), key=valid_gt.count) if valid_gt else None
+    if valid_gt:
+        majority_gt = max(set(valid_gt), key=valid_gt.count)
+        purity = valid_gt.count(majority_gt) / len(valid_gt)
+        gt_mode = majority_gt if purity >= TRACKLET_PURITY_THRESHOLD else None
+    else:
+        gt_mode = None
 
     return {
         "track_id":        track_id,

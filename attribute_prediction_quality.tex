@@ -1,0 +1,67 @@
+\subsection{Attribute Prediction Quality}
+\label{sec:attribute-prediction-quality}
+
+Before evaluating the splitter components, we examine the quality of the underlying attribute predictions that serve as input signals. Since the jersey and team splitters can only act on information provided by their respective predictors, understanding where predictions fail is essential for interpreting splitter performance. We conduct a \emph{funnel analysis} that traces each ground truth identity switch through four stages: whether the opportunity exists in the ground truth annotations, whether the predictor detects the relevant attribute on both sides of the switch, whether the predictions produce a discriminative signal, and whether the splitter ultimately fires. Table~\ref{tab:funnel-analysis} summarises both funnels across the 49 test sequences.
+
+An important caveat applies to the interpretation of this funnel. The ground truth jersey numbers and team labels originate from the Game State Reconstruction (GSR) dataset, which provides a single annotation per player identity across the entire video rather than per frame visibility labels. When we report that 724 switches involve players with different GT jersey numbers, this means the two player identities are \emph{known} to wear different numbers somewhere in the match, not that those numbers were necessarily readable in the frames surrounding the switch point. A player who appears for only 5 frames at a distance will still have a GT jersey number if that number was annotated in an entirely different part of the video. Consequently, the first stage of the funnel represents a \emph{theoretical ceiling} based on player identity, not a measure of visual opportunity. The drop from Stage~1 to Stage~2 therefore conflates genuine OCR failures with cases where no jersey was ever readable near the switch, and these two causes cannot be disentangled without per frame visibility annotations. Similarly, detection and signal are evaluated over the full tracklet segments before and after the switch rather than within a narrow window around the switch point. The splitter fires whenever it accumulates sufficient evidence, which may occur well after the actual switch.
+
+\begin{table}[ht]
+\centering
+\caption{Funnel analysis of attribute prediction at identity switches.}
+\label{tab:funnel-analysis}
+\begin{tabular}{lrrrr}
+\toprule
+\textbf{Stage} & \multicolumn{2}{c}{\textbf{Jersey}} & \multicolumn{2}{c}{\textbf{Team}} \\
+\cmidrule(lr){2-3} \cmidrule(lr){4-5}
+ & Count & \% of prev. & Count & \% of prev. \\
+\midrule
+Total identity switches & 1048 & --- & 1048 & --- \\
+Opportunity (GT attribute differs) & 724 & 69.1\% & 653 & 62.3\% \\
+Detection (predictions on both sides) & 107 & 14.8\% & 643 & 98.5\% \\
+Signal (predicted values differ) & 51 & 47.7\% & 293 & 45.6\% \\
+Splitter fires & 13 & 25.5\% & 39 & 13.3\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Jersey Number Prediction}
+
+Of the 1048 ground truth identity switches, 724 (69.1\%) involve players whose GT annotations indicate different jersey numbers. As discussed above, this is a theoretical ceiling: it reflects that the two player identities wear different numbers somewhere in the match, not that those numbers were visually distinguishable near the switch point. The OCR pipeline produces confident predictions on both sides of the switch in only 107 cases (14.8\% of the 724 opportunities). This drop combines two factors that cannot be separated: cases where the jersey was genuinely visible but the OCR pipeline failed to read it (due to pose based torso cropping, ReID outlier filtering, or legibility filtering), and cases where no jersey was ever readable near the switch in the first place (e.g.\ because the player appeared at a distance or was occluded).
+
+Among the 107 switches where both sides have a jersey prediction, 51 (47.7\%) produce a signal where the predicted numbers differ. The remaining 56 cases represent instances where the OCR model returns the same number for both players, either because of genuine confusion between visually similar digits or because the predictions happen to agree by coincidence. Of these 51 signals, the splitter acts on 13 (25.5\%). The persistence filter requires a minimum number of consistent predictions within a lookahead window with a high agreement ratio and low entropy, which means that sparse or inconsistent predictions are insufficient to trigger a split. The remaining 38 signals are cases where the evidence, while present, does not meet the persistence threshold.
+
+The delay analysis further illustrates the nature of jersey based splitting. Among the 13 splits that the jersey splitter fires at true identity switches, the delay between the ground truth switch and the predicted split ranges from +5 to +236 frames (0.20s to 9.44s). This is inherent to how jersey splitting operates: the predictor must first observe enough frames of the new player to accumulate confident, persistent evidence, which inevitably introduces delay. As a result, the jersey splitter contributes primarily to long term tracklet purity rather than to timely split detection as measured by the intrinsic metrics.
+
+\subsubsection{Team Identity Prediction}
+
+The team funnel exhibits a fundamentally different bottleneck profile. Of 1048 identity switches, 653 (62.3\%) involve a transition between players on different teams. Unlike jersey prediction, the team classifier achieves near universal detection: 643 of 653 cross team switches (98.5\%) have confident team predictions on both sides. This is expected because team classification uses SigLIP embeddings with 2 class clustering, which produces a prediction for nearly every frame where a torso crop exists.
+
+The critical bottleneck for team prediction is signal accuracy. Of the 643 detected switches, only 293 (45.6\%) produce a signal where the predicted teams actually differ. Manual inspection reveals that the team classifier is reliable when players are clearly visible and unoccluded, but highly sensitive to occlusion. Identity switches typically occur when two players are in close proximity, and the torso crops extracted during the transition period frequently contain the occluding player rather than the player being tracked. In such cases, the classifier correctly identifies the visible player's team for both sides of the switch, producing the same team label and therefore no signal. This is not a classifier error but a consequence of the input crops being contaminated by the occluding player.
+
+Of the 293 valid team signals, 39 (13.3\%) result in the splitter firing. The persistence filter converts a smaller fraction of signals into splits compared to the jersey splitter, reflecting the noisier nature of team predictions in occluded regions.
+
+\subsubsection{Persistence Filter Sensitivity}
+\label{sec:persistence-filter-sensitivity}
+
+The persistence filter parameters control the conversion from signal to split: how many consistent predictions are required, over what lookahead window, and at what confidence or entropy threshold. To understand this tradeoff, we sweep these parameters across a grid and classify each resulting split as either \emph{true} (near a ground truth switch where the attribute differs) or \emph{false} (any split that does not correspond to a correct detection). Figure~\ref{fig:pareto-front} shows the resulting precision versus recall for each configuration, where precision is the fraction of predicted splits that are correct, and recall is the fraction of ground truth switches that are detected by at least one split. Note that these metrics differ from the intrinsic IDS metrics in Table~\ref{tab:splitter_results_final} in two important ways: the tolerance window is $\pm$750 frames rather than $\pm$10, and recall is computed only over switches where the relevant attribute differs (724 for jersey, 653 for team) rather than over all 1048 switches. The wider tolerance accounts for the fact that attribute based splitters inherently fire with delay, and the restricted denominator excludes switches where both players share the same attribute (e.g.\ same team), which no attribute based splitter could ever detect.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\textwidth]{figures/persistence_precision_recall.pdf}
+\caption{Precision versus recall tradeoff for persistence filter parameter configurations. Each point represents one parameter combination. The dashed line indicates the Pareto front: the set of configurations where no other configuration achieves both higher precision and higher recall. The star marks the selected configuration.}
+\label{fig:pareto-front}
+\end{figure}
+
+For the jersey splitter, precision ranges from 50\% to 92\% and recall from 0.1\% to 4.1\% across the parameter grid. The Pareto front reveals a smooth tradeoff: more aggressive settings (lower minimum persistence, higher entropy threshold, shorter lookahead) increase recall at the cost of precision, primarily by introducing false splits on segments where no identity switch occurred. The false positives produced by the jersey splitter likely stem from occlusion on segments where no identity switch occurred: when the tracked player is temporarily occluded, the crop may show a nearby player's jersey, and the OCR correctly reads that player's number, producing a persistent but incorrect signal.
+
+For the team splitter, precision ranges from 52\% to 82\% and recall from 4.4\% to 12.6\%. The lookahead window is the most influential parameter, with shorter windows producing substantially more splits of all types. The lower precision compared to jersey reflects the noisier nature of team predictions in occluded regions, as discussed above.
+
+The selected configurations (marked with stars in Figure~\ref{fig:pareto-front}) lie on the Pareto front. We note that parameter selection was performed on the test set due to the computational cost of generating attribute prediction caches for the training split; ideally, this selection would be performed on a held out validation set. However, HOTA scores vary by less than 0.1 points across configurations on and near the Pareto front, indicating low sensitivity to the exact parameter choice within this region.
+
+\subsubsection{Implications}
+
+The funnel analyses reveal two distinct failure modes. For jersey numbers, the system is bottlenecked by \emph{visibility and detection}: the prediction pipeline produces usable numbers on both sides of a switch in only 14.8\% of the cases where the GT indicates different jersey numbers. Since this figure conflates OCR failures with cases where no jersey was readable near the switch, the true OCR failure rate is likely lower than 85\%. Nonetheless, improving detection coverage remains the most impactful direction, whether through more aggressive detection strategies (lower legibility thresholds, alternative cropping methods) or through richer input signals (higher resolution footage, multiple camera angles). When the pipeline does produce a signal, 25.5\% of those signals lead to a split, but the inherent delay means these splits rarely fall within tight evaluation tolerances.
+
+For team identity, the system is bottlenecked by \emph{occlusion sensitivity}: the classifier produces correct predictions when players are clearly visible, but identity switches inherently occur during close player interactions where occlusion contaminates the input crops. This is a fundamental limitation of appearance based team classification from a single camera view, as the classifier cannot distinguish a tracked player's team when the crop shows a different, occluding player. Potential directions to mitigate this include leveraging temporal smoothing that discounts predictions during detected occlusion events, incorporating spatial cues such as field position or formation structure, or using multiple camera angles to maintain visibility during player interactions.
+
+Both funnels confirm that the persistence filters fulfil their intended role: they convert a meaningful fraction of valid signals into splits (25.5\% for jersey, 13.3\% for team) while strongly suppressing false signals (0 out of 4 for jersey same number switches, 8 out of 119 for same team false signals). The persistence filter sensitivity analysis further shows that the selected parameters lie on the Pareto front of the precision recall tradeoff, and that the system is robust to small parameter variations. The primary avenue for improving attribute based splitting therefore lies upstream, in increasing OCR coverage for jerseys and improving classification accuracy for teams, rather than in adjusting the persistence filter parameters.

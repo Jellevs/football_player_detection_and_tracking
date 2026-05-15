@@ -139,17 +139,39 @@ class JerseyPredictorConfig:
 @dataclass
 class SplitterConfig:
     # Jersey splitter
-    jersey_min_persistence: int = 5
-    jersey_lookahead: int = 20
-    jersey_entropy_threshold: float = 0.2
-    jersey_min_persistence_ratio: float = 0.8
+    jersey_min_persistence: int = 20
+    jersey_lookahead: int = 150
+    jersey_entropy_threshold: float = 0.02
+    jersey_min_persistence_ratio: float = 0.9
 
     # Team splitter
-    team_min_persistence: int = 5
-    team_min_persistence_ratio: float = 0.8
-    team_lookahead: int = 50
-    team_confidence_threshold: float = 0.6  # ignore team predictions below this confidence
+    team_min_persistence: int = 10
+    team_min_persistence_ratio: float = 0.9
+    team_lookahead: int = 100
+    team_confidence_threshold: float = 0.7  # ignore team predictions below this confidence
 
+    # Temporal ReID splitter
+    temporal_reid_min_gap_frames: int = 5
+    temporal_reid_threshold: float = 0.15
+    temporal_reid_min_segment_frames: int = 5
+    temporal_reid_n_samples: int = 20
+
+    # Bounding box splitter
+    bbox_lookback_window: int = 20
+    bbox_lookahead_window: int = 10
+    bbox_std_threshold: float = 4.0
+    bbox_min_spike_velocity: float = 35.0
+    bbox_max_spike_duration: int = 3
+
+    # Trajectory splitter
+    proximity_distance: float = 50.0
+    min_overlap_frames: int = 3
+    velocity_window: int = 5
+    min_velocity_change: float = 30.0
+    direction_change_threshold: float = 120.0
+    swap_similarity_threshold: float = 0.95
+
+    # Common
     min_fragment_length: int = 20
 
 

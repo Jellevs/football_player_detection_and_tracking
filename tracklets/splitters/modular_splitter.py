@@ -85,7 +85,8 @@ class ModularSplitter(UnifiedSplitter):
 
         if not switch_indices:
             return None
-
+        
+        
         return self._create_fragments(tracklet, switch_indices, n, next_available_id)
 
     # ------------------------------------------------------------------

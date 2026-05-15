@@ -8,20 +8,20 @@ class TrajectorySplitter:
     def __init__(self, config=None):
         self.config = config if config else SplitterConfig()
 
-        # Proximity detection - VERY TIGHT: only near-overlapping boxes
-        self.proximity_distance = 50  # pixels - bboxes closer than this (was 50)
-        self.min_overlap_frames = 3   # minimum frames of proximity to consider
+        # Proximity detection — sourced from config/settings.py
+        self.proximity_distance = self.config.proximity_distance
+        self.min_overlap_frames = self.config.min_overlap_frames
 
-        # Velocity analysis - VERY HIGH thresholds
-        self.velocity_window = 5       # frames before/after to calculate velocity
-        self.min_velocity_change = 30.0 # pixels/frame - minimum speed change (was 20.0)
-        self.direction_change_threshold = 120  # degrees - minimum direction change (was 90)
+        # Velocity analysis — sourced from config/settings.py
+        self.velocity_window = self.config.velocity_window
+        self.min_velocity_change = self.config.min_velocity_change
+        self.direction_change_threshold = self.config.direction_change_threshold
 
-        # Trajectory swap detection - VERY STRICT: only obvious swaps
-        self.swap_similarity_threshold = 0.95  # cosine similarity for velocity swap (was 0.75)
+        # Trajectory swap detection — sourced from config/settings.py
+        self.swap_similarity_threshold = self.config.swap_similarity_threshold
 
-        # Fragment filtering - keep detections but require valid splits
-        self.min_fragment_length = 10  # frames (increased to avoid spurious tiny splits)
+        # Fragment filtering — sourced from config/settings.py
+        self.min_fragment_length = self.config.min_fragment_length
         
     
     def split_all_tracklets(self, tracklets_dict):

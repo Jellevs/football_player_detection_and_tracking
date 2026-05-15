@@ -45,29 +45,15 @@ class JerseyNumberPredictorParseq:
         if not full_crops:
             return [], [], np.full(num_frames, np.nan), np.zeros(num_frames), np.ones(num_frames)
 
-        # Stage 1: ReID outlier filtering (extracts its own Centroid-ReID embeddings)
-        # if self.reid_filter:
-        #     [full_crops, torso_crops], indices = self.reid_filter.filter(
-        #         [full_crops, torso_crops], indices
-        #     )
-
-        # Keep ReID-filtered torso crops for team classification (before legibility)
         torso_crops_for_teams = torso_crops.copy()
         indices_for_teams = indices.copy()
                 
-        # Stage 2: Legibility filtering
+        # Stage 1: Legibility filtering
         if self.legibility_predictor and full_crops:
             [full_crops, torso_crops], indices = self.legibility_predictor.filter(
                 [full_crops, torso_crops], indices
             )
 
-        # Stage 3: Predict jersey numbers on filtered torso crops
-        #
-        # FIX: We now extract raw probability vectors (2x11) per frame
-        #      matching Koshkina str.py run_inference() which saves:
-        #        logits[:,:3,:11].softmax(-1)  →  'raw' field
-        #        logits[:,:3,:11]              →  'logits' field
-        #
         if torso_crops:
             jersey_predictions, confs_mean, entropies, raw_probs_list = self.predict_jersey(torso_crops)
         else:
@@ -75,12 +61,11 @@ class JerseyNumberPredictorParseq:
         
         jerseys, confs_mean, entropies = self.map_to_frames(jersey_predictions, confs_mean, entropies, indices, num_frames)
 
-        # Store raw probs on the tracklet for tracklet-level consolidation later
+        # # Store raw probs on the tracklet for tracklet-level consolidation later
         tracklet.pred_attributes['jersey_raw_probs'] = raw_probs_list
         tracklet.pred_attributes['jersey_raw_probs_indices'] = indices
 
         return torso_crops_for_teams, indices_for_teams, jerseys, confs_mean, entropies
-
 
     def extract_crops(self, images, tracklet):
         """ Extract full and torso crops for all frames in tracklet """

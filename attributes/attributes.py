@@ -28,10 +28,6 @@ def predict_attributes(images, tracklets, paths, jersey_cfg, device):
         paths=paths
     )
 
-    # Phase 1: Predict jersey numbers + collect ReID-filtered torso crops for team classification
-    # The jersey pipeline extracts pose-cropped torsos, applies ReID outlier filtering,
-    # then returns those crops BEFORE legibility filtering — perfect for team classification
-    # (team color is visible even on illegible jersey crops).
     print("Phase 1: Extracting crops and predicting jersey numbers...")
 
     tracklet_team_crops = {}
@@ -57,7 +53,9 @@ def predict_attributes(images, tracklets, paths, jersey_cfg, device):
     # Phase 2: Team classification — fit on all ReID-filtered torso crops
     print(f"Phase 2: Team classification ({len(all_team_crops)} crops)...")
     team_predictions, siglip_embeddings, team_confidences = team_classifier.fit_predict_all(all_team_crops)
-    # team_predictions = team_classifier.fit_predict_all(all_team_crops)
+
+ 
+
 
     # Phase 3: Map predictions back to tracklets
     print("Phase 3: Mapping predictions to tracklets...")
