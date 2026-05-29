@@ -117,14 +117,14 @@ class XGBoostMerger:
                     continue
 
                 # Hard constraint: confident jersey mismatch
-                if not self.disable_jersey_constraint and self._jersey_conflict(t_a, t_b):
-                    dist_matrix[i, j] = dist_matrix[j, i] = 2.0
-                    continue
+                # if not self.disable_jersey_constraint and self._jersey_conflict(t_a, t_b):
+                #     dist_matrix[i, j] = dist_matrix[j, i] = 2.0
+                #     continue
 
-                # Hard constraint: consistent team mismatch
-                if not self.disable_team_constraint and self._team_conflict(t_a, t_b):
-                    dist_matrix[i, j] = dist_matrix[j, i] = 2.0
-                    continue
+                # # Hard constraint: consistent team mismatch
+                # if not self.disable_team_constraint and self._team_conflict(t_a, t_b):
+                #     dist_matrix[i, j] = dist_matrix[j, i] = 2.0
+                #     continue
 
                 agg_a = self._aggregate(t_a)
                 agg_b = self._aggregate(t_b)
@@ -169,19 +169,6 @@ class XGBoostMerger:
             std  = np.zeros(512, dtype=np.float32)
         for i, v in enumerate(mean): fa[f"reid_mean_{i}"] = v
         for i, v in enumerate(std):  fa[f"reid_std_{i}"]  = v
-
-        # SigLIP
-        siglip_all   = tracklet.pred_attributes.get("siglip_embeddings", [])
-        valid_siglip = [s for s in siglip_all if np.any(np.array(s) != 0)]
-        if valid_siglip:
-            sa    = np.stack(valid_siglip).astype(np.float32)
-            smean = sa.mean(axis=0)
-            sstd  = sa.std(axis=0)
-        else:
-            smean = np.zeros(768, dtype=np.float32)
-            sstd  = np.zeros(768, dtype=np.float32)
-        for i, v in enumerate(smean): fa[f"siglip_mean_{i}"] = v
-        for i, v in enumerate(sstd):  fa[f"siglip_std_{i}"]  = v
 
         # Jersey
         jerseys   = tracklet.pred_attributes.get("jerseys", [])
@@ -292,11 +279,6 @@ class XGBoostMerger:
         reid_b = np.array([fb[k] for k in sorted(fb) if k.startswith("reid_mean_")], dtype=np.float32)
         na, nb = np.linalg.norm(reid_a) + 1e-6, np.linalg.norm(reid_b) + 1e-6
         row["pairwise_reid_cosine_sim"] = float(np.dot(reid_a / na, reid_b / nb))
-
-        sig_a = np.array([fa[k] for k in sorted(fa) if k.startswith("siglip_mean_")], dtype=np.float32)
-        sig_b = np.array([fb[k] for k in sorted(fb) if k.startswith("siglip_mean_")], dtype=np.float32)
-        na_s, nb_s = np.linalg.norm(sig_a) + 1e-6, np.linalg.norm(sig_b) + 1e-6
-        row["pairwise_siglip_cosine_sim"] = float(np.dot(sig_a / na_s, sig_b / nb_s))
 
         j_a, j_b = fa["jersey_mode"], fb["jersey_mode"]
         nan_a = isinstance(j_a, float) and np.isnan(j_a)

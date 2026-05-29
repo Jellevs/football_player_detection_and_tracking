@@ -37,8 +37,12 @@ from sklearn.metrics import (
 # neg_ratio = 5
 
 # OUTPUT_ROOT = Path(fr"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\weights\xgboost_{neg_ratio}_neg_ratio_no_main_subj_filt_SPLITTED")
-SAVE_DIR    = Path(fr"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\experiments\tracklet_merger\xgboost\training_data\xgboost_neg_ratio5_tracklet_length0_tracklet_purity1_reid512_siglip768_SPLITTEDFalse")
-DATA_DIR    = Path(fr"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\experiments\tracklet_merger\xgboost\training_data\xgboost_neg_ratio5_tracklet_length0_tracklet_purity1_reid512_siglip768_SPLITTEDFalse")
+SAVE_DIR    = Path(r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\experiments\tracklet_merger\xgboost\output")
+DATA_DIR    = Path(r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\experiments\tracklet_merger\xgboost\training_data\xgboost_train_data")
+FIXED_EVAL_DIR = Path(r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\experiments\tracklet_merger\xgboost\training_data\fixed_eval")
+
+# SigLIP columns to exclude (hurt transformer performance, remove for consistency)
+SIGLIP_COLS = {"pairwise_siglip_cosine_sim"}
 
 
 # ---------------------------------------------------------------------------
@@ -55,14 +59,22 @@ def load_splits(data_dir: Path):
     included directly — no PCA.
     """
     train_path = data_dir / "combined_train_data.csv"
-    val_path   = data_dir / "combined_valid_data.csv"
-    test_path  = data_dir / "combined_test_data.csv"
+
+    # Val/test: use fixed eval data (no downsampling) when available
+    if FIXED_EVAL_DIR.exists():
+        val_path  = FIXED_EVAL_DIR / "combined_valid_data.csv"
+        test_path = FIXED_EVAL_DIR / "combined_test_data.csv"
+        print(f"  Loading FIXED val/test from {FIXED_EVAL_DIR}")
+    else:
+        val_path  = data_dir / "combined_valid_data.csv"
+        test_path = data_dir / "combined_test_data.csv"
 
     for p in [train_path, val_path, test_path]:
         if not p.exists():
             raise FileNotFoundError(
                 f"Missing: {p}\n"
-                f"Run generate_merger_training_data.py for each split first."
+                f"Run generate_merger_training_data.py (train) and "
+                f"generate_fixed_eval_data.py (val/test) first."
             )
 
     train_df = pd.read_csv(train_path)
@@ -78,6 +90,7 @@ def load_splits(data_dir: Path):
     all_cols     = train_df.columns.tolist()
     feature_cols = [c for c in all_cols
                     if c not in non_feature
+                    and c not in SIGLIP_COLS
                     and (c.startswith("A_") or c.startswith("B_") or c.startswith("pairwise_"))]
 
     print(f"        feature cols : {len(feature_cols)}")
@@ -239,7 +252,7 @@ def train():
         "feature_cols"   : feature_cols,
         "threshold"      : threshold,
         "reid_dim"       : 512,
-        "siglip_dim"     : 768,
+        # "siglip_dim"     : 768,
     }
     meta_path = SAVE_DIR / "xgboost_merger_meta.json"
     with open(meta_path, "w") as f:

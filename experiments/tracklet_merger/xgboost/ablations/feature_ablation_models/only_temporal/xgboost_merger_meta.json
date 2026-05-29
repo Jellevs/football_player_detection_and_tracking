@@ -1,0 +1,14 @@
+{
+  "feature_cols": [
+    "A_start_frame",
+    "A_end_frame",
+    "A_duration",
+    "A_n_frames",
+    "B_start_frame",
+    "B_end_frame",
+    "B_duration",
+    "B_n_frames",
+    "pairwise_temporal_gap"
+  ],
+  "threshold": 0.6000000000000002
+}

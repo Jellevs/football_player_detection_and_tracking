@@ -1,0 +1,21 @@
+\paragraph{Hard Constraints}\label{par:hard_constraints}
+
+The XGBoost connector always enforces a temporal overlap constraint, since a single player cannot be in two locations simultaneously. The rule-based connector additionally uses two attribute-based hard constraints: two tracklets with conflicting predicted jersey numbers or team identities can never belong to the same player. We test whether these attribute-based constraints improve the XGBoost connector's performance. These hard constraints override the model's prediction by setting the pairwise distance to 2.0, preventing a merge regardless of the connector output. Table~\ref{tab:hard_constraint_ablation} presents the results.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{ccccl}
+\toprule
+\textbf{Jersey} & \textbf{Team} & \textbf{HOTA $\uparrow$} & \textbf{AssA} & \textbf{$\Delta$ HOTA} \\
+\midrule
+$\times$ & $\times$ & \textbf{90.849} & \textbf{87.765} & baseline \\
+\checkmark & $\times$ & 90.707 & 87.486 & $-$0.142 \\
+$\times$ & \checkmark & 90.725 & 87.521 & $-$0.124 \\
+\checkmark & \checkmark & 90.583 & 87.248 & $-$0.266 \\
+\bottomrule
+\end{tabular}
+\caption{Effect of adding jersey and team hard constraints on the validation set. All configurations include the temporal overlap constraint and use merge threshold 0.70.}
+\label{tab:hard_constraint_ablation}
+\end{table}
+
+Both attribute-based constraints reduce the XGBoost connector's performance. Adding the jersey number constraint lowers HOTA by 0.142, adding the team identity constraint lowers it by 0.124, and adding both constraints together lowers it by 0.266. This occurs because the predicted jersey numbers and team identities can be unreliable, particularly during occlusion. When a hard constraint detects a conflict based on a corrupted prediction, it immediately blocks the capability of connecting the tracklet pair, regardless of how strongly the other features suggest that the tracklets belong to the same player. The XGBoost model, by contrast, considers all features jointly and can still merge a tracklet pair when the ReID similarity and spatial proximity outweigh an unreliable team or jersey prediction. Based on these results, we use only the temporal overlap constraint for all subsequent experiments.

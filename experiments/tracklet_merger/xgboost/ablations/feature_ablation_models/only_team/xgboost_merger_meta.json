@@ -1,0 +1,16 @@
+{
+  "feature_cols": [
+    "A_team_mode",
+    "A_team_consistency",
+    "A_team_coverage",
+    "A_team_conf_mean",
+    "B_team_mode",
+    "B_team_consistency",
+    "B_team_coverage",
+    "B_team_conf_mean",
+    "pairwise_team_match",
+    "pairwise_team_conflict",
+    "pairwise_team_both_consistent"
+  ],
+  "threshold": 0.5400000000000001
+}

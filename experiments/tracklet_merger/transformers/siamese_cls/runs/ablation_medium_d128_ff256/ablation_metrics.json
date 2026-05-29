@@ -1,0 +1,15 @@
+{
+  "size_label": "medium",
+  "d_model": 128,
+  "dim_feedforward": 256,
+  "nhead": 4,
+  "num_layers": 4,
+  "n_params": 772097,
+  "best_epoch": 44,
+  "threshold": 0.5800000000000002,
+  "val_auc": 0.8956122949485781,
+  "val_ap": 0.5277466491186229,
+  "test_auc": 0.8722387764630521,
+  "test_ap": 0.465799887480815,
+  "test_f1": 0.4701107011070111
+}

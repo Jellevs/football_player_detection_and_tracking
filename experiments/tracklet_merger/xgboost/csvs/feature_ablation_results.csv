@@ -1,0 +1,23 @@
+variant,mode,groups_description,n_features,config_name,merge_threshold,HOTA,DetA,AssA,IDF1,MOTA,val_f1,val_auc,split,timestamp
+baseline_all,baseline,all features,47,neg3_minlen0_purity0.6_splitTrue,0.7,90.708,94.047,87.502,94.791,99.447,0.7699797160243408,0.937000579932569,valid,2026-05-23 21:18:55
+remove_jersey,remove,all minus jersey (11 cols removed),36,neg3_minlen0_purity0.6_splitTrue,0.7,89.825,94.024,85.83,93.609,99.442,0.7496062992125985,0.9271256292709388,valid,2026-05-23 21:18:56
+remove_team,remove,all minus team (11 cols removed),36,neg3_minlen0_purity0.6_splitTrue,0.7,90.582,94.029,87.276,94.573,99.446,0.7608607389362566,0.9304453573421008,valid,2026-05-23 21:18:57
+remove_temporal,remove,all minus temporal (9 cols removed),38,neg3_minlen0_purity0.6_splitTrue,0.7,90.37,94.055,86.844,94.275,99.442,0.7623721881390593,0.927763775603582,valid,2026-05-23 21:18:58
+remove_spatial,remove,all minus spatial (14 cols removed),33,neg3_minlen0_purity0.6_splitTrue,0.7,89.658,94.055,85.483,93.273,99.436,0.7085470085470086,0.9023318581436424,valid,2026-05-23 21:18:59
+remove_reid,remove,all minus reid (1 cols removed),46,neg3_minlen0_purity0.6_splitTrue,0.7,89.018,94.055,84.269,92.562,99.435,0.7245370370370371,0.9164182658913651,valid,2026-05-23 21:19:00
+remove_siglip,remove,all minus siglip (1 cols removed),46,neg3_minlen0_purity0.6_splitTrue,0.7,90.897,94.051,87.863,95.044,99.447,0.7660606060606061,0.935976767416169,valid,2026-05-23 21:19:01
+remove_jersey_team,remove,all minus jersey+team (22 cols removed),25,neg3_minlen0_purity0.6_splitTrue,0.7,89.944,93.991,86.086,93.76,99.443,0.7424118129614438,0.9195452711239889,valid,2026-05-23 21:19:01
+remove_reid_siglip,remove,all minus reid+siglip (2 cols removed),45,neg3_minlen0_purity0.6_splitTrue,0.7,88.622,94.051,83.528,92.119,99.431,0.7225296442687748,0.9151900436823733,valid,2026-05-23 21:19:02
+remove_temporal_spatial,remove,all minus temporal+spatial (23 cols removed),24,neg3_minlen0_purity0.6_splitTrue,0.7,89.453,94.059,85.089,93.03,99.422,0.6594952420355813,0.8766842851504186,valid,2026-05-23 21:19:03
+only_jersey,keep,only jersey (11 cols),11,neg3_minlen0_purity0.6_splitTrue,0.7,83.595,94.012,74.363,85.598,99.385,0.43091440125814423,0.6491780613493686,valid,2026-05-23 21:19:04
+only_team,keep,only team (11 cols),11,neg3_minlen0_purity0.6_splitTrue,0.7,81.808,94.046,71.196,83.24,99.375,0.5471948949747407,0.7555479480750867,valid,2026-05-23 21:19:04
+only_temporal,keep,only temporal (9 cols),9,neg3_minlen0_purity0.6_splitTrue,0.7,80.549,93.997,69.064,81.792,99.387,0.4382083108472747,0.652280259580464,valid,2026-05-23 21:19:05
+only_spatial,keep,only spatial (14 cols),14,neg3_minlen0_purity0.6_splitTrue,0.7,83.798,93.958,74.767,85.987,99.407,0.6100278551532033,0.8300596911583437,valid,2026-05-23 21:19:06
+only_reid,keep,only reid (1 cols),1,neg3_minlen0_purity0.6_splitTrue,0.7,87.786,94.041,81.966,90.86,99.414,0.6302447552447552,0.796070350451267,valid,2026-05-23 21:19:06
+only_siglip,keep,only siglip (1 cols),1,neg3_minlen0_purity0.6_splitTrue,0.7,82.201,94.074,71.857,83.924,99.378,0.507227332457293,0.7069587498153256,valid,2026-05-23 21:19:07
+only_pairwise,keep,only pairwise features (13 cols),13,neg3_minlen0_purity0.6_splitTrue,0.7,90.54,94.06,87.168,94.566,99.446,0.7682976142337242,0.9313939770805356,valid,2026-05-23 21:19:07
+only_per_tracklet,keep,only per-tracklet A_/B_ features (34 cols),34,neg3_minlen0_purity0.6_splitTrue,0.7,86.576,94.027,79.74,89.25,99.419,0.6657142857142857,0.8657451692499024,valid,2026-05-23 21:19:09
+remove_pt_jersey,remove,"remove per-tracklet jersey only, keep pairwise jersey (8 cols removed)",39,neg3_minlen0_purity0.6_splitTrue,0.7,90.531,94.052,87.157,94.546,99.445,0.7704,0.9367522894106078,valid,2026-05-23 21:19:10
+remove_pt_team,remove,"remove per-tracklet team only, keep pairwise team (8 cols removed)",39,neg3_minlen0_purity0.6_splitTrue,0.7,90.682,94.055,87.444,94.728,99.447,0.7712062256809339,0.9361972740964187,valid,2026-05-23 21:19:11
+remove_pt_temporal,remove,"remove per-tracklet temporal only, keep pairwise temporal (8 cols removed)",39,neg3_minlen0_purity0.6_splitTrue,0.7,90.67,94.052,87.425,94.721,99.448,0.7709677419354839,0.9345000341785354,valid,2026-05-23 21:19:12
+remove_pt_spatial,remove,"remove per-tracklet spatial only, keep pairwise spatial (10 cols removed)",37,neg3_minlen0_purity0.6_splitTrue,0.7,90.679,94.045,87.449,94.671,99.446,0.7618283881315157,0.9323756728210081,valid,2026-05-23 21:19:12

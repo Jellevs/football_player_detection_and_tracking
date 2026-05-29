@@ -143,3 +143,481 @@ timestamp,exp_id,run_name,split,HOTA,DetA,AssA,IDF1,MOTA,config
 2026-05-15 16:58:10,sweep_hota,negNone_minlen5_purity0.8_splitTrue,valid,89.607,94.076,85.368,92.522,99.417,"{'config_name': 'negNone_minlen5_purity0.8_splitTrue', 'merge_threshold': 0.5}"
 2026-05-15 17:01:40,sweep_hota,negNone_minlen5_purity1.0_splitFalse,valid,87.635,94.08,81.655,89.141,99.393,"{'config_name': 'negNone_minlen5_purity1.0_splitFalse', 'merge_threshold': 0.5}"
 2026-05-15 17:05:08,sweep_hota,negNone_minlen5_purity1.0_splitTrue,valid,87.664,94.08,81.71,89.188,99.398,"{'config_name': 'negNone_minlen5_purity1.0_splitTrue', 'merge_threshold': 0.5}"
+2026-05-15 19:25:28,feat_ablation,feat_ablation_baseline_all,valid,90.243,94.054,86.601,93.858,99.436,{'variant': 'baseline_all'}
+2026-05-15 19:28:47,feat_ablation,feat_ablation_remove_jersey,valid,89.806,94.056,85.764,93.065,99.433,{'variant': 'remove_jersey'}
+2026-05-19 12:10:41,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.300,valid,89.73,94.063,85.614,92.838,99.426,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.3}"
+2026-05-19 12:13:26,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.350,valid,89.929,94.059,85.997,93.224,99.429,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.35}"
+2026-05-19 12:16:15,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.400,valid,90.116,94.059,86.354,93.534,99.433,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.4}"
+2026-05-19 12:18:59,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.450,valid,90.195,94.056,86.507,93.73,99.435,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.45}"
+2026-05-19 12:21:42,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.500,valid,90.257,94.055,86.628,93.881,99.436,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.5}"
+2026-05-19 12:24:25,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.550,valid,90.314,94.055,86.737,94.027,99.437,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.55}"
+2026-05-19 12:27:07,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.600,valid,90.361,94.055,86.828,94.156,99.437,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.6}"
+2026-05-19 12:29:50,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.650,valid,90.462,94.055,87.022,94.327,99.438,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.65}"
+2026-05-19 12:32:32,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.700,valid,90.452,94.053,87.005,94.362,99.438,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.7}"
+2026-05-19 14:46:04,hc_ablation,neg3_minlen0_purity0.6_splitTrue_TJM,valid,90.257,94.055,86.628,93.881,99.436,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'temporal': True, 'jersey': True, 'team': True}"
+2026-05-19 14:46:04,hc_ablation,neg3_minlen0_purity0.6_splitTrue_tJM,valid,90.257,94.055,86.628,93.881,99.436,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'temporal': False, 'jersey': True, 'team': True}"
+2026-05-19 14:46:04,hc_ablation,neg3_minlen0_purity0.6_splitTrue_TjM,valid,90.257,94.055,86.628,93.881,99.436,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'temporal': True, 'jersey': False, 'team': True}"
+2026-05-19 14:46:04,hc_ablation,neg3_minlen0_purity0.6_splitTrue_TJm,valid,90.257,94.055,86.628,93.881,99.436,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'temporal': True, 'jersey': True, 'team': False}"
+2026-05-19 14:46:04,hc_ablation,neg3_minlen0_purity0.6_splitTrue_tjM,valid,90.257,94.055,86.628,93.881,99.436,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'temporal': False, 'jersey': False, 'team': True}"
+2026-05-19 14:46:04,hc_ablation,neg3_minlen0_purity0.6_splitTrue_tJm,valid,90.257,94.055,86.628,93.881,99.436,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'temporal': False, 'jersey': True, 'team': False}"
+2026-05-19 14:46:04,hc_ablation,neg3_minlen0_purity0.6_splitTrue_Tjm,valid,90.257,94.055,86.628,93.881,99.436,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'temporal': True, 'jersey': False, 'team': False}"
+2026-05-19 14:46:04,hc_ablation,neg3_minlen0_purity0.6_splitTrue_tjm,valid,90.257,94.055,86.628,93.881,99.436,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'temporal': False, 'jersey': False, 'team': False}"
+2026-05-19 15:00:42,hc_ablation,neg3_minlen0_purity0.6_splitTrue_TJM,valid,90.462,94.055,87.022,94.327,99.438,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'temporal': True, 'jersey': True, 'team': True}"
+2026-05-19 15:08:15,hc_ablation,neg3_minlen0_purity0.6_splitTrue_tJM,valid,84.229,94.082,75.437,84.064,99.364,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'temporal': False, 'jersey': True, 'team': True}"
+2026-05-19 15:11:52,hc_ablation,neg3_minlen0_purity0.6_splitTrue_TjM,valid,90.582,94.051,87.256,94.554,99.439,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'temporal': True, 'jersey': False, 'team': True}"
+2026-05-19 15:16:26,hc_ablation,neg3_minlen0_purity0.6_splitTrue_TJm,valid,90.632,94.053,87.351,94.576,99.445,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'temporal': True, 'jersey': True, 'team': False}"
+2026-05-19 15:24:57,hc_ablation,neg3_minlen0_purity0.6_splitTrue_tjM,valid,82.164,94.084,71.788,81.015,99.349,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'temporal': False, 'jersey': False, 'team': True}"
+2026-05-19 15:36:13,hc_ablation,neg3_minlen0_purity0.6_splitTrue_tJm,valid,84.282,94.077,75.537,84.129,99.364,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'temporal': False, 'jersey': True, 'team': False}"
+2026-05-19 15:41:18,hc_ablation,neg3_minlen0_purity0.6_splitTrue_Tjm,valid,90.742,94.049,87.567,94.804,99.446,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'temporal': True, 'jersey': False, 'team': False}"
+2026-05-19 15:53:44,hc_ablation,neg3_minlen0_purity0.6_splitTrue_tjm,valid,82.205,94.087,71.858,80.919,99.347,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'temporal': False, 'jersey': False, 'team': False}"
+2026-05-19 17:49:39,feat_ablation,feat_ablation_remove_team,valid,90.227,94.033,86.591,93.769,99.441,{'variant': 'remove_team'}
+2026-05-19 17:54:01,feat_ablation,feat_ablation_remove_temporal,valid,90.286,94.057,86.682,93.99,99.437,{'variant': 'remove_temporal'}
+2026-05-19 17:58:29,feat_ablation,feat_ablation_remove_spatial,valid,89.641,94.06,85.446,93.054,99.43,{'variant': 'remove_spatial'}
+2026-05-19 18:03:35,feat_ablation,feat_ablation_remove_reid,valid,88.7,94.059,83.666,91.876,99.429,{'variant': 'remove_reid'}
+2026-05-19 18:08:38,feat_ablation,feat_ablation_remove_siglip,valid,90.475,94.056,87.045,94.151,99.441,{'variant': 'remove_siglip'}
+2026-05-19 18:13:29,feat_ablation,feat_ablation_remove_jersey_team,valid,89.637,94.001,85.493,92.965,99.436,{'variant': 'remove_jersey_team'}
+2026-05-19 18:18:15,feat_ablation,feat_ablation_remove_reid_siglip,valid,88.397,94.052,83.103,91.544,99.426,{'variant': 'remove_reid_siglip'}
+2026-05-19 18:23:03,feat_ablation,feat_ablation_remove_temporal_spatial,valid,89.489,94.061,85.155,92.902,99.416,{'variant': 'remove_temporal_spatial'}
+2026-05-19 18:27:36,feat_ablation,feat_ablation_only_jersey,valid,84.221,94.027,75.469,85.839,99.38,{'variant': 'only_jersey'}
+2026-05-19 18:32:23,feat_ablation,feat_ablation_only_team,valid,81.882,94.054,71.319,83.248,99.373,{'variant': 'only_team'}
+2026-05-19 18:37:19,feat_ablation,feat_ablation_only_temporal,valid,81.16,94.015,70.101,82.134,99.379,{'variant': 'only_temporal'}
+2026-05-19 18:42:19,feat_ablation,feat_ablation_only_spatial,valid,83.93,93.983,74.982,85.713,99.404,{'variant': 'only_spatial'}
+2026-05-19 18:47:13,feat_ablation,feat_ablation_only_reid,valid,88.021,94.053,82.395,90.926,99.407,{'variant': 'only_reid'}
+2026-05-19 18:51:59,feat_ablation,feat_ablation_only_siglip,valid,82.879,94.074,73.046,84.536,99.372,{'variant': 'only_siglip'}
+2026-05-19 18:57:11,feat_ablation,feat_ablation_only_pairwise,valid,90.345,94.06,86.792,94.131,99.442,{'variant': 'only_pairwise'}
+2026-05-19 19:02:01,feat_ablation,feat_ablation_only_per_tracklet,valid,86.449,94.029,79.504,88.641,99.41,{'variant': 'only_per_tracklet'}
+2026-05-19 22:26:53,feat_ablation,feat_ablation_baseline_all,valid,90.243,94.054,86.601,93.858,99.436,{'variant': 'baseline_all'}
+2026-05-19 22:26:53,feat_ablation,feat_ablation_remove_jersey,valid,89.806,94.056,85.764,93.065,99.433,{'variant': 'remove_jersey'}
+2026-05-19 22:26:53,feat_ablation,feat_ablation_remove_team,valid,90.227,94.033,86.591,93.769,99.441,{'variant': 'remove_team'}
+2026-05-19 22:26:53,feat_ablation,feat_ablation_remove_temporal,valid,90.286,94.057,86.682,93.99,99.437,{'variant': 'remove_temporal'}
+2026-05-19 22:26:53,feat_ablation,feat_ablation_remove_spatial,valid,89.641,94.06,85.446,93.054,99.43,{'variant': 'remove_spatial'}
+2026-05-19 22:26:53,feat_ablation,feat_ablation_remove_reid,valid,88.7,94.059,83.666,91.876,99.429,{'variant': 'remove_reid'}
+2026-05-19 22:26:53,feat_ablation,feat_ablation_remove_siglip,valid,90.475,94.056,87.045,94.151,99.441,{'variant': 'remove_siglip'}
+2026-05-19 22:26:53,feat_ablation,feat_ablation_remove_jersey_team,valid,89.637,94.001,85.493,92.965,99.436,{'variant': 'remove_jersey_team'}
+2026-05-19 22:26:53,feat_ablation,feat_ablation_remove_reid_siglip,valid,88.397,94.052,83.103,91.544,99.426,{'variant': 'remove_reid_siglip'}
+2026-05-19 22:26:53,feat_ablation,feat_ablation_remove_temporal_spatial,valid,89.489,94.061,85.155,92.902,99.416,{'variant': 'remove_temporal_spatial'}
+2026-05-19 22:26:53,feat_ablation,feat_ablation_only_jersey,valid,84.221,94.027,75.469,85.839,99.38,{'variant': 'only_jersey'}
+2026-05-19 22:26:53,feat_ablation,feat_ablation_only_team,valid,81.882,94.054,71.319,83.248,99.373,{'variant': 'only_team'}
+2026-05-19 22:26:53,feat_ablation,feat_ablation_only_temporal,valid,81.16,94.015,70.101,82.134,99.379,{'variant': 'only_temporal'}
+2026-05-19 22:26:53,feat_ablation,feat_ablation_only_spatial,valid,83.93,93.983,74.982,85.713,99.404,{'variant': 'only_spatial'}
+2026-05-19 22:26:53,feat_ablation,feat_ablation_only_reid,valid,88.021,94.053,82.395,90.926,99.407,{'variant': 'only_reid'}
+2026-05-19 22:26:53,feat_ablation,feat_ablation_only_siglip,valid,82.879,94.074,73.046,84.536,99.372,{'variant': 'only_siglip'}
+2026-05-19 22:26:53,feat_ablation,feat_ablation_only_pairwise,valid,90.345,94.06,86.792,94.131,99.442,{'variant': 'only_pairwise'}
+2026-05-19 22:26:53,feat_ablation,feat_ablation_only_per_tracklet,valid,86.449,94.029,79.504,88.641,99.41,{'variant': 'only_per_tracklet'}
+2026-05-19 22:38:05,feat_ablation,feat_ablation_baseline_all,valid,90.686,94.048,87.459,94.709,99.447,{'variant': 'baseline_all'}
+2026-05-19 22:43:18,feat_ablation,feat_ablation_remove_jersey,valid,89.799,94.025,85.78,93.503,99.442,{'variant': 'remove_jersey'}
+2026-05-19 22:48:41,feat_ablation,feat_ablation_remove_team,valid,90.523,94.028,87.163,94.427,99.445,{'variant': 'remove_team'}
+2026-05-19 22:53:52,feat_ablation,feat_ablation_remove_temporal,valid,90.401,94.055,86.904,94.265,99.441,{'variant': 'remove_temporal'}
+2026-05-19 22:59:00,feat_ablation,feat_ablation_remove_spatial,valid,89.643,94.056,85.453,93.18,99.435,{'variant': 'remove_spatial'}
+2026-05-19 23:04:18,feat_ablation,feat_ablation_remove_reid,valid,88.904,94.056,84.053,92.349,99.434,{'variant': 'remove_reid'}
+2026-05-19 23:09:23,feat_ablation,feat_ablation_remove_siglip,valid,90.884,94.05,87.838,94.962,99.447,{'variant': 'remove_siglip'}
+2026-05-19 23:14:34,feat_ablation,feat_ablation_remove_jersey_team,valid,89.921,94.0,86.035,93.663,99.442,{'variant': 'remove_jersey_team'}
+2026-05-19 23:19:53,feat_ablation,feat_ablation_remove_reid_siglip,valid,88.61,94.05,83.505,92.024,99.43,{'variant': 'remove_reid_siglip'}
+2026-05-19 23:25:02,feat_ablation,feat_ablation_remove_temporal_spatial,valid,89.468,94.06,85.116,93.034,99.42,{'variant': 'remove_temporal_spatial'}
+2026-05-19 23:29:40,feat_ablation,feat_ablation_only_jersey,valid,83.659,94.012,74.478,85.682,99.385,{'variant': 'only_jersey'}
+2026-05-19 23:34:45,feat_ablation,feat_ablation_only_team,valid,81.814,94.047,71.206,83.254,99.374,{'variant': 'only_team'}
+2026-05-19 23:39:39,feat_ablation,feat_ablation_only_temporal,valid,80.669,93.999,69.268,81.926,99.386,{'variant': 'only_temporal'}
+2026-05-19 23:44:48,feat_ablation,feat_ablation_only_spatial,valid,83.826,93.973,74.804,85.946,99.407,{'variant': 'only_spatial'}
+2026-05-19 23:49:45,feat_ablation,feat_ablation_only_reid,valid,87.88,94.041,82.141,90.868,99.412,{'variant': 'only_reid'}
+2026-05-19 23:54:39,feat_ablation,feat_ablation_only_siglip,valid,82.39,94.075,72.187,84.142,99.377,{'variant': 'only_siglip'}
+2026-05-19 23:59:50,feat_ablation,feat_ablation_only_pairwise,valid,90.529,94.06,87.147,94.526,99.446,{'variant': 'only_pairwise'}
+2026-05-20 00:05:17,feat_ablation,feat_ablation_only_per_tracklet,valid,86.585,94.034,79.751,89.179,99.417,{'variant': 'only_per_tracklet'}
+2026-05-20 00:11:33,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.750_average,valid,90.738,94.048,87.56,94.893,99.447,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.75, 'linkage_method': 'average'}"
+2026-05-20 00:15:42,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.800_average,valid,90.718,94.048,87.519,94.9,99.447,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.8, 'linkage_method': 'average'}"
+2026-05-20 00:19:59,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.300_single,valid,85.714,94.042,78.152,86.462,99.388,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.3, 'linkage_method': 'single'}"
+2026-05-20 00:24:12,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.350_single,valid,85.43,94.045,77.635,86.008,99.386,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.35, 'linkage_method': 'single'}"
+2026-05-20 00:28:24,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.400_single,valid,85.039,94.046,76.925,85.356,99.38,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.4, 'linkage_method': 'single'}"
+2026-05-20 00:32:39,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.450_single,valid,84.634,94.059,76.184,84.64,99.376,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.45, 'linkage_method': 'single'}"
+2026-05-20 00:36:53,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.500_single,valid,84.399,94.056,75.766,84.259,99.373,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.5, 'linkage_method': 'single'}"
+2026-05-20 00:41:14,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.550_single,valid,84.006,94.06,75.06,83.675,99.37,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.55, 'linkage_method': 'single'}"
+2026-05-20 00:45:28,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.600_single,valid,83.782,94.066,74.657,83.37,99.367,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.6, 'linkage_method': 'single'}"
+2026-05-20 00:49:41,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.650_single,valid,83.628,94.08,74.372,83.105,99.364,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.65, 'linkage_method': 'single'}"
+2026-05-20 00:53:39,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.700_single,valid,83.259,94.08,73.717,82.473,99.36,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.7, 'linkage_method': 'single'}"
+2026-05-20 00:57:35,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.750_single,valid,83.117,94.08,73.467,82.235,99.358,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.75, 'linkage_method': 'single'}"
+2026-05-20 01:01:31,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.800_single,valid,83.001,94.083,73.26,82.086,99.356,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.8, 'linkage_method': 'single'}"
+2026-05-20 01:05:33,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.300_complete,valid,89.429,94.064,85.04,92.356,99.423,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.3, 'linkage_method': 'complete'}"
+2026-05-20 01:09:42,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.350_complete,valid,89.618,94.06,85.404,92.718,99.425,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.35, 'linkage_method': 'complete'}"
+2026-05-20 01:13:40,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.400_complete,valid,89.847,94.059,85.84,93.097,99.429,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.4, 'linkage_method': 'complete'}"
+2026-05-20 01:17:41,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.450_complete,valid,89.891,94.059,85.924,93.21,99.43,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.45, 'linkage_method': 'complete'}"
+2026-05-20 01:21:47,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.500_complete,valid,90.019,94.059,86.17,93.451,99.433,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.5, 'linkage_method': 'complete'}"
+2026-05-20 01:25:52,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.550_complete,valid,90.115,94.056,86.354,93.616,99.434,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.55, 'linkage_method': 'complete'}"
+2026-05-20 01:29:54,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.600_complete,valid,90.186,94.055,86.493,93.746,99.435,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.6, 'linkage_method': 'complete'}"
+2026-05-20 01:33:59,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.650_complete,valid,90.248,94.054,86.612,93.857,99.437,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.65, 'linkage_method': 'complete'}"
+2026-05-20 01:37:54,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.700_complete,valid,90.266,94.053,86.647,93.964,99.437,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.7, 'linkage_method': 'complete'}"
+2026-05-20 01:42:15,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.750_complete,valid,90.258,94.052,86.633,94.034,99.438,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.75, 'linkage_method': 'complete'}"
+2026-05-20 01:46:47,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.800_complete,valid,90.295,94.052,86.703,94.148,99.439,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.8, 'linkage_method': 'complete'}"
+2026-05-20 02:22:04,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.300_average,valid,89.781,94.063,85.711,92.932,99.43,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.3, 'linkage_method': 'average'}"
+2026-05-20 02:25:43,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.350_average,valid,90.002,94.058,86.137,93.342,99.434,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.35, 'linkage_method': 'average'}"
+2026-05-20 02:29:20,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.400_average,valid,90.206,94.058,86.528,93.69,99.438,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.4, 'linkage_method': 'average'}"
+2026-05-20 02:32:58,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.450_average,valid,90.292,94.055,86.696,93.885,99.441,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.45, 'linkage_method': 'average'}"
+2026-05-20 02:36:35,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.500_average,valid,90.367,94.054,86.839,94.066,99.442,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.5, 'linkage_method': 'average'}"
+2026-05-20 02:40:12,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.550_average,valid,90.452,94.054,87.003,94.265,99.443,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.55, 'linkage_method': 'average'}"
+2026-05-20 02:43:49,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.600_average,valid,90.521,94.05,87.14,94.452,99.444,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.6, 'linkage_method': 'average'}"
+2026-05-20 02:47:27,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.650_average,valid,90.742,94.049,87.567,94.804,99.446,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.65, 'linkage_method': 'average'}"
+2026-05-20 02:51:04,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.700_average,valid,90.746,94.048,87.575,94.861,99.446,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.7, 'linkage_method': 'average'}"
+2026-05-20 02:54:41,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.750_average,valid,90.738,94.048,87.56,94.893,99.447,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.75, 'linkage_method': 'average'}"
+2026-05-20 02:58:18,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.800_average,valid,90.718,94.048,87.519,94.9,99.447,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.8, 'linkage_method': 'average'}"
+2026-05-20 03:01:56,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.300_single,valid,85.714,94.042,78.152,86.462,99.388,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.3, 'linkage_method': 'single'}"
+2026-05-20 03:05:33,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.350_single,valid,85.43,94.045,77.635,86.008,99.386,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.35, 'linkage_method': 'single'}"
+2026-05-20 03:09:10,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.400_single,valid,85.039,94.046,76.925,85.356,99.38,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.4, 'linkage_method': 'single'}"
+2026-05-20 03:12:48,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.450_single,valid,84.634,94.059,76.184,84.64,99.376,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.45, 'linkage_method': 'single'}"
+2026-05-20 03:16:25,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.500_single,valid,84.399,94.056,75.766,84.259,99.373,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.5, 'linkage_method': 'single'}"
+2026-05-20 03:20:03,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.550_single,valid,84.006,94.06,75.06,83.675,99.37,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.55, 'linkage_method': 'single'}"
+2026-05-20 03:23:39,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.600_single,valid,83.782,94.066,74.657,83.37,99.367,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.6, 'linkage_method': 'single'}"
+2026-05-20 03:27:16,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.650_single,valid,83.628,94.08,74.372,83.105,99.364,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.65, 'linkage_method': 'single'}"
+2026-05-20 03:30:53,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.700_single,valid,83.259,94.08,73.717,82.473,99.36,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.7, 'linkage_method': 'single'}"
+2026-05-20 03:34:30,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.750_single,valid,83.117,94.08,73.467,82.235,99.358,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.75, 'linkage_method': 'single'}"
+2026-05-20 03:38:07,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.800_single,valid,83.001,94.083,73.26,82.086,99.356,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.8, 'linkage_method': 'single'}"
+2026-05-20 03:41:44,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.300_complete,valid,89.429,94.064,85.04,92.356,99.423,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.3, 'linkage_method': 'complete'}"
+2026-05-20 03:45:21,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.350_complete,valid,89.618,94.06,85.404,92.718,99.425,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.35, 'linkage_method': 'complete'}"
+2026-05-20 03:48:57,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.400_complete,valid,89.847,94.059,85.84,93.097,99.429,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.4, 'linkage_method': 'complete'}"
+2026-05-20 03:52:34,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.450_complete,valid,89.891,94.059,85.924,93.21,99.43,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.45, 'linkage_method': 'complete'}"
+2026-05-20 03:56:11,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.500_complete,valid,90.019,94.059,86.17,93.451,99.433,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.5, 'linkage_method': 'complete'}"
+2026-05-20 03:59:48,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.550_complete,valid,90.115,94.056,86.354,93.616,99.434,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.55, 'linkage_method': 'complete'}"
+2026-05-20 04:03:26,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.600_complete,valid,90.186,94.055,86.493,93.746,99.435,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.6, 'linkage_method': 'complete'}"
+2026-05-20 04:07:02,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.650_complete,valid,90.248,94.054,86.612,93.857,99.437,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.65, 'linkage_method': 'complete'}"
+2026-05-20 04:10:38,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.700_complete,valid,90.266,94.053,86.647,93.964,99.437,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.7, 'linkage_method': 'complete'}"
+2026-05-20 04:14:15,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.750_complete,valid,90.258,94.052,86.633,94.034,99.438,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.75, 'linkage_method': 'complete'}"
+2026-05-20 04:17:52,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.800_complete,valid,90.295,94.052,86.703,94.148,99.439,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.8, 'linkage_method': 'complete'}"
+2026-05-20 12:07:57,hc_ablation,neg3_minlen0_purity0.6_splitTrue_TJM,valid,90.746,94.048,87.575,94.861,99.446,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'temporal': True, 'jersey': True, 'team': True}"
+2026-05-20 12:07:57,hc_ablation,neg3_minlen0_purity0.6_splitTrue_tJM,valid,90.746,94.048,87.575,94.861,99.446,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'temporal': False, 'jersey': True, 'team': True}"
+2026-05-20 12:07:57,hc_ablation,neg3_minlen0_purity0.6_splitTrue_TjM,valid,90.746,94.048,87.575,94.861,99.446,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'temporal': True, 'jersey': False, 'team': True}"
+2026-05-20 12:07:57,hc_ablation,neg3_minlen0_purity0.6_splitTrue_TJm,valid,90.746,94.048,87.575,94.861,99.446,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'temporal': True, 'jersey': True, 'team': False}"
+2026-05-20 12:07:57,hc_ablation,neg3_minlen0_purity0.6_splitTrue_tjM,valid,90.746,94.048,87.575,94.861,99.446,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'temporal': False, 'jersey': False, 'team': True}"
+2026-05-20 12:07:57,hc_ablation,neg3_minlen0_purity0.6_splitTrue_tJm,valid,90.746,94.048,87.575,94.861,99.446,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'temporal': False, 'jersey': True, 'team': False}"
+2026-05-20 12:07:57,hc_ablation,neg3_minlen0_purity0.6_splitTrue_Tjm,valid,90.746,94.048,87.575,94.861,99.446,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'temporal': True, 'jersey': False, 'team': False}"
+2026-05-20 12:07:57,hc_ablation,neg3_minlen0_purity0.6_splitTrue_tjm,valid,90.746,94.048,87.575,94.861,99.446,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'temporal': False, 'jersey': False, 'team': False}"
+2026-05-20 13:38:08,hc_ablation,neg3_minlen0_purity0.6_splitTrue_TJM,valid,90.452,94.053,87.005,94.362,99.438,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'temporal': True, 'jersey': True, 'team': True}"
+2026-05-20 13:38:08,hc_ablation,neg3_minlen0_purity0.6_splitTrue_tJM,valid,90.452,94.053,87.005,94.362,99.438,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'temporal': False, 'jersey': True, 'team': True}"
+2026-05-20 13:38:08,hc_ablation,neg3_minlen0_purity0.6_splitTrue_TjM,valid,90.452,94.053,87.005,94.362,99.438,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'temporal': True, 'jersey': False, 'team': True}"
+2026-05-20 13:38:08,hc_ablation,neg3_minlen0_purity0.6_splitTrue_TJm,valid,90.452,94.053,87.005,94.362,99.438,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'temporal': True, 'jersey': True, 'team': False}"
+2026-05-20 13:38:08,hc_ablation,neg3_minlen0_purity0.6_splitTrue_tjM,valid,90.452,94.053,87.005,94.362,99.438,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'temporal': False, 'jersey': False, 'team': True}"
+2026-05-20 13:38:08,hc_ablation,neg3_minlen0_purity0.6_splitTrue_tJm,valid,90.452,94.053,87.005,94.362,99.438,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'temporal': False, 'jersey': True, 'team': False}"
+2026-05-20 13:38:08,hc_ablation,neg3_minlen0_purity0.6_splitTrue_Tjm,valid,90.452,94.053,87.005,94.362,99.438,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'temporal': True, 'jersey': False, 'team': False}"
+2026-05-20 13:38:08,hc_ablation,neg3_minlen0_purity0.6_splitTrue_tjm,valid,90.452,94.053,87.005,94.362,99.438,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'temporal': False, 'jersey': False, 'team': False}"
+2026-05-20 13:45:01,hc_ablation,neg3_minlen0_purity0.6_splitTrue_TJM,valid,90.452,94.053,87.005,94.362,99.438,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'temporal': True, 'jersey': True, 'team': True}"
+2026-05-20 13:52:27,hc_ablation,neg3_minlen0_purity0.6_splitTrue_tJM,valid,83.962,94.083,74.96,83.638,99.362,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'temporal': False, 'jersey': True, 'team': True}"
+2026-05-20 13:56:26,hc_ablation,neg3_minlen0_purity0.6_splitTrue_TjM,valid,90.591,94.049,87.275,94.615,99.439,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'temporal': True, 'jersey': False, 'team': True}"
+2026-05-20 14:01:43,hc_ablation,neg3_minlen0_purity0.6_splitTrue_TJm,valid,90.625,94.049,87.341,94.621,99.445,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'temporal': True, 'jersey': True, 'team': False}"
+2026-05-20 14:10:38,hc_ablation,neg3_minlen0_purity0.6_splitTrue_tjM,valid,82.089,94.084,71.659,80.877,99.348,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'temporal': False, 'jersey': False, 'team': True}"
+2026-05-20 14:21:56,hc_ablation,neg3_minlen0_purity0.6_splitTrue_tJm,valid,84.03,94.076,75.087,83.78,99.361,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'temporal': False, 'jersey': True, 'team': False}"
+2026-05-20 14:26:43,hc_ablation,neg3_minlen0_purity0.6_splitTrue_Tjm,valid,90.746,94.048,87.575,94.861,99.446,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'temporal': True, 'jersey': False, 'team': False}"
+2026-05-20 14:39:02,hc_ablation,neg3_minlen0_purity0.6_splitTrue_tjm,valid,82.142,94.086,71.75,80.755,99.347,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'temporal': False, 'jersey': False, 'team': False}"
+2026-05-20 20:30:08,feat_ablation,feat_ablation_baseline_all,valid,90.708,94.047,87.502,94.791,99.447,{'variant': 'baseline_all'}
+2026-05-20 20:35:03,feat_ablation,feat_ablation_remove_jersey,valid,89.825,94.024,85.83,93.609,99.442,{'variant': 'remove_jersey'}
+2026-05-20 20:39:51,feat_ablation,feat_ablation_remove_team,valid,90.582,94.029,87.276,94.573,99.446,{'variant': 'remove_team'}
+2026-05-20 20:44:38,feat_ablation,feat_ablation_remove_temporal,valid,90.37,94.055,86.844,94.275,99.442,{'variant': 'remove_temporal'}
+2026-05-20 20:49:36,feat_ablation,feat_ablation_remove_spatial,valid,89.658,94.055,85.483,93.273,99.436,{'variant': 'remove_spatial'}
+2026-05-20 20:54:28,feat_ablation,feat_ablation_remove_reid,valid,89.018,94.055,84.269,92.562,99.435,{'variant': 'remove_reid'}
+2026-05-20 20:59:14,feat_ablation,feat_ablation_remove_siglip,valid,90.897,94.051,87.863,95.044,99.447,{'variant': 'remove_siglip'}
+2026-05-20 21:04:05,feat_ablation,feat_ablation_remove_jersey_team,valid,89.944,93.991,86.086,93.76,99.443,{'variant': 'remove_jersey_team'}
+2026-05-20 21:09:00,feat_ablation,feat_ablation_remove_reid_siglip,valid,88.622,94.051,83.528,92.119,99.431,{'variant': 'remove_reid_siglip'}
+2026-05-20 21:13:41,feat_ablation,feat_ablation_remove_temporal_spatial,valid,89.453,94.059,85.089,93.03,99.422,{'variant': 'remove_temporal_spatial'}
+2026-05-20 21:18:40,feat_ablation,feat_ablation_only_jersey,valid,83.595,94.012,74.363,85.598,99.385,{'variant': 'only_jersey'}
+2026-05-20 21:23:27,feat_ablation,feat_ablation_only_team,valid,81.808,94.046,71.196,83.24,99.375,{'variant': 'only_team'}
+2026-05-20 21:28:10,feat_ablation,feat_ablation_only_temporal,valid,80.549,93.997,69.064,81.792,99.387,{'variant': 'only_temporal'}
+2026-05-20 21:33:06,feat_ablation,feat_ablation_only_spatial,valid,83.798,93.958,74.767,85.987,99.407,{'variant': 'only_spatial'}
+2026-05-20 21:38:15,feat_ablation,feat_ablation_only_reid,valid,87.786,94.041,81.966,90.86,99.414,{'variant': 'only_reid'}
+2026-05-20 21:43:51,feat_ablation,feat_ablation_only_siglip,valid,82.201,94.074,71.857,83.924,99.378,{'variant': 'only_siglip'}
+2026-05-20 21:48:58,feat_ablation,feat_ablation_only_pairwise,valid,90.54,94.06,87.168,94.566,99.446,{'variant': 'only_pairwise'}
+2026-05-20 21:53:49,feat_ablation,feat_ablation_only_per_tracklet,valid,86.576,94.027,79.74,89.25,99.419,{'variant': 'only_per_tracklet'}
+2026-05-20 22:46:18,feat_ablation,feat_ablation_remove_pt_jersey,valid,90.531,94.052,87.157,94.546,99.445,{'variant': 'remove_pt_jersey'}
+2026-05-20 22:51:07,feat_ablation,feat_ablation_remove_pt_team,valid,90.682,94.055,87.444,94.728,99.447,{'variant': 'remove_pt_team'}
+2026-05-20 22:56:34,feat_ablation,feat_ablation_remove_pt_temporal,valid,90.67,94.052,87.425,94.721,99.448,{'variant': 'remove_pt_temporal'}
+2026-05-20 23:02:05,feat_ablation,feat_ablation_remove_pt_spatial,valid,90.679,94.045,87.449,94.671,99.446,{'variant': 'remove_pt_spatial'}
+2026-05-23 21:18:55,feat_ablation,feat_ablation_baseline_all,valid,90.708,94.047,87.502,94.791,99.447,{'variant': 'baseline_all'}
+2026-05-23 21:18:56,feat_ablation,feat_ablation_remove_jersey,valid,89.825,94.024,85.83,93.609,99.442,{'variant': 'remove_jersey'}
+2026-05-23 21:18:57,feat_ablation,feat_ablation_remove_team,valid,90.582,94.029,87.276,94.573,99.446,{'variant': 'remove_team'}
+2026-05-23 21:18:58,feat_ablation,feat_ablation_remove_temporal,valid,90.37,94.055,86.844,94.275,99.442,{'variant': 'remove_temporal'}
+2026-05-23 21:18:59,feat_ablation,feat_ablation_remove_spatial,valid,89.658,94.055,85.483,93.273,99.436,{'variant': 'remove_spatial'}
+2026-05-23 21:19:00,feat_ablation,feat_ablation_remove_reid,valid,89.018,94.055,84.269,92.562,99.435,{'variant': 'remove_reid'}
+2026-05-23 21:19:01,feat_ablation,feat_ablation_remove_siglip,valid,90.897,94.051,87.863,95.044,99.447,{'variant': 'remove_siglip'}
+2026-05-23 21:19:01,feat_ablation,feat_ablation_remove_jersey_team,valid,89.944,93.991,86.086,93.76,99.443,{'variant': 'remove_jersey_team'}
+2026-05-23 21:19:02,feat_ablation,feat_ablation_remove_reid_siglip,valid,88.622,94.051,83.528,92.119,99.431,{'variant': 'remove_reid_siglip'}
+2026-05-23 21:19:03,feat_ablation,feat_ablation_remove_temporal_spatial,valid,89.453,94.059,85.089,93.03,99.422,{'variant': 'remove_temporal_spatial'}
+2026-05-23 21:19:04,feat_ablation,feat_ablation_only_jersey,valid,83.595,94.012,74.363,85.598,99.385,{'variant': 'only_jersey'}
+2026-05-23 21:19:04,feat_ablation,feat_ablation_only_team,valid,81.808,94.046,71.196,83.24,99.375,{'variant': 'only_team'}
+2026-05-23 21:19:05,feat_ablation,feat_ablation_only_temporal,valid,80.549,93.997,69.064,81.792,99.387,{'variant': 'only_temporal'}
+2026-05-23 21:19:06,feat_ablation,feat_ablation_only_spatial,valid,83.798,93.958,74.767,85.987,99.407,{'variant': 'only_spatial'}
+2026-05-23 21:19:06,feat_ablation,feat_ablation_only_reid,valid,87.786,94.041,81.966,90.86,99.414,{'variant': 'only_reid'}
+2026-05-23 21:19:07,feat_ablation,feat_ablation_only_siglip,valid,82.201,94.074,71.857,83.924,99.378,{'variant': 'only_siglip'}
+2026-05-23 21:19:07,feat_ablation,feat_ablation_only_pairwise,valid,90.54,94.06,87.168,94.566,99.446,{'variant': 'only_pairwise'}
+2026-05-23 21:19:09,feat_ablation,feat_ablation_only_per_tracklet,valid,86.576,94.027,79.74,89.25,99.419,{'variant': 'only_per_tracklet'}
+2026-05-23 21:19:10,feat_ablation,feat_ablation_remove_pt_jersey,valid,90.531,94.052,87.157,94.546,99.445,{'variant': 'remove_pt_jersey'}
+2026-05-23 21:19:11,feat_ablation,feat_ablation_remove_pt_team,valid,90.682,94.055,87.444,94.728,99.447,{'variant': 'remove_pt_team'}
+2026-05-23 21:19:12,feat_ablation,feat_ablation_remove_pt_temporal,valid,90.67,94.052,87.425,94.721,99.448,{'variant': 'remove_pt_temporal'}
+2026-05-23 21:19:12,feat_ablation,feat_ablation_remove_pt_spatial,valid,90.679,94.045,87.449,94.671,99.446,{'variant': 'remove_pt_spatial'}
+2026-05-23 22:51:40,sweep_hota,neg10_minlen0_purity0.6_splitFalse,valid,89.835,94.058,85.819,93.262,99.431,"{'config_name': 'neg10_minlen0_purity0.6_splitFalse', 'merge_threshold': 0.7}"
+2026-05-23 22:51:40,sweep_hota,neg10_minlen0_purity0.6_splitTrue,valid,90.0,94.076,86.117,93.23,99.431,"{'config_name': 'neg10_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 22:51:40,sweep_hota,neg10_minlen0_purity0.8_splitFalse,valid,89.69,94.072,85.53,92.704,99.427,"{'config_name': 'neg10_minlen0_purity0.8_splitFalse', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,neg10_minlen0_purity0.8_splitTrue,valid,89.75,94.08,85.637,92.767,99.428,"{'config_name': 'neg10_minlen0_purity0.8_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,neg10_minlen0_purity1.0_splitFalse,valid,88.837,94.08,83.906,91.267,99.422,"{'config_name': 'neg10_minlen0_purity1.0_splitFalse', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,neg10_minlen0_purity1.0_splitTrue,valid,88.783,94.074,83.81,91.169,99.418,"{'config_name': 'neg10_minlen0_purity1.0_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,neg10_minlen10_purity0.6_splitFalse,valid,89.756,94.075,85.653,92.778,99.413,"{'config_name': 'neg10_minlen10_purity0.6_splitFalse', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,neg10_minlen10_purity0.6_splitTrue,valid,89.865,94.077,85.857,92.943,99.413,"{'config_name': 'neg10_minlen10_purity0.6_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,neg10_minlen10_purity0.8_splitFalse,valid,89.718,94.076,85.578,92.754,99.414,"{'config_name': 'neg10_minlen10_purity0.8_splitFalse', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,neg10_minlen10_purity0.8_splitTrue,valid,89.682,94.073,85.512,92.972,99.416,"{'config_name': 'neg10_minlen10_purity0.8_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,neg10_minlen10_purity1.0_splitFalse,valid,88.8,94.074,83.842,91.269,99.406,"{'config_name': 'neg10_minlen10_purity1.0_splitFalse', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,neg10_minlen10_purity1.0_splitTrue,valid,89.226,94.08,84.64,92.227,99.414,"{'config_name': 'neg10_minlen10_purity1.0_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,neg10_minlen5_purity0.6_splitFalse,valid,89.753,94.074,85.647,92.834,99.414,"{'config_name': 'neg10_minlen5_purity0.6_splitFalse', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,neg10_minlen5_purity0.6_splitTrue,valid,89.717,94.078,85.576,92.718,99.42,"{'config_name': 'neg10_minlen5_purity0.6_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,neg10_minlen5_purity0.8_splitFalse,valid,89.651,94.078,85.449,92.697,99.416,"{'config_name': 'neg10_minlen5_purity0.8_splitFalse', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,neg10_minlen5_purity0.8_splitTrue,valid,89.712,94.078,85.565,92.727,99.42,"{'config_name': 'neg10_minlen5_purity0.8_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,neg10_minlen5_purity1.0_splitFalse,valid,88.669,94.071,83.597,91.087,99.407,"{'config_name': 'neg10_minlen5_purity1.0_splitFalse', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,neg10_minlen5_purity1.0_splitTrue,valid,88.918,94.083,84.056,91.409,99.415,"{'config_name': 'neg10_minlen5_purity1.0_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,neg3_minlen0_purity0.6_splitFalse,valid,90.146,94.047,86.423,93.65,99.435,"{'config_name': 'neg3_minlen0_purity0.6_splitFalse', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,neg3_minlen0_purity0.6_splitTrue,valid,90.257,94.055,86.628,93.881,99.436,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,neg3_minlen0_purity0.8_splitFalse,valid,89.144,94.052,84.51,92.315,99.428,"{'config_name': 'neg3_minlen0_purity0.8_splitFalse', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,neg3_minlen0_purity0.8_splitTrue,valid,90.123,94.058,86.369,93.694,99.435,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,neg3_minlen0_purity1.0_splitFalse,valid,89.379,94.066,84.943,92.306,99.433,"{'config_name': 'neg3_minlen0_purity1.0_splitFalse', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,neg3_minlen0_purity1.0_splitTrue,valid,89.851,94.06,85.847,93.237,99.433,"{'config_name': 'neg3_minlen0_purity1.0_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,neg3_minlen10_purity0.6_splitFalse,valid,89.989,94.062,86.107,93.422,99.42,"{'config_name': 'neg3_minlen10_purity0.6_splitFalse', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,neg3_minlen10_purity0.6_splitTrue,valid,89.973,94.059,86.081,93.5,99.421,"{'config_name': 'neg3_minlen10_purity0.6_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,neg3_minlen10_purity0.8_splitFalse,valid,89.743,94.065,85.636,93.12,99.419,"{'config_name': 'neg3_minlen10_purity0.8_splitFalse', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,neg3_minlen10_purity0.8_splitTrue,valid,90.007,94.066,86.139,93.527,99.418,"{'config_name': 'neg3_minlen10_purity0.8_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,neg3_minlen10_purity1.0_splitFalse,valid,89.021,94.075,84.258,91.823,99.412,"{'config_name': 'neg3_minlen10_purity1.0_splitFalse', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,neg3_minlen10_purity1.0_splitTrue,valid,89.414,94.078,84.998,92.5,99.416,"{'config_name': 'neg3_minlen10_purity1.0_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,neg3_minlen5_purity0.6_splitFalse,valid,90.036,94.061,86.198,93.574,99.422,"{'config_name': 'neg3_minlen5_purity0.6_splitFalse', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,neg3_minlen5_purity0.6_splitTrue,valid,90.141,94.054,86.406,93.76,99.432,"{'config_name': 'neg3_minlen5_purity0.6_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,neg3_minlen5_purity0.8_splitFalse,valid,90.024,94.081,86.158,93.444,99.424,"{'config_name': 'neg3_minlen5_purity0.8_splitFalse', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,neg3_minlen5_purity0.8_splitTrue,valid,90.039,94.064,86.203,93.548,99.43,"{'config_name': 'neg3_minlen5_purity0.8_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,neg3_minlen5_purity1.0_splitFalse,valid,88.998,94.079,84.209,91.746,99.415,"{'config_name': 'neg3_minlen5_purity1.0_splitFalse', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,neg3_minlen5_purity1.0_splitTrue,valid,89.339,94.063,84.869,92.477,99.425,"{'config_name': 'neg3_minlen5_purity1.0_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,neg5_minlen0_purity0.6_splitFalse,valid,90.17,94.064,86.454,93.576,99.433,"{'config_name': 'neg5_minlen0_purity0.6_splitFalse', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,neg5_minlen0_purity0.6_splitTrue,valid,90.047,94.058,86.222,93.583,99.434,"{'config_name': 'neg5_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,neg5_minlen0_purity0.8_splitFalse,valid,90.192,94.063,86.496,93.683,99.434,"{'config_name': 'neg5_minlen0_purity0.8_splitFalse', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,neg5_minlen0_purity0.8_splitTrue,valid,90.132,94.079,86.367,93.545,99.433,"{'config_name': 'neg5_minlen0_purity0.8_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,neg5_minlen0_purity1.0_splitFalse,valid,89.235,94.072,84.664,91.978,99.428,"{'config_name': 'neg5_minlen0_purity1.0_splitFalse', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,neg5_minlen0_purity1.0_splitTrue,valid,89.588,94.065,85.342,92.608,99.43,"{'config_name': 'neg5_minlen0_purity1.0_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,neg5_minlen10_purity0.6_splitFalse,valid,90.107,94.076,86.322,93.463,99.417,"{'config_name': 'neg5_minlen10_purity0.6_splitFalse', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,neg5_minlen10_purity0.6_splitTrue,valid,90.008,94.066,86.14,93.444,99.419,"{'config_name': 'neg5_minlen10_purity0.6_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,neg5_minlen10_purity0.8_splitFalse,valid,89.977,94.06,86.087,93.395,99.419,"{'config_name': 'neg5_minlen10_purity0.8_splitFalse', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,neg5_minlen10_purity0.8_splitTrue,valid,90.07,94.073,86.252,93.488,99.417,"{'config_name': 'neg5_minlen10_purity0.8_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,neg5_minlen10_purity1.0_splitFalse,valid,89.026,94.071,84.269,91.737,99.409,"{'config_name': 'neg5_minlen10_purity1.0_splitFalse', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,neg5_minlen10_purity1.0_splitTrue,valid,89.194,94.08,84.579,92.034,99.414,"{'config_name': 'neg5_minlen10_purity1.0_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,neg5_minlen5_purity0.6_splitFalse,valid,90.197,94.074,86.495,93.694,99.42,"{'config_name': 'neg5_minlen5_purity0.6_splitFalse', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,neg5_minlen5_purity0.6_splitTrue,valid,89.993,94.074,86.105,93.311,99.426,"{'config_name': 'neg5_minlen5_purity0.6_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,neg5_minlen5_purity0.8_splitFalse,valid,89.552,94.074,85.263,92.78,99.416,"{'config_name': 'neg5_minlen5_purity0.8_splitFalse', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,neg5_minlen5_purity0.8_splitTrue,valid,90.202,94.076,86.502,93.675,99.428,"{'config_name': 'neg5_minlen5_purity0.8_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,neg5_minlen5_purity1.0_splitFalse,valid,89.038,94.075,84.288,92.01,99.414,"{'config_name': 'neg5_minlen5_purity1.0_splitFalse', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,neg5_minlen5_purity1.0_splitTrue,valid,89.773,94.079,85.68,92.962,99.426,"{'config_name': 'neg5_minlen5_purity1.0_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,negNone_minlen0_purity0.6_splitFalse,valid,89.728,94.074,85.601,92.638,99.425,"{'config_name': 'negNone_minlen0_purity0.6_splitFalse', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,negNone_minlen0_purity0.6_splitTrue,valid,89.686,94.078,85.518,92.595,99.424,"{'config_name': 'negNone_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,negNone_minlen0_purity0.8_splitFalse,valid,89.48,94.077,85.126,92.314,99.426,"{'config_name': 'negNone_minlen0_purity0.8_splitFalse', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,negNone_minlen0_purity0.8_splitTrue,valid,89.741,94.077,85.622,92.738,99.426,"{'config_name': 'negNone_minlen0_purity0.8_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,negNone_minlen0_purity1.0_splitFalse,valid,87.473,94.08,81.354,88.851,99.405,"{'config_name': 'negNone_minlen0_purity1.0_splitFalse', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,negNone_minlen0_purity1.0_splitTrue,valid,87.595,94.078,81.581,89.037,99.406,"{'config_name': 'negNone_minlen0_purity1.0_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,negNone_minlen10_purity0.6_splitFalse,valid,89.615,94.072,85.387,92.53,99.41,"{'config_name': 'negNone_minlen10_purity0.6_splitFalse', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,negNone_minlen10_purity0.6_splitTrue,valid,89.607,94.077,85.366,92.463,99.411,"{'config_name': 'negNone_minlen10_purity0.6_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,negNone_minlen10_purity0.8_splitFalse,valid,88.839,94.078,83.91,91.647,99.409,"{'config_name': 'negNone_minlen10_purity0.8_splitFalse', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,negNone_minlen10_purity0.8_splitTrue,valid,89.631,94.076,85.414,92.563,99.41,"{'config_name': 'negNone_minlen10_purity0.8_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,negNone_minlen10_purity1.0_splitFalse,valid,87.682,94.083,81.738,89.181,99.394,"{'config_name': 'negNone_minlen10_purity1.0_splitFalse', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,negNone_minlen10_purity1.0_splitTrue,valid,87.728,94.076,81.83,89.233,99.393,"{'config_name': 'negNone_minlen10_purity1.0_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,negNone_minlen5_purity0.6_splitFalse,valid,89.731,94.073,85.605,92.713,99.413,"{'config_name': 'negNone_minlen5_purity0.6_splitFalse', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,negNone_minlen5_purity0.6_splitTrue,valid,89.679,94.081,85.5,92.636,99.416,"{'config_name': 'negNone_minlen5_purity0.6_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,negNone_minlen5_purity0.8_splitFalse,valid,89.539,94.072,85.242,92.413,99.413,"{'config_name': 'negNone_minlen5_purity0.8_splitFalse', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,negNone_minlen5_purity0.8_splitTrue,valid,89.607,94.076,85.368,92.522,99.417,"{'config_name': 'negNone_minlen5_purity0.8_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,negNone_minlen5_purity1.0_splitFalse,valid,87.635,94.08,81.655,89.141,99.393,"{'config_name': 'negNone_minlen5_purity1.0_splitFalse', 'merge_threshold': 0.7}"
+2026-05-23 22:51:41,sweep_hota,negNone_minlen5_purity1.0_splitTrue,valid,87.664,94.08,81.71,89.188,99.398,"{'config_name': 'negNone_minlen5_purity1.0_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 23:00:25,sweep_hota,neg5_minlen0_purity0.6_splitTrue,valid,90.49,94.053,87.076,94.337,99.444,"{'config_name': 'neg5_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 23:02:33,sweep_hota,neg5_minlen0_purity0.8_splitTrue,valid,90.516,94.052,87.128,94.351,99.445,"{'config_name': 'neg5_minlen0_purity0.8_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 23:04:43,sweep_hota,negNone_minlen0_purity0.6_splitFalse,valid,90.187,94.06,86.489,93.568,99.442,"{'config_name': 'negNone_minlen0_purity0.6_splitFalse', 'merge_threshold': 0.7}"
+2026-05-23 23:06:51,sweep_hota,negNone_minlen0_purity0.8_splitTrue,valid,90.313,94.066,86.726,93.798,99.442,"{'config_name': 'negNone_minlen0_purity0.8_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 23:09:01,sweep_hota,neg10_minlen0_purity0.6_splitTrue,valid,90.42,94.054,86.942,94.007,99.443,"{'config_name': 'neg10_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 23:11:10,sweep_hota,negNone_minlen0_purity0.6_splitTrue,valid,90.205,94.066,86.518,93.562,99.439,"{'config_name': 'negNone_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 23:13:19,sweep_hota,neg3_minlen0_purity0.8_splitTrue,valid,90.849,94.057,87.765,94.902,99.447,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 23:15:30,sweep_hota,neg3_minlen0_purity0.6_splitTrue,valid,90.725,94.055,87.527,94.771,99.446,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 23:17:45,sweep_hota,neg10_minlen0_purity0.8_splitTrue,valid,90.307,94.065,86.716,93.804,99.443,"{'config_name': 'neg10_minlen0_purity0.8_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 23:19:54,sweep_hota,neg5_minlen0_purity0.8_splitFalse,valid,90.466,94.052,87.032,94.177,99.444,"{'config_name': 'neg5_minlen0_purity0.8_splitFalse', 'merge_threshold': 0.7}"
+2026-05-23 23:22:03,sweep_hota,neg3_minlen0_purity0.6_splitFalse,valid,90.589,94.052,87.269,94.509,99.446,"{'config_name': 'neg3_minlen0_purity0.6_splitFalse', 'merge_threshold': 0.7}"
+2026-05-23 23:24:10,sweep_hota,neg5_minlen0_purity0.6_splitFalse,valid,90.803,94.06,87.674,94.732,99.446,"{'config_name': 'neg5_minlen0_purity0.6_splitFalse', 'merge_threshold': 0.7}"
+2026-05-23 23:26:18,sweep_hota,negNone_minlen0_purity0.8_splitFalse,valid,90.025,94.057,86.183,93.4,99.442,"{'config_name': 'negNone_minlen0_purity0.8_splitFalse', 'merge_threshold': 0.7}"
+2026-05-23 23:28:24,sweep_hota,neg10_minlen0_purity0.8_splitFalse,valid,90.389,94.049,86.887,94.004,99.442,"{'config_name': 'neg10_minlen0_purity0.8_splitFalse', 'merge_threshold': 0.7}"
+2026-05-23 23:30:32,sweep_hota,negNone_minlen5_purity0.6_splitTrue,valid,90.163,94.078,86.426,93.562,99.432,"{'config_name': 'negNone_minlen5_purity0.6_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 23:32:40,sweep_hota,neg5_minlen5_purity0.8_splitTrue,valid,90.284,94.068,86.668,93.836,99.437,"{'config_name': 'neg5_minlen5_purity0.8_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 23:34:47,sweep_hota,neg5_minlen5_purity0.6_splitTrue,valid,90.49,94.073,87.059,94.236,99.439,"{'config_name': 'neg5_minlen5_purity0.6_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 23:36:51,sweep_hota,neg10_minlen5_purity0.6_splitTrue,valid,90.27,94.074,86.635,93.719,99.435,"{'config_name': 'neg10_minlen5_purity0.6_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 23:38:52,sweep_hota,neg3_minlen5_purity0.6_splitTrue,valid,90.535,94.055,87.162,94.418,99.442,"{'config_name': 'neg3_minlen5_purity0.6_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 23:40:54,sweep_hota,neg10_minlen5_purity0.8_splitTrue,valid,90.308,94.078,86.706,93.789,99.433,"{'config_name': 'neg10_minlen5_purity0.8_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 23:42:56,sweep_hota,negNone_minlen5_purity0.8_splitTrue,valid,90.417,94.075,86.918,93.961,99.435,"{'config_name': 'negNone_minlen5_purity0.8_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 23:45:10,sweep_hota,neg3_minlen0_purity1.0_splitTrue,valid,89.92,94.059,85.98,93.634,99.443,"{'config_name': 'neg3_minlen0_purity1.0_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 23:47:21,sweep_hota,neg5_minlen0_purity1.0_splitTrue,valid,90.22,94.06,86.553,93.771,99.443,"{'config_name': 'neg5_minlen0_purity1.0_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 23:49:29,sweep_hota,neg3_minlen5_purity0.8_splitTrue,valid,90.324,94.06,86.753,94.158,99.442,"{'config_name': 'neg3_minlen5_purity0.8_splitTrue', 'merge_threshold': 0.7}"
+2026-05-23 23:51:42,sweep_hota,neg3_minlen0_purity0.8_splitFalse,valid,88.69,94.051,83.652,92.097,99.446,"{'config_name': 'neg3_minlen0_purity0.8_splitFalse', 'merge_threshold': 0.7}"
+2026-05-24 00:35:55,thresh_sweep,neg3_minlen0_purity0.8_splitTrue_t0.300_average,valid,89.961,94.068,86.05,93.14,99.43,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'merge_threshold': 0.3, 'linkage_method': 'average'}"
+2026-05-24 00:38:11,thresh_sweep,neg3_minlen0_purity0.8_splitTrue_t0.350_average,valid,90.054,94.068,86.227,93.316,99.433,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'merge_threshold': 0.35, 'linkage_method': 'average'}"
+2026-05-24 00:40:21,thresh_sweep,neg3_minlen0_purity0.8_splitTrue_t0.400_average,valid,90.211,94.065,86.53,93.611,99.436,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'merge_threshold': 0.4, 'linkage_method': 'average'}"
+2026-05-24 00:42:34,thresh_sweep,neg3_minlen0_purity0.8_splitTrue_t0.450_average,valid,90.354,94.065,86.804,93.915,99.438,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'merge_threshold': 0.45, 'linkage_method': 'average'}"
+2026-05-24 00:44:46,thresh_sweep,neg3_minlen0_purity0.8_splitTrue_t0.500_average,valid,90.419,94.063,86.932,94.081,99.44,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'merge_threshold': 0.5, 'linkage_method': 'average'}"
+2026-05-24 00:47:00,thresh_sweep,neg3_minlen0_purity0.8_splitTrue_t0.550_average,valid,90.613,94.063,87.304,94.434,99.442,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'merge_threshold': 0.55, 'linkage_method': 'average'}"
+2026-05-24 00:50:20,thresh_sweep,neg3_minlen0_purity0.8_splitTrue_t0.600_average,valid,90.743,94.061,87.556,94.65,99.444,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'merge_threshold': 0.6, 'linkage_method': 'average'}"
+2026-05-24 00:53:20,thresh_sweep,neg3_minlen0_purity0.8_splitTrue_t0.650_average,valid,90.829,94.056,87.727,94.807,99.446,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'merge_threshold': 0.65, 'linkage_method': 'average'}"
+2026-05-24 00:55:47,thresh_sweep,neg3_minlen0_purity0.8_splitTrue_t0.700_average,valid,90.849,94.057,87.765,94.902,99.447,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'merge_threshold': 0.7, 'linkage_method': 'average'}"
+2026-05-24 00:58:06,thresh_sweep,neg3_minlen0_purity0.8_splitTrue_t0.750_average,valid,90.795,94.055,87.662,94.834,99.448,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'merge_threshold': 0.75, 'linkage_method': 'average'}"
+2026-05-24 01:00:15,thresh_sweep,neg3_minlen0_purity0.8_splitTrue_t0.800_average,valid,90.867,94.054,87.802,94.979,99.448,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'merge_threshold': 0.8, 'linkage_method': 'average'}"
+2026-05-24 01:42:46,hc_ablation,neg3_minlen0_purity0.8_splitTrue_TJM,valid,90.849,94.057,87.765,94.902,99.447,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'temporal': True, 'jersey': True, 'team': True}"
+2026-05-24 01:42:46,hc_ablation,neg3_minlen0_purity0.8_splitTrue_tJM,valid,90.849,94.057,87.765,94.902,99.447,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'temporal': False, 'jersey': True, 'team': True}"
+2026-05-24 01:42:46,hc_ablation,neg3_minlen0_purity0.8_splitTrue_TjM,valid,90.849,94.057,87.765,94.902,99.447,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'temporal': True, 'jersey': False, 'team': True}"
+2026-05-24 01:42:46,hc_ablation,neg3_minlen0_purity0.8_splitTrue_TJm,valid,90.849,94.057,87.765,94.902,99.447,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'temporal': True, 'jersey': True, 'team': False}"
+2026-05-24 01:42:46,hc_ablation,neg3_minlen0_purity0.8_splitTrue_tjM,valid,90.849,94.057,87.765,94.902,99.447,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'temporal': False, 'jersey': False, 'team': True}"
+2026-05-24 01:42:46,hc_ablation,neg3_minlen0_purity0.8_splitTrue_tJm,valid,90.849,94.057,87.765,94.902,99.447,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'temporal': False, 'jersey': True, 'team': False}"
+2026-05-24 01:42:46,hc_ablation,neg3_minlen0_purity0.8_splitTrue_Tjm,valid,90.849,94.057,87.765,94.902,99.447,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'temporal': True, 'jersey': False, 'team': False}"
+2026-05-24 01:42:46,hc_ablation,neg3_minlen0_purity0.8_splitTrue_tjm,valid,90.849,94.057,87.765,94.902,99.447,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'temporal': False, 'jersey': False, 'team': False}"
+2026-05-24 01:46:34,hc_ablation,neg3_minlen0_purity0.8_splitTrue_TJM,valid,90.583,94.062,87.248,94.463,99.44,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'temporal': True, 'jersey': True, 'team': True}"
+2026-05-24 01:46:34,hc_ablation,neg3_minlen0_purity0.8_splitTrue_tJM,valid,90.583,94.062,87.248,94.463,99.44,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'temporal': False, 'jersey': True, 'team': True}"
+2026-05-24 01:46:34,hc_ablation,neg3_minlen0_purity0.8_splitTrue_TjM,valid,90.583,94.062,87.248,94.463,99.44,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'temporal': True, 'jersey': False, 'team': True}"
+2026-05-24 01:46:34,hc_ablation,neg3_minlen0_purity0.8_splitTrue_TJm,valid,90.583,94.062,87.248,94.463,99.44,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'temporal': True, 'jersey': True, 'team': False}"
+2026-05-24 01:46:34,hc_ablation,neg3_minlen0_purity0.8_splitTrue_tjM,valid,90.583,94.062,87.248,94.463,99.44,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'temporal': False, 'jersey': False, 'team': True}"
+2026-05-24 01:46:34,hc_ablation,neg3_minlen0_purity0.8_splitTrue_tJm,valid,90.583,94.062,87.248,94.463,99.44,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'temporal': False, 'jersey': True, 'team': False}"
+2026-05-24 01:46:34,hc_ablation,neg3_minlen0_purity0.8_splitTrue_Tjm,valid,90.583,94.062,87.248,94.463,99.44,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'temporal': True, 'jersey': False, 'team': False}"
+2026-05-24 01:46:34,hc_ablation,neg3_minlen0_purity0.8_splitTrue_tjm,valid,90.583,94.062,87.248,94.463,99.44,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'temporal': False, 'jersey': False, 'team': False}"
+2026-05-24 01:51:00,hc_ablation,neg3_minlen0_purity0.8_splitTrue_TJM,valid,90.583,94.062,87.248,94.463,99.44,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'temporal': True, 'jersey': True, 'team': True}"
+2026-05-24 01:54:45,hc_ablation,neg3_minlen0_purity0.8_splitTrue_tJM,valid,83.859,94.088,74.774,83.433,99.361,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'temporal': False, 'jersey': True, 'team': True}"
+2026-05-24 01:56:40,hc_ablation,neg3_minlen0_purity0.8_splitTrue_TjM,valid,90.725,94.062,87.521,94.711,99.44,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'temporal': True, 'jersey': False, 'team': True}"
+2026-05-24 01:58:54,hc_ablation,neg3_minlen0_purity0.8_splitTrue_TJm,valid,90.707,94.061,87.486,94.651,99.446,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'temporal': True, 'jersey': True, 'team': False}"
+2026-05-24 02:02:46,hc_ablation,neg3_minlen0_purity0.8_splitTrue_tjM,valid,82.052,94.084,71.595,80.785,99.348,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'temporal': False, 'jersey': False, 'team': True}"
+2026-05-24 02:07:26,hc_ablation,neg3_minlen0_purity0.8_splitTrue_tJm,valid,84.041,94.09,75.097,83.7,99.359,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'temporal': False, 'jersey': True, 'team': False}"
+2026-05-24 02:09:35,hc_ablation,neg3_minlen0_purity0.8_splitTrue_Tjm,valid,90.849,94.057,87.765,94.902,99.447,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'temporal': True, 'jersey': False, 'team': False}"
+2026-05-24 02:14:09,hc_ablation,neg3_minlen0_purity0.8_splitTrue_tjm,valid,82.266,94.084,71.967,80.915,99.346,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'temporal': False, 'jersey': False, 'team': False}"
+2026-05-24 02:21:52,feat_ablation,feat_ablation_baseline_all,valid,90.872,94.057,87.81,94.955,99.448,{'variant': 'baseline_all'}
+2026-05-24 02:23:55,feat_ablation,feat_ablation_remove_jersey,valid,89.679,94.029,85.547,93.287,99.442,{'variant': 'remove_jersey'}
+2026-05-24 02:25:58,feat_ablation,feat_ablation_remove_team,valid,90.343,94.047,86.8,94.012,99.444,{'variant': 'remove_team'}
+2026-05-24 02:27:58,feat_ablation,feat_ablation_remove_temporal,valid,90.448,94.054,86.996,94.441,99.442,{'variant': 'remove_temporal'}
+2026-05-24 02:29:59,feat_ablation,feat_ablation_remove_spatial,valid,89.642,94.057,85.451,93.143,99.435,{'variant': 'remove_spatial'}
+2026-05-24 02:32:01,feat_ablation,feat_ablation_remove_reid,valid,88.239,94.052,82.807,91.012,99.431,{'variant': 'remove_reid'}
+2026-05-24 02:34:05,feat_ablation,feat_ablation_remove_siglip,valid,90.752,94.055,87.58,94.781,99.447,{'variant': 'remove_siglip'}
+2026-05-24 02:36:07,feat_ablation,feat_ablation_remove_jersey_team,valid,89.323,94.028,84.871,92.551,99.439,{'variant': 'remove_jersey_team'}
+2026-05-24 02:38:11,feat_ablation,feat_ablation_remove_reid_siglip,valid,88.603,94.054,83.488,91.974,99.431,{'variant': 'remove_reid_siglip'}
+2026-05-24 02:40:14,feat_ablation,feat_ablation_remove_temporal_spatial,valid,88.886,94.07,84.005,92.355,99.421,{'variant': 'remove_temporal_spatial'}
+2026-05-24 02:42:15,feat_ablation,feat_ablation_only_jersey,valid,83.774,94.043,74.658,85.849,99.384,{'variant': 'only_jersey'}
+2026-05-24 02:44:20,feat_ablation,feat_ablation_only_team,valid,81.622,94.045,70.874,82.956,99.373,{'variant': 'only_team'}
+2026-05-24 02:46:28,feat_ablation,feat_ablation_only_temporal,valid,80.242,94.04,68.506,81.176,99.382,{'variant': 'only_temporal'}
+2026-05-24 02:48:30,feat_ablation,feat_ablation_only_spatial,valid,83.667,93.991,74.506,85.754,99.408,{'variant': 'only_spatial'}
+2026-05-24 02:50:23,feat_ablation,feat_ablation_only_reid,valid,87.758,94.039,81.915,90.949,99.413,{'variant': 'only_reid'}
+2026-05-24 02:52:17,feat_ablation,feat_ablation_only_siglip,valid,79.079,94.016,66.554,79.982,99.371,{'variant': 'only_siglip'}
+2026-05-24 02:54:11,feat_ablation,feat_ablation_only_pairwise,valid,90.475,94.055,87.047,94.593,99.446,{'variant': 'only_pairwise'}
+2026-05-24 02:56:08,feat_ablation,feat_ablation_only_per_tracklet,valid,86.596,94.023,79.779,89.263,99.416,{'variant': 'only_per_tracklet'}
+2026-05-24 02:58:02,feat_ablation,feat_ablation_remove_pt_jersey,valid,90.546,94.049,87.189,94.515,99.445,{'variant': 'remove_pt_jersey'}
+2026-05-24 02:59:56,feat_ablation,feat_ablation_remove_pt_team,valid,90.619,94.057,87.322,94.568,99.448,{'variant': 'remove_pt_team'}
+2026-05-24 03:01:51,feat_ablation,feat_ablation_remove_pt_temporal,valid,90.685,94.055,87.449,94.711,99.446,{'variant': 'remove_pt_temporal'}
+2026-05-24 03:03:46,feat_ablation,feat_ablation_remove_pt_spatial,valid,90.616,94.06,87.313,94.569,99.446,{'variant': 'remove_pt_spatial'}
+2026-05-24 03:09:16,sweep_hota,neg10_minlen0_purity0.6_splitFalse,valid,89.33,94.054,84.86,93.012,99.449,"{'config_name': 'neg10_minlen0_purity0.6_splitFalse', 'merge_threshold': 0.7}"
+2026-05-24 03:11:10,sweep_hota,neg10_minlen0_purity1.0_splitFalse,valid,89.696,94.071,85.542,92.895,99.437,"{'config_name': 'neg10_minlen0_purity1.0_splitFalse', 'merge_threshold': 0.7}"
+2026-05-24 03:13:04,sweep_hota,neg10_minlen0_purity1.0_splitTrue,valid,89.644,94.063,85.449,92.781,99.437,"{'config_name': 'neg10_minlen0_purity1.0_splitTrue', 'merge_threshold': 0.7}"
+2026-05-24 03:14:57,sweep_hota,neg10_minlen10_purity0.6_splitFalse,valid,90.027,94.075,86.169,93.289,99.416,"{'config_name': 'neg10_minlen10_purity0.6_splitFalse', 'merge_threshold': 0.7}"
+2026-05-24 03:16:52,sweep_hota,neg10_minlen10_purity0.6_splitTrue,valid,90.235,94.079,86.563,93.603,99.421,"{'config_name': 'neg10_minlen10_purity0.6_splitTrue', 'merge_threshold': 0.7}"
+2026-05-24 03:18:45,sweep_hota,neg10_minlen10_purity0.8_splitFalse,valid,89.925,94.078,85.972,93.108,99.42,"{'config_name': 'neg10_minlen10_purity0.8_splitFalse', 'merge_threshold': 0.7}"
+2026-05-24 03:20:39,sweep_hota,neg10_minlen10_purity0.8_splitTrue,valid,90.139,94.075,86.383,93.476,99.416,"{'config_name': 'neg10_minlen10_purity0.8_splitTrue', 'merge_threshold': 0.7}"
+2026-05-24 03:22:31,sweep_hota,neg10_minlen10_purity1.0_splitFalse,valid,89.042,94.073,84.298,91.718,99.412,"{'config_name': 'neg10_minlen10_purity1.0_splitFalse', 'merge_threshold': 0.7}"
+2026-05-24 03:24:22,sweep_hota,neg10_minlen10_purity1.0_splitTrue,valid,89.836,94.054,85.823,93.479,99.438,"{'config_name': 'neg10_minlen10_purity1.0_splitTrue', 'merge_threshold': 0.7}"
+2026-05-24 03:26:15,sweep_hota,neg10_minlen5_purity0.6_splitFalse,valid,90.109,94.079,86.322,93.424,99.423,"{'config_name': 'neg10_minlen5_purity0.6_splitFalse', 'merge_threshold': 0.7}"
+2026-05-24 03:28:08,sweep_hota,neg10_minlen5_purity0.8_splitFalse,valid,89.971,94.076,86.062,93.28,99.426,"{'config_name': 'neg10_minlen5_purity0.8_splitFalse', 'merge_threshold': 0.7}"
+2026-05-24 03:30:00,sweep_hota,neg10_minlen5_purity1.0_splitFalse,valid,89.087,94.073,84.384,91.829,99.417,"{'config_name': 'neg10_minlen5_purity1.0_splitFalse', 'merge_threshold': 0.7}"
+2026-05-24 03:31:53,sweep_hota,neg10_minlen5_purity1.0_splitTrue,valid,89.673,94.082,85.488,92.763,99.431,"{'config_name': 'neg10_minlen5_purity1.0_splitTrue', 'merge_threshold': 0.7}"
+2026-05-24 03:33:44,sweep_hota,neg3_minlen0_purity1.0_splitFalse,valid,90.159,94.062,86.433,93.912,99.447,"{'config_name': 'neg3_minlen0_purity1.0_splitFalse', 'merge_threshold': 0.7}"
+2026-05-24 03:35:36,sweep_hota,neg3_minlen10_purity0.6_splitFalse,valid,90.471,94.064,87.03,94.24,99.428,"{'config_name': 'neg3_minlen10_purity0.6_splitFalse', 'merge_threshold': 0.7}"
+2026-05-24 03:37:28,sweep_hota,neg3_minlen10_purity0.6_splitTrue,valid,90.437,94.058,86.969,94.27,99.43,"{'config_name': 'neg3_minlen10_purity0.6_splitTrue', 'merge_threshold': 0.7}"
+2026-05-24 03:39:18,sweep_hota,neg3_minlen10_purity0.8_splitFalse,valid,89.938,94.063,86.009,93.726,99.436,"{'config_name': 'neg3_minlen10_purity0.8_splitFalse', 'merge_threshold': 0.7}"
+2026-05-24 03:41:10,sweep_hota,neg3_minlen10_purity0.8_splitTrue,valid,90.501,94.075,87.078,94.29,99.429,"{'config_name': 'neg3_minlen10_purity0.8_splitTrue', 'merge_threshold': 0.7}"
+2026-05-24 03:43:01,sweep_hota,neg3_minlen10_purity1.0_splitFalse,valid,89.592,94.07,85.343,92.809,99.419,"{'config_name': 'neg3_minlen10_purity1.0_splitFalse', 'merge_threshold': 0.7}"
+2026-05-24 03:44:53,sweep_hota,neg3_minlen10_purity1.0_splitTrue,valid,89.748,94.079,85.634,93.047,99.426,"{'config_name': 'neg3_minlen10_purity1.0_splitTrue', 'merge_threshold': 0.7}"
+2026-05-24 03:46:45,sweep_hota,neg3_minlen5_purity0.6_splitFalse,valid,90.652,94.078,87.366,94.481,99.435,"{'config_name': 'neg3_minlen5_purity0.6_splitFalse', 'merge_threshold': 0.7}"
+2026-05-24 03:48:36,sweep_hota,neg3_minlen5_purity0.8_splitFalse,valid,90.184,94.061,86.483,94.05,99.435,"{'config_name': 'neg3_minlen5_purity0.8_splitFalse', 'merge_threshold': 0.7}"
+2026-05-24 03:50:27,sweep_hota,neg3_minlen5_purity1.0_splitFalse,valid,89.183,94.072,84.566,92.303,99.424,"{'config_name': 'neg3_minlen5_purity1.0_splitFalse', 'merge_threshold': 0.7}"
+2026-05-24 03:52:18,sweep_hota,neg3_minlen5_purity1.0_splitTrue,valid,90.112,94.061,86.345,93.878,99.444,"{'config_name': 'neg3_minlen5_purity1.0_splitTrue', 'merge_threshold': 0.7}"
+2026-05-24 03:54:10,sweep_hota,neg5_minlen0_purity1.0_splitFalse,valid,89.767,94.06,85.686,93.237,99.442,"{'config_name': 'neg5_minlen0_purity1.0_splitFalse', 'merge_threshold': 0.7}"
+2026-05-24 03:56:02,sweep_hota,neg5_minlen10_purity0.6_splitFalse,valid,90.353,94.079,86.79,93.898,99.425,"{'config_name': 'neg5_minlen10_purity0.6_splitFalse', 'merge_threshold': 0.7}"
+2026-05-24 03:57:53,sweep_hota,neg5_minlen10_purity0.6_splitTrue,valid,90.443,94.058,86.982,94.351,99.437,"{'config_name': 'neg5_minlen10_purity0.6_splitTrue', 'merge_threshold': 0.7}"
+2026-05-24 03:59:43,sweep_hota,neg5_minlen10_purity0.8_splitFalse,valid,88.784,94.045,83.835,92.181,99.439,"{'config_name': 'neg5_minlen10_purity0.8_splitFalse', 'merge_threshold': 0.7}"
+2026-05-24 04:01:36,sweep_hota,neg5_minlen10_purity0.8_splitTrue,valid,90.406,94.059,86.91,94.078,99.425,"{'config_name': 'neg5_minlen10_purity0.8_splitTrue', 'merge_threshold': 0.7}"
+2026-05-24 04:03:28,sweep_hota,neg5_minlen10_purity1.0_splitFalse,valid,89.323,94.073,84.831,92.278,99.414,"{'config_name': 'neg5_minlen10_purity1.0_splitFalse', 'merge_threshold': 0.7}"
+2026-05-24 04:05:20,sweep_hota,neg5_minlen10_purity1.0_splitTrue,valid,89.755,94.082,85.643,92.979,99.423,"{'config_name': 'neg5_minlen10_purity1.0_splitTrue', 'merge_threshold': 0.7}"
+2026-05-24 04:07:12,sweep_hota,neg5_minlen5_purity0.6_splitFalse,valid,90.531,94.077,87.133,94.178,99.43,"{'config_name': 'neg5_minlen5_purity0.6_splitFalse', 'merge_threshold': 0.7}"
+2026-05-24 04:09:02,sweep_hota,neg5_minlen5_purity0.8_splitFalse,valid,88.985,94.037,84.22,92.391,99.439,"{'config_name': 'neg5_minlen5_purity0.8_splitFalse', 'merge_threshold': 0.7}"
+2026-05-24 04:10:54,sweep_hota,neg5_minlen5_purity1.0_splitFalse,valid,89.401,94.071,84.981,92.466,99.42,"{'config_name': 'neg5_minlen5_purity1.0_splitFalse', 'merge_threshold': 0.7}"
+2026-05-24 04:12:46,sweep_hota,neg5_minlen5_purity1.0_splitTrue,valid,89.907,94.082,85.935,93.256,99.436,"{'config_name': 'neg5_minlen5_purity1.0_splitTrue', 'merge_threshold': 0.7}"
+2026-05-24 04:14:39,sweep_hota,negNone_minlen0_purity1.0_splitFalse,valid,88.549,94.072,83.372,90.903,99.429,"{'config_name': 'negNone_minlen0_purity1.0_splitFalse', 'merge_threshold': 0.7}"
+2026-05-24 04:16:33,sweep_hota,negNone_minlen0_purity1.0_splitTrue,valid,88.844,94.078,83.921,91.242,99.428,"{'config_name': 'negNone_minlen0_purity1.0_splitTrue', 'merge_threshold': 0.7}"
+2026-05-24 04:18:27,sweep_hota,negNone_minlen10_purity0.6_splitFalse,valid,89.971,94.076,86.061,93.102,99.416,"{'config_name': 'negNone_minlen10_purity0.6_splitFalse', 'merge_threshold': 0.7}"
+2026-05-24 04:20:21,sweep_hota,negNone_minlen10_purity0.6_splitTrue,valid,90.168,94.079,86.436,93.478,99.42,"{'config_name': 'negNone_minlen10_purity0.6_splitTrue', 'merge_threshold': 0.7}"
+2026-05-24 04:22:14,sweep_hota,negNone_minlen10_purity0.8_splitFalse,valid,89.582,94.08,85.316,92.523,99.412,"{'config_name': 'negNone_minlen10_purity0.8_splitFalse', 'merge_threshold': 0.7}"
+2026-05-24 04:24:08,sweep_hota,negNone_minlen10_purity0.8_splitTrue,valid,90.096,94.075,86.301,93.367,99.416,"{'config_name': 'negNone_minlen10_purity0.8_splitTrue', 'merge_threshold': 0.7}"
+2026-05-24 04:25:59,sweep_hota,negNone_minlen10_purity1.0_splitFalse,valid,89.115,94.077,84.433,91.85,99.412,"{'config_name': 'negNone_minlen10_purity1.0_splitFalse', 'merge_threshold': 0.7}"
+2026-05-24 04:27:52,sweep_hota,negNone_minlen10_purity1.0_splitTrue,valid,88.824,94.077,83.884,91.189,99.408,"{'config_name': 'negNone_minlen10_purity1.0_splitTrue', 'merge_threshold': 0.7}"
+2026-05-24 04:29:46,sweep_hota,negNone_minlen5_purity0.6_splitFalse,valid,90.038,94.075,86.19,93.225,99.421,"{'config_name': 'negNone_minlen5_purity0.6_splitFalse', 'merge_threshold': 0.7}"
+2026-05-24 04:31:39,sweep_hota,negNone_minlen5_purity0.8_splitFalse,valid,89.929,94.073,85.983,93.062,99.422,"{'config_name': 'negNone_minlen5_purity0.8_splitFalse', 'merge_threshold': 0.7}"
+2026-05-24 04:33:32,sweep_hota,negNone_minlen5_purity1.0_splitFalse,valid,88.566,94.07,83.404,90.91,99.408,"{'config_name': 'negNone_minlen5_purity1.0_splitFalse', 'merge_threshold': 0.7}"
+2026-05-24 04:35:25,sweep_hota,negNone_minlen5_purity1.0_splitTrue,valid,89.09,94.077,84.387,91.704,99.424,"{'config_name': 'negNone_minlen5_purity1.0_splitTrue', 'merge_threshold': 0.7}"
+2026-05-24 13:01:41,thresh_sweep,neg3_minlen0_purity0.6_splitTrue_t0.300_average,valid,89.795,94.063,85.737,92.912,99.431,"{'config_name': 'neg3_minlen0_purity0.6_splitTrue', 'merge_threshold': 0.3, 'linkage_method': 'average'}"
+2026-05-24 13:05:40,thresh_sweep,neg3_minlen0_purity0.8_splitTrue_t0.300_single,valid,85.72,94.049,78.157,86.42,99.387,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'merge_threshold': 0.3, 'linkage_method': 'single'}"
+2026-05-24 13:07:34,thresh_sweep,neg3_minlen0_purity0.8_splitTrue_t0.350_single,valid,85.354,94.05,77.49,85.915,99.383,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'merge_threshold': 0.35, 'linkage_method': 'single'}"
+2026-05-24 13:09:27,thresh_sweep,neg3_minlen0_purity0.8_splitTrue_t0.400_single,valid,85.113,94.052,77.054,85.478,99.38,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'merge_threshold': 0.4, 'linkage_method': 'single'}"
+2026-05-24 13:11:21,thresh_sweep,neg3_minlen0_purity0.8_splitTrue_t0.450_single,valid,84.743,94.07,76.371,84.878,99.377,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'merge_threshold': 0.45, 'linkage_method': 'single'}"
+2026-05-24 13:13:14,thresh_sweep,neg3_minlen0_purity0.8_splitTrue_t0.500_single,valid,84.584,94.07,76.086,84.572,99.375,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'merge_threshold': 0.5, 'linkage_method': 'single'}"
+2026-05-24 13:15:07,thresh_sweep,neg3_minlen0_purity0.8_splitTrue_t0.550_single,valid,84.341,94.074,75.647,84.201,99.372,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'merge_threshold': 0.55, 'linkage_method': 'single'}"
+2026-05-24 13:17:00,thresh_sweep,neg3_minlen0_purity0.8_splitTrue_t0.600_single,valid,84.091,94.078,75.196,83.768,99.37,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'merge_threshold': 0.6, 'linkage_method': 'single'}"
+2026-05-24 13:18:54,thresh_sweep,neg3_minlen0_purity0.8_splitTrue_t0.650_single,valid,83.811,94.08,74.696,83.335,99.366,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'merge_threshold': 0.65, 'linkage_method': 'single'}"
+2026-05-24 13:20:47,thresh_sweep,neg3_minlen0_purity0.8_splitTrue_t0.700_single,valid,83.622,94.08,74.362,83.03,99.364,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'merge_threshold': 0.7, 'linkage_method': 'single'}"
+2026-05-24 13:22:40,thresh_sweep,neg3_minlen0_purity0.8_splitTrue_t0.750_single,valid,83.328,94.082,73.839,82.576,99.36,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'merge_threshold': 0.75, 'linkage_method': 'single'}"
+2026-05-24 13:24:33,thresh_sweep,neg3_minlen0_purity0.8_splitTrue_t0.800_single,valid,83.097,94.083,73.43,82.269,99.358,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'merge_threshold': 0.8, 'linkage_method': 'single'}"
+2026-05-24 13:26:26,thresh_sweep,neg3_minlen0_purity0.8_splitTrue_t0.300_complete,valid,89.624,94.065,85.409,92.575,99.425,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'merge_threshold': 0.3, 'linkage_method': 'complete'}"
+2026-05-24 13:28:20,thresh_sweep,neg3_minlen0_purity0.8_splitTrue_t0.350_complete,valid,89.696,94.065,85.548,92.711,99.427,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'merge_threshold': 0.35, 'linkage_method': 'complete'}"
+2026-05-24 13:30:13,thresh_sweep,neg3_minlen0_purity0.8_splitTrue_t0.400_complete,valid,89.882,94.063,85.905,93.029,99.43,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'merge_threshold': 0.4, 'linkage_method': 'complete'}"
+2026-05-24 13:32:06,thresh_sweep,neg3_minlen0_purity0.8_splitTrue_t0.450_complete,valid,90.041,94.063,86.208,93.354,99.431,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'merge_threshold': 0.45, 'linkage_method': 'complete'}"
+2026-05-24 13:33:59,thresh_sweep,neg3_minlen0_purity0.8_splitTrue_t0.500_complete,valid,90.091,94.063,86.303,93.462,99.432,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'merge_threshold': 0.5, 'linkage_method': 'complete'}"
+2026-05-24 13:35:52,thresh_sweep,neg3_minlen0_purity0.8_splitTrue_t0.550_complete,valid,90.235,94.063,86.579,93.71,99.434,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'merge_threshold': 0.55, 'linkage_method': 'complete'}"
+2026-05-24 13:37:45,thresh_sweep,neg3_minlen0_purity0.8_splitTrue_t0.600_complete,valid,90.235,94.062,86.58,93.74,99.435,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'merge_threshold': 0.6, 'linkage_method': 'complete'}"
+2026-05-24 13:39:38,thresh_sweep,neg3_minlen0_purity0.8_splitTrue_t0.650_complete,valid,90.266,94.061,86.64,93.785,99.436,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'merge_threshold': 0.65, 'linkage_method': 'complete'}"
+2026-05-24 13:41:31,thresh_sweep,neg3_minlen0_purity0.8_splitTrue_t0.700_complete,valid,90.325,94.061,86.753,93.906,99.437,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'merge_threshold': 0.7, 'linkage_method': 'complete'}"
+2026-05-24 13:43:24,thresh_sweep,neg3_minlen0_purity0.8_splitTrue_t0.750_complete,valid,90.34,94.058,86.784,93.973,99.438,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'merge_threshold': 0.75, 'linkage_method': 'complete'}"
+2026-05-24 13:45:17,thresh_sweep,neg3_minlen0_purity0.8_splitTrue_t0.800_complete,valid,90.482,94.055,87.06,94.304,99.439,"{'config_name': 'neg3_minlen0_purity0.8_splitTrue', 'merge_threshold': 0.8, 'linkage_method': 'complete'}"
+2026-05-29 00:09:47,transformer_hota_sweep,cross_attention_t0.30,valid,86.614,94.072,79.773,87.368,99.396,"{'model': 'cross_attention', 'merge_threshold': 0.3, 'linkage': 'average'}"
+2026-05-29 00:12:19,transformer_hota_sweep,cross_attention_t0.35,valid,86.773,94.074,80.063,87.697,99.4,"{'model': 'cross_attention', 'merge_threshold': 0.35, 'linkage': 'average'}"
+2026-05-29 00:14:57,transformer_hota_sweep,cross_attention_t0.40,valid,86.877,94.075,80.254,87.9,99.401,"{'model': 'cross_attention', 'merge_threshold': 0.4, 'linkage': 'average'}"
+2026-05-29 00:17:30,transformer_hota_sweep,cross_attention_t0.45,valid,86.992,94.072,80.469,88.137,99.403,"{'model': 'cross_attention', 'merge_threshold': 0.45, 'linkage': 'average'}"
+2026-05-29 00:20:10,transformer_hota_sweep,cross_attention_t0.50,valid,87.202,94.071,80.859,88.55,99.407,"{'model': 'cross_attention', 'merge_threshold': 0.5, 'linkage': 'average'}"
+2026-05-29 00:22:57,transformer_hota_sweep,cross_attention_t0.55,valid,87.46,94.067,81.34,89.051,99.411,"{'model': 'cross_attention', 'merge_threshold': 0.55, 'linkage': 'average'}"
+2026-05-29 00:25:35,transformer_hota_sweep,cross_attention_t0.60,valid,87.662,94.063,81.719,89.55,99.415,"{'model': 'cross_attention', 'merge_threshold': 0.6, 'linkage': 'average'}"
+2026-05-29 00:28:09,transformer_hota_sweep,cross_attention_t0.65,valid,87.893,94.065,82.148,90.024,99.419,"{'model': 'cross_attention', 'merge_threshold': 0.65, 'linkage': 'average'}"
+2026-05-29 00:30:49,transformer_hota_sweep,cross_attention_t0.70,valid,88.064,94.046,82.485,90.448,99.423,"{'model': 'cross_attention', 'merge_threshold': 0.7, 'linkage': 'average'}"
+2026-05-29 00:33:21,transformer_hota_sweep,cross_attention_t0.75,valid,88.185,94.046,82.71,90.75,99.425,"{'model': 'cross_attention', 'merge_threshold': 0.75, 'linkage': 'average'}"
+2026-05-29 00:35:55,transformer_hota_sweep,cross_attention_t0.80,valid,88.398,94.046,83.11,91.262,99.428,"{'model': 'cross_attention', 'merge_threshold': 0.8, 'linkage': 'average'}"
+2026-05-29 01:37:53,transformer_hota_sweep,siamese_cls_t0.30,valid,87.621,94.066,81.641,89.272,99.408,"{'model': 'siamese_cls', 'merge_threshold': 0.3, 'linkage': 'average'}"
+2026-05-29 01:40:19,transformer_hota_sweep,siamese_cls_t0.35,valid,87.661,94.068,81.712,89.385,99.41,"{'model': 'siamese_cls', 'merge_threshold': 0.35, 'linkage': 'average'}"
+2026-05-29 01:42:44,transformer_hota_sweep,siamese_cls_t0.40,valid,87.822,94.067,82.014,89.717,99.412,"{'model': 'siamese_cls', 'merge_threshold': 0.4, 'linkage': 'average'}"
+2026-05-29 01:45:06,transformer_hota_sweep,siamese_cls_t0.45,valid,88.029,94.065,82.402,90.081,99.415,"{'model': 'siamese_cls', 'merge_threshold': 0.45, 'linkage': 'average'}"
+2026-05-29 01:47:32,transformer_hota_sweep,siamese_cls_t0.50,valid,88.256,94.063,82.83,90.514,99.419,"{'model': 'siamese_cls', 'merge_threshold': 0.5, 'linkage': 'average'}"
+2026-05-29 01:50:04,transformer_hota_sweep,siamese_cls_t0.55,valid,88.28,94.061,82.875,90.662,99.421,"{'model': 'siamese_cls', 'merge_threshold': 0.55, 'linkage': 'average'}"
+2026-05-29 01:52:31,transformer_hota_sweep,siamese_cls_t0.60,valid,88.451,94.062,83.194,91.052,99.423,"{'model': 'siamese_cls', 'merge_threshold': 0.6, 'linkage': 'average'}"
+2026-05-29 01:54:53,transformer_hota_sweep,siamese_cls_t0.65,valid,88.635,94.061,83.541,91.446,99.426,"{'model': 'siamese_cls', 'merge_threshold': 0.65, 'linkage': 'average'}"
+2026-05-29 01:57:28,transformer_hota_sweep,siamese_cls_t0.70,valid,88.667,94.04,83.619,91.6,99.428,"{'model': 'siamese_cls', 'merge_threshold': 0.7, 'linkage': 'average'}"
+2026-05-29 02:00:18,transformer_hota_sweep,siamese_cls_t0.75,valid,88.678,94.038,83.644,91.72,99.429,"{'model': 'siamese_cls', 'merge_threshold': 0.75, 'linkage': 'average'}"
+2026-05-29 02:02:47,transformer_hota_sweep,siamese_cls_t0.80,valid,88.689,94.038,83.664,91.867,99.43,"{'model': 'siamese_cls', 'merge_threshold': 0.8, 'linkage': 'average'}"
+2026-05-29 02:05:13,transformer_hota_sweep,siamese_cls_t0.85,valid,88.729,94.038,83.738,92.058,99.432,"{'model': 'siamese_cls', 'merge_threshold': 0.85, 'linkage': 'average'}"
+2026-05-29 02:07:37,transformer_hota_sweep,siamese_cls_t0.90,valid,88.717,94.037,83.718,92.299,99.434,"{'model': 'siamese_cls', 'merge_threshold': 0.9, 'linkage': 'average'}"
+2026-05-29 02:10:41,transformer_hota_sweep,hybrid_t0.30,valid,86.753,94.074,80.027,87.77,99.401,"{'model': 'hybrid', 'merge_threshold': 0.3, 'linkage': 'average'}"
+2026-05-29 02:13:46,transformer_hota_sweep,hybrid_t0.35,valid,86.976,94.073,80.437,88.21,99.404,"{'model': 'hybrid', 'merge_threshold': 0.35, 'linkage': 'average'}"
+2026-05-29 02:16:51,transformer_hota_sweep,hybrid_t0.40,valid,87.111,94.073,80.688,88.444,99.407,"{'model': 'hybrid', 'merge_threshold': 0.4, 'linkage': 'average'}"
+2026-05-29 02:19:54,transformer_hota_sweep,hybrid_t0.45,valid,87.337,94.072,81.107,88.826,99.411,"{'model': 'hybrid', 'merge_threshold': 0.45, 'linkage': 'average'}"
+2026-05-29 02:22:31,transformer_hota_sweep,hybrid_t0.50,valid,87.648,94.063,81.693,89.394,99.414,"{'model': 'hybrid', 'merge_threshold': 0.5, 'linkage': 'average'}"
+2026-05-29 02:25:08,transformer_hota_sweep,hybrid_t0.55,valid,87.979,94.044,82.328,90.028,99.418,"{'model': 'hybrid', 'merge_threshold': 0.55, 'linkage': 'average'}"
+2026-05-29 02:27:41,transformer_hota_sweep,hybrid_t0.60,valid,88.333,94.044,82.989,90.828,99.422,"{'model': 'hybrid', 'merge_threshold': 0.6, 'linkage': 'average'}"
+2026-05-29 02:30:10,transformer_hota_sweep,hybrid_t0.65,valid,88.361,94.041,83.045,91.002,99.424,"{'model': 'hybrid', 'merge_threshold': 0.65, 'linkage': 'average'}"
+2026-05-29 02:32:41,transformer_hota_sweep,hybrid_t0.70,valid,88.495,94.041,83.295,91.327,99.426,"{'model': 'hybrid', 'merge_threshold': 0.7, 'linkage': 'average'}"
+2026-05-29 02:35:14,transformer_hota_sweep,hybrid_t0.75,valid,88.656,94.041,83.599,91.707,99.429,"{'model': 'hybrid', 'merge_threshold': 0.75, 'linkage': 'average'}"
+2026-05-29 02:37:46,transformer_hota_sweep,hybrid_t0.80,valid,88.747,94.039,83.772,91.994,99.43,"{'model': 'hybrid', 'merge_threshold': 0.8, 'linkage': 'average'}"
+2026-05-29 02:40:18,transformer_hota_sweep,hybrid_t0.85,valid,88.789,94.041,83.85,92.175,99.432,"{'model': 'hybrid', 'merge_threshold': 0.85, 'linkage': 'average'}"
+2026-05-29 02:42:56,transformer_hota_sweep,hybrid_t0.90,valid,88.565,94.039,83.428,92.068,99.434,"{'model': 'hybrid', 'merge_threshold': 0.9, 'linkage': 'average'}"
+2026-05-29 02:45:02,transformer_hota_sweep,pairwise_mlp_t0.30,valid,88.31,94.063,82.929,90.764,99.421,"{'model': 'pairwise_mlp', 'merge_threshold': 0.3, 'linkage': 'average'}"
+2026-05-29 02:47:05,transformer_hota_sweep,pairwise_mlp_t0.35,valid,88.489,94.062,83.267,91.205,99.424,"{'model': 'pairwise_mlp', 'merge_threshold': 0.35, 'linkage': 'average'}"
+2026-05-29 02:49:10,transformer_hota_sweep,pairwise_mlp_t0.40,valid,88.586,94.061,83.45,91.456,99.426,"{'model': 'pairwise_mlp', 'merge_threshold': 0.4, 'linkage': 'average'}"
+2026-05-29 02:51:16,transformer_hota_sweep,pairwise_mlp_t0.45,valid,88.718,94.058,83.701,91.785,99.428,"{'model': 'pairwise_mlp', 'merge_threshold': 0.45, 'linkage': 'average'}"
+2026-05-29 02:53:20,transformer_hota_sweep,pairwise_mlp_t0.50,valid,88.794,94.058,83.844,92.012,99.429,"{'model': 'pairwise_mlp', 'merge_threshold': 0.5, 'linkage': 'average'}"
+2026-05-29 02:55:29,transformer_hota_sweep,pairwise_mlp_t0.55,valid,88.815,94.058,83.882,92.103,99.43,"{'model': 'pairwise_mlp', 'merge_threshold': 0.55, 'linkage': 'average'}"
+2026-05-29 02:57:33,transformer_hota_sweep,pairwise_mlp_t0.60,valid,88.805,94.059,83.864,92.156,99.431,"{'model': 'pairwise_mlp', 'merge_threshold': 0.6, 'linkage': 'average'}"
+2026-05-29 02:59:40,transformer_hota_sweep,pairwise_mlp_t0.65,valid,88.802,94.058,83.859,92.19,99.432,"{'model': 'pairwise_mlp', 'merge_threshold': 0.65, 'linkage': 'average'}"
+2026-05-29 03:01:41,transformer_hota_sweep,pairwise_mlp_t0.70,valid,88.748,94.058,83.757,92.142,99.433,"{'model': 'pairwise_mlp', 'merge_threshold': 0.7, 'linkage': 'average'}"
+2026-05-29 03:03:42,transformer_hota_sweep,pairwise_mlp_t0.75,valid,88.659,94.061,83.587,92.06,99.433,"{'model': 'pairwise_mlp', 'merge_threshold': 0.75, 'linkage': 'average'}"
+2026-05-29 03:05:44,transformer_hota_sweep,pairwise_mlp_t0.80,valid,88.609,94.061,83.493,92.0,99.433,"{'model': 'pairwise_mlp', 'merge_threshold': 0.8, 'linkage': 'average'}"
+2026-05-29 03:07:46,transformer_hota_sweep,pairwise_mlp_t0.85,valid,88.378,94.061,83.059,91.669,99.432,"{'model': 'pairwise_mlp', 'merge_threshold': 0.85, 'linkage': 'average'}"
+2026-05-29 03:09:47,transformer_hota_sweep,pairwise_mlp_t0.90,valid,88.115,94.06,82.566,91.199,99.431,"{'model': 'pairwise_mlp', 'merge_threshold': 0.9, 'linkage': 'average'}"

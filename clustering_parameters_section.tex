@@ -1,0 +1,47 @@
+\paragraph{Clustering Parameters}\label{par:clustering_parameters}
+
+After selecting the best training configuration, we tune the two parameters that control the hierarchical agglomerative clustering step: the \emph{merge distance threshold} and the \emph{linkage method}. The connector converts each predicted merge probability $p$ into a distance $d = 1 - p$. HAC then iteratively connects the two closest clusters until the smallest inter-cluster distance exceeds the merge distance threshold. A higher threshold is therefore more lenient: at threshold 0.70 any cluster pair with average predicted probability above 0.30 can still be connected, whereas at threshold 0.30 only pairs with probability above 0.70 qualify. The linkage method determines how the distance between two multi-fragment clusters is computed. We test three variants: average linkage (mean of all pairwise distances), complete linkage (maximum pairwise distance), and single linkage (minimum pairwise distance). Table~\ref{tab:linkage_comparison} compares the three linkage methods, each at its best threshold, and Table~\ref{tab:clustering_sweep} presents the full threshold sweep for average linkage.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lccc}
+\toprule
+\textbf{Linkage} & \textbf{Best threshold} & \textbf{HOTA $\uparrow$} & \textbf{AssA} \\
+\midrule
+\textbf{Average} & \textbf{0.70} & \textbf{90.849} & \textbf{87.765} \\
+Complete & 0.80 & 90.482 & 87.060 \\
+Single & 0.30 & 85.720 & 78.157 \\
+\bottomrule
+\end{tabular}
+\caption{Comparison of linkage methods, each at its best threshold on the validation set.}
+\label{tab:linkage_comparison}
+\end{table}
+
+Average linkage outperforms complete linkage by 0.367 HOTA and single linkage by 5.129 HOTA. Complete linkage is more conservative: it requires the most distant pair of fragments in two clusters to be within the threshold before merging, which prevents some correct merges that average linkage allows. Single linkage exhibits the opposite problem: it merges clusters based on their closest pair, which causes a chaining effect where unrelated fragments are progressively pulled into the same cluster through intermediary fragments. This effect worsens at higher thresholds, explaining why single linkage is the only method where HOTA \emph{decreases} as the threshold increases.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{cccc}
+\toprule
+\textbf{Threshold} & \textbf{HOTA $\uparrow$} & \textbf{AssA} & \textbf{IDF1} \\
+\midrule
+0.30 & 89.961 & 86.050 & 93.140 \\
+0.35 & 90.054 & 86.227 & 93.316 \\
+0.40 & 90.211 & 86.530 & 93.611 \\
+0.45 & 90.354 & 86.804 & 93.915 \\
+0.50 & 90.419 & 86.932 & 94.081 \\
+0.55 & 90.613 & 87.304 & 94.434 \\
+0.60 & 90.743 & 87.556 & 94.650 \\
+0.65 & 90.829 & 87.727 & 94.807 \\
+\textbf{0.70} & \textbf{90.849} & \textbf{87.765} & 94.902 \\
+0.75 & 90.795 & 87.662 & 94.834 \\
+0.80 & 90.867 & 87.802 & \textbf{94.979} \\
+0.85 & 90.752 & -- & -- \\
+0.90 & 89.243 & -- & -- \\
+\bottomrule
+\end{tabular}
+\caption{Merge threshold sweep with average linkage on the validation set. HOTA plateaus between thresholds 0.65 and 0.80 with a total variation of 0.038.}
+\label{tab:clustering_sweep}
+\end{table}
+
+HOTA increases steadily from 89.961 at threshold 0.30 to a plateau between 0.65 and 0.80, where it varies by only 0.038 (90.829--90.867). Beyond 0.80 performance drops sharply, with threshold 0.90 falling to 89.243 as overly aggressive merging introduces incorrect connections that outweigh the gains. The plateau indicates that the model benefits from connecting aggressively: correct merge predictions often come with moderate confidence, particularly for fragment pairs with noisy attribute predictions or large temporal gaps. A strict threshold discards these correct connections, while the temporal overlap constraint already prevents the most harmful incorrect ones. We select threshold 0.70 as it lies in the centre of the plateau, following the one-standard-error principle~\cite{hastie2009elements} that favours the more conservative hyperparameter when performance differences are within noise. Based on these results, we adopt average linkage with a merge threshold of 0.70 for all subsequent experiments.

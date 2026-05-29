@@ -26,8 +26,8 @@ from typing import Dict, Tuple
 from scipy.cluster.hierarchy import linkage, fcluster
 from scipy.spatial.distance import squareform
 
-from transformer.model import SiameseCLSTransformer
-from transformer.dataset import extract_frame_features, compute_pairwise_features, RAW_DIM
+from experiments.tracklet_merger.transformers.siamese_cls.model import SiameseCLSTransformer
+from experiments.tracklet_merger.transformers.utils import extract_frame_features, compute_pairwise_features
 
 
 class TransformerMerger:

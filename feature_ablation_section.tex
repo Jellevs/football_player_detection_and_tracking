@@ -1,0 +1,57 @@
+\paragraph{Feature Ablation}\label{par:feature_ablation}
+
+The XGBoost connector uses 47 features organised into six groups: jersey (11), team (11), temporal (9), spatial (14), ReID (1), and SigLIP (1). Each group contains per-tracklet features that summarise each fragment individually (e.g.\ jersey mode, mean bbox height) and pairwise features that compare the two fragments directly (e.g.\ jersey match, spatial distance, ReID cosine similarity). The ReID and SigLIP groups consist of a single pairwise cosine similarity each. To measure the contribution of each group, we conduct two sets of experiments: \emph{remove-one}, where a single group is removed and the model is retrained on the remaining features, and \emph{keep-one}, where the model is retrained using only the features of a single group. Tables~\ref{tab:feature_ablation_remove} and~\ref{tab:feature_ablation_keep} present the results.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lccc}
+\toprule
+\textbf{Removed group} & \textbf{\#Feat} & \textbf{HOTA $\uparrow$} & \textbf{$\Delta$ HOTA} \\
+\midrule
+None (baseline)      & 47 & \textbf{90.872} & -- \\
+$-$ SigLIP           & 46 & 90.752 & $-$0.120 \\
+$-$ temporal         & 38 & 90.448 & $-$0.424 \\
+$-$ team             & 36 & 90.343 & $-$0.529 \\
+$-$ jersey           & 36 & 89.679 & $-$1.193 \\
+$-$ spatial          & 33 & 89.642 & $-$1.230 \\
+$-$ ReID             & 46 & 88.239 & $-$2.633 \\
+$-$ ReID \& SigLIP   & 45 & 88.603 & $-$2.269 \\
+\bottomrule
+\end{tabular}
+\caption{Remove-one feature ablation on the validation set. Each row removes one feature group and retrains the model. All models use merge threshold 0.70 and average linkage.}
+\label{tab:feature_ablation_remove}
+\end{table}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lccc}
+\toprule
+\textbf{Kept group} & \textbf{\#Feat} & \textbf{HOTA $\uparrow$} & \textbf{$\Delta$ HOTA} \\
+\midrule
+Only pairwise        & 13 & \textbf{90.475} & $-$0.397 \\
+Only per-tracklet    & 34 & 86.596 & $-$4.276 \\
+\midrule
+Only ReID            &  1 & 87.758 & $-$3.114 \\
+Only spatial         & 14 & 83.667 & $-$7.205 \\
+Only jersey          & 11 & 83.774 & $-$7.098 \\
+Only team            & 11 & 81.622 & $-$9.250 \\
+Only temporal        &  9 & 80.242 & $-$10.630 \\
+Only SigLIP          &  1 & 79.079 & $-$11.793 \\
+\bottomrule
+\end{tabular}
+\caption{Keep-one feature ablation on the validation set. Each row retains only one feature group. All models use merge threshold 0.70 and average linkage.}
+\label{tab:feature_ablation_keep}
+\end{table}
+
+ReID cosine similarity is the single most important feature. Removing it costs 2.633 HOTA, and using only ReID (a single feature) achieves 87.758, far above any other individual group. Spatial and jersey features follow in importance, with removal costs of 1.230 and 1.193 respectively. Team and temporal features contribute moderately ($-$0.529 and $-$0.424 when removed). SigLIP contributes the least among the useful groups ($-$0.120 when removed).
+
+The most striking result is the keep-one comparison between pairwise and per-tracklet features. Using only the 13 pairwise features (which compare two fragments directly) achieves 90.475, just 0.397 below the full 47-feature baseline. In contrast, the 34 per-tracklet features (which summarise each fragment individually) achieve only 86.596. This confirms that the model primarily learns from how two fragments relate to each other rather than from their individual properties.
+
+Figure~\ref{fig:feature_importance} shows the top 20 features ranked by XGBoost's gain-based feature importance. Team match and team conflict rank highest, followed by ReID cosine similarity and the jersey pairwise features. This ranking appears to contradict the ablation results, where removing team features costs only 0.529 HOTA while removing jersey features costs 1.193. The discrepancy arises because feature importance measures how frequently and effectively a feature is used in tree splits, but does not account for redundancy. Team features provide a strong initial signal that the model relies on heavily, but when they are removed, other features --- particularly ReID similarity and jersey match --- can partially compensate, as they correlate with team identity. Jersey features, despite lower individual importance scores, provide unique information about player identity that no other feature group can recover, making them more costly to remove. Based on these results, we adopt the full 47-feature model for all subsequent evaluations.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{figures/xgboost_feature_importance.png}
+\caption{Top 20 XGBoost features ranked by gain-based importance. Features are coloured by their attribute group.}
+\label{fig:feature_importance}
+\end{figure}

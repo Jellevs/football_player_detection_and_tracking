@@ -1,0 +1,15 @@
+{
+  "size_label": "xlarge",
+  "d_model": 256,
+  "dim_feedforward": 512,
+  "nhead": 4,
+  "num_layers": 4,
+  "n_params": 2582401,
+  "best_epoch": 42,
+  "threshold": 0.7100000000000002,
+  "val_auc": 0.9008660512163461,
+  "val_ap": 0.544673799426498,
+  "test_auc": 0.875378031565067,
+  "test_ap": 0.47095647005606855,
+  "test_f1": 0.49461400359066426
+}

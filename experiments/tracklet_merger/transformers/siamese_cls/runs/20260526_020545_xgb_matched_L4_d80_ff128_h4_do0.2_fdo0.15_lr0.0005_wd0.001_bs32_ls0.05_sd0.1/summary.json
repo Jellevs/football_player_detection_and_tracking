@@ -1,0 +1,32 @@
+{
+  "run_id": "20260526_020545_xgb_matched_L4_d80_ff128_h4_do0.2_fdo0.15_lr0.0005_wd0.001_bs32_ls0.05_sd0.1",
+  "run_name": "xgb_matched_L4_d80_ff128_h4_do0.2_fdo0.15_lr0.0005_wd0.001_bs32_ls0.05_sd0.1",
+  "data_strategy": "xgb_matched",
+  "timestamp": "20260526_020545",
+  "best_epoch": 37,
+  "n_params": 342961,
+  "val_metrics": {
+    "threshold": 0.8600000000000002,
+    "auc_roc": 0.896437882149534,
+    "avg_precision": 0.5285339742728646,
+    "f1": 0.5043334709038382,
+    "precision": 0.5177966101694915,
+    "recall": 0.4915526950925181,
+    "tn": 16279,
+    "fp": 569,
+    "fn": 632,
+    "tp": 611
+  },
+  "test_metrics": {
+    "threshold": 0.8600000000000002,
+    "auc_roc": 0.8712395997534607,
+    "avg_precision": 0.4908647273097936,
+    "f1": 0.4748201438848921,
+    "precision": 0.4690635451505017,
+    "recall": 0.480719794344473,
+    "tn": 17162,
+    "fp": 635,
+    "fn": 606,
+    "tp": 561
+  }
+}

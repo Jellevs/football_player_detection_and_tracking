@@ -45,20 +45,19 @@ from utils.config import SplitterConfig
 # ---------------------------------------------------------------------------
 
 # Which SoccerNetGS split folders to include.  Each may contain many sequences.
-SPLITS_TO_PROCESS = ["valid"]   # do NOT include "test" until final evaluation
+SPLITS_TO_PROCESS = ["train"]   # do NOT include "test" until final evaluation
 
-SPLIT_OUTPUT_NAME = "valid"             # the label used in the output filename
+SPLIT_OUTPUT_NAME = "train"             # the label used in the output filename
                                          # run again with SPLITS_TO_PROCESS=["valid"] and
                                          # SPLIT_OUTPUT_NAME="valid", etc.
 
-MAX_TEMPORAL_GAP        = None   # frames; pairs further apart are skipped
-NEGATIVE_RATIO          = 3   # neg/pos sampling ratio (None = keep all, 2.0 = old default)
+MAX_TEMPORAL_GAP        = 750   # frames; pairs further apart are skipped
+NEGATIVE_RATIO          = 3      # neg/pos sampling ratio (None = keep all)
 MIN_TRACKLET_LEN        = 0      # frames; shorter tracklets are discarded
 REID_DIM                = 512    # OSNet x1_0 embedding dimension
-SIGLIP_DIM              = 768    # SigLIP embedding dimension
 TEAM_CONFIDENCE_THRESHOLD = 0.6  # min KMeans confidence to count a team prediction as reliable
 
-TRACKLET_PURITY_THRESHOLD = 1  # at least 80% of frames must share the majority GT ID
+TRACKLET_PURITY_THRESHOLD = 0.6  # minimum fraction of frames sharing the majority GT ID
 
 # ---------------------------------------------------------------------------
 # Purity threshold for GT labeling
@@ -79,11 +78,10 @@ TRACKLET_PURITY_THRESHOLD = 1  # at least 80% of frames must share the majority 
 # removes the most misleading training examples.
 # ---------------------------------------------------------------------------
 
-SPLITTED = False
 DATA_ROOT        = Path(r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\data\soccernet\soccernet-player-tracking")
-OUTPUT_ROOT      = Path(fr"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\experiments\tracklet_merger\xgboost\training_data\xgboost_neg_ratio{NEGATIVE_RATIO}_tracklet_length{MIN_TRACKLET_LEN}_tracklet_purity{TRACKLET_PURITY_THRESHOLD}_reid{REID_DIM}_siglip{SIGLIP_DIM}_SPLITTED{SPLITTED}")
+OUTPUT_ROOT      = Path(fr"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\experiments\tracklet_merger\xgboost\training_data\xgboost_train_data_NEGATIVE_RATIO{NEGATIVE_RATIO}_MIN_TRACKLET_LEN{MIN_TRACKLET_LEN}_TRACKLET_PURITY_THRESHOLD{TRACKLET_PURITY_THRESHOLD}")
 CACHE_ROOT       = Path(r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\output\cache")
-# CACHE_SPLIT_ROOT = Path(r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\output\cache_split")
+CACHE_SPLIT_ROOT = Path(r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\output\cache_split")
 
 # Splitter config — must match the settings used during inference (settings.py SPLITTER dict)
 SPLITTER_CFG = SplitterConfig()
@@ -97,12 +95,11 @@ def aggregate_tracklet(tracklet, track_id: int) -> Optional[dict]:
     """
     Collapse a variable-length tracklet into a fixed-size feature dict.
 
-    Raw embedding arrays are NOT stored as individual columns — XGBoost cannot
-    exploit high-dimensional embedding vectors meaningfully. Instead, pairwise
-    cosine similarities are computed at pair-generation time and stored as
-    pairwise_reid_cosine_sim / pairwise_siglip_cosine_sim. The raw mean vectors
-    are kept in the aggregated dict under 'reid_mean_vec' and 'siglip_mean_vec'
-    for use during pair generation, but are never written to CSV columns.
+    Raw embedding arrays are NOT stored as individual columns. Instead, pairwise
+    cosine similarity is computed at pair generation time and stored as
+    pairwise_reid_cosine_sim. The raw mean vector is kept in the aggregated
+    dict under 'reid_mean_vec' for use during pair generation, but is never
+    written to CSV columns.
 
     Jersey number    → mode, entropy_mean, confidence_mean, coverage
     Team             → mode (int), consistency, coverage
@@ -125,15 +122,6 @@ def aggregate_tracklet(tracklet, track_id: int) -> Optional[dict]:
     norms    = np.linalg.norm(emb_arr, axis=1, keepdims=True) + 1e-6
     emb_norm = emb_arr / norms
     reid_mean_vec = emb_norm.mean(axis=0)   # stored on agg dict, not in feats
-
-    # ---- SigLIP (same — vector for cosine sim only) ----
-    siglip_all   = tracklet.pred_attributes.get("siglip_embeddings", [])
-    valid_siglip = [s for s in siglip_all if np.any(np.array(s) != 0)]
-    if valid_siglip:
-        siglip_arr      = np.stack(valid_siglip).astype(np.float32)
-        siglip_mean_vec = siglip_arr.mean(axis=0)
-    else:
-        siglip_mean_vec = np.zeros(SIGLIP_DIM, dtype=np.float32)
 
     # ---- Jersey ----
     jerseys    = tracklet.pred_attributes.get("jerseys", [])
@@ -234,7 +222,6 @@ def aggregate_tracklet(tracklet, track_id: int) -> Optional[dict]:
         "gt_id":           gt_mode,
         "features":        feats,
         "reid_mean_vec":   reid_mean_vec,
-        "siglip_mean_vec": siglip_mean_vec,
     }
 
 
@@ -289,10 +276,10 @@ def compute_pairwise_features(agg_a: dict, agg_b: dict) -> dict:
     pw["reid_cosine_sim"] = float(np.dot(reid_a / na, reid_b / nb))
 
     # SigLIP cosine similarity
-    sig_a = agg_a["siglip_mean_vec"]
-    sig_b = agg_b["siglip_mean_vec"]
-    na_s, nb_s = np.linalg.norm(sig_a) + 1e-6, np.linalg.norm(sig_b) + 1e-6
-    pw["siglip_cosine_sim"] = float(np.dot(sig_a / na_s, sig_b / nb_s))
+    # sig_a = agg_a["siglip_mean_vec"]
+    # sig_b = agg_b["siglip_mean_vec"]
+    # na_s, nb_s = np.linalg.norm(sig_a) + 1e-6, np.linalg.norm(sig_b) + 1e-6
+    # pw["siglip_cosine_sim"] = float(np.dot(sig_a / na_s, sig_b / nb_s))
 
     # Jersey agreement
     j_a, j_b = fa["jersey_mode"], fb["jersey_mode"]
@@ -483,10 +470,7 @@ def main():
         print(f"{'='*70}")
 
         for seq in tqdm(sequences, desc=split):
-            if SPLITTED:
-                tracklets = load_or_compute_split_tracklets(seq)
-            else:
-                tracklets = load_presplit_tracklets(seq)
+            tracklets = load_or_compute_split_tracklets(seq)
 
             if tracklets is None:
                 continue

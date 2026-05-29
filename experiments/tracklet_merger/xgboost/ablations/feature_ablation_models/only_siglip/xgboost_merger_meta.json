@@ -1,0 +1,6 @@
+{
+  "feature_cols": [
+    "pairwise_siglip_cosine_sim"
+  ],
+  "threshold": 0.6100000000000001
+}

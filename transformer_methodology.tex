@@ -1,0 +1,86 @@
+\subsection{Transformer-based Merger}
+The XGBoost merger successfully learns complex interactions between features, but it relies on aggregated tracklet-level statistics. By compressing an entire tracklet into a fixed-size set of averages and modes, we lose the temporal structure of the data: the order of frames, how appearance changes across the tracklet, and which frames are located at the boundary where the player disappears and reappears. These are the exact signals that humans use to recognize a player across multiple video clips. A transformer-based merger addresses this limitation by processing per-frame features directly, using self-attention to identify which frames are informative and how two frame sequences relate to each other.
+
+\
+
+Three transformer architectures are developed and evaluated, each representing a different approach to comparing two variable-length tracklet sequences. The \textbf{Siamese CLS} encoder processes each tracklet independently through a shared transformer encoder and compares the resulting fixed-size summaries. The \textbf{Cross-Attention} model allows frames from one tracklet to directly attend to frames from the other, enabling frame-level correspondence matching. The \textbf{Hybrid} model combines both approaches: it first builds intra-tracklet context using self-attention, then performs cross-attention comparison on the enriched representations. All three architectures share the same per-frame token construction, positional encoding scheme, and classification head design, and differ only in how they process and compare the two frame sequences. The following paragraphs describe these shared components and each architecture in detail.
+
+
+\paragraph{Per-frame Token Construction}\label{par:token_construction}
+Each frame in a tracklet is represented as a single token that concatenates all available information for that detection. Specifically, five feature types are combined per frame:
+
+\begin{itemize}
+    \item \textbf{ReID embedding} (512 dimensions). The L2-normalized appearance embedding extracted by the ReID model described in Section \ref{}. This captures the visual appearance of the player in each frame.
+
+    \item \textbf{SigLIP embedding} (768 dimensions). A pretrained vision-language embedding that complements the ReID features with a broader visual representation, particularly useful for team identity discrimination as described in Section \ref{}.
+
+    \item \textbf{Bounding box features} (7 dimensions). Geometric properties derived from the detection bounding box: center coordinates $(c_x, c_y)$, width, height, aspect ratio, area, and a normalized vertical position $c_y^{\text{norm}}$ that encodes the player's depth on the pitch.
+
+    \item \textbf{Attribute scalars} (5 dimensions). Per-frame predicted attributes: the jersey number prediction, jersey prediction entropy, mean jersey confidence, team identity prediction, and team prediction confidence.
+
+    \item \textbf{Detection score} (1 dimension). The confidence score of the object detector for this detection.
+\end{itemize}
+
+The resulting raw token has a dimensionality of 1293. All three architectures use the same single-layer projection to map this raw token to the model dimension: a linear layer followed by layer normalization, GELU activation, and dropout. This projects the full 1293-dimensional input directly to $d_{\text{model}}$, allowing the subsequent attention layers to learn which features are relevant for the matching task.
+
+\paragraph{Positional Encoding}\label{par:pos_encoding}
+Standard transformer positional encodings assume fixed-length sequences with integer positions. Tracklet sequences violate both assumptions: tracklets vary in length from a few frames to several hundred, and the absolute frame numbers carry temporal information that integer positions cannot express. A tracklet starting at frame 10 and one starting at frame 500 occur at very different times in the video, and this temporal context is relevant for determining whether two tracklets could belong to the same player.
+
+\
+
+We use a dual sinusoidal positional encoding that encodes two complementary signals per frame. The first signal is the \textit{intra-tracklet position}, normalized linearly from 0 to 1 within each tracklet. This tells the model where a frame sits relative to the tracklet boundaries: a value near 0 indicates the beginning of the tracklet (where the player first appeared), while a value near 1 indicates the end (where the player was last seen). The second signal is the \textit{absolute frame number}, normalized by the maximum sequence length of 750 frames. This encodes when in the video a frame occurs, allowing the model to reason about temporal gaps between tracklets.
+
+\
+
+Each signal is encoded using sinusoidal functions at logarithmically spaced frequencies, producing $d_{\text{model}}/2$ dimensions per signal. The two encodings are concatenated to form the full $d_{\text{model}}$-dimensional positional encoding, which is added to the projected frame tokens. Both signals are scaled by a factor of 100 before encoding to spread values across the frequency bands. Because the encoding uses continuous-valued positions rather than integer indices, it naturally handles variable-length sequences and temporal subsampling without requiring interpolation.
+
+
+\paragraph{Sequence Handling}
+Tracklets in the dataset range from a single frame to the full 750-frame sequence length. To maintain a fixed computational budget, sequences longer than $T_{\text{max}} = 200$ frames are temporally subsampled using uniform spacing: 200 frame indices are selected at evenly spaced intervals across the full tracklet, preserving both endpoints and the overall temporal structure. Sequences shorter than $T_{\text{max}}$ are padded with zeros to fill the remaining positions. A binary padding mask marks which positions contain real frames and which are padding, ensuring that the attention mechanism ignores padded positions.
+
+
+\paragraph{Siamese CLS Encoder}\label{par:siamese_cls}
+The Siamese CLS architecture encodes each tracklet independently through a shared transformer encoder, producing a single fixed-size embedding per tracklet. A learned \texttt{[CLS]} token is prepended to the projected frame tokens before entering the encoder. This token participates in self-attention across all layers and serves as an aggregation mechanism: because it attends to every frame in the sequence, its final representation captures a global summary of the entire tracklet.
+
+\
+
+The encoder consists of a stack of transformer encoder layers with pre-layer normalization for stable training. Each layer contains multi-head self-attention followed by a feed-forward network. After all encoder layers, a final layer normalization is applied and the \texttt{[CLS]} token embedding (at position 0) is extracted as the tracklet representation. Since the encoder weights are shared between both tracklets in a pair, each tracklet is encoded by the same function. This Siamese design has a practical advantage for inference: each tracklet needs to be encoded only once, and its embedding can be reused across all candidate pairs involving that tracklet.
+
+
+\paragraph{Cross-Attention Architecture}\label{par:cross_attention}
+The Cross-Attention architecture takes a fundamentally different approach: instead of encoding each tracklet in isolation, it allows frames from one tracklet to directly attend to frames from the other. This enables the model to discover frame-level correspondences, such as finding the frame in tracklet $B$ that looks most similar to the last frame of tracklet $A$, or detecting that no frame in $B$ matches any frame in $A$.
+
+\
+
+After projecting raw tokens and adding positional encodings, the two frame sequences enter a stack of bidirectional cross-attention layers. Each layer performs two operations sequentially: first, tracklet $A$'s frames attend to tracklet $B$'s frames (using $A$ as queries and $B$ as keys and values), updating $A$'s representations with information from $B$. Then, tracklet $B$'s frames attend to the now-updated tracklet $A$, incorporating $A$'s context into $B$'s representations. Each cross-attention operation is followed by a feed-forward network with separate weights for each side. Pre-layer normalization is applied before each attention operation.
+
+\
+
+After cross-attention, each tracklet's frame sequence is summarized using attention pooling: a single learned query vector attends over all frames in the cross-attended sequence to produce a fixed-size output. This is more expressive than simple mean pooling, since it learns to weight informative frames more heavily. A shared attention pooler is used for both tracklets.
+
+
+\paragraph{Hybrid Architecture}\label{par:hybrid}
+The Hybrid architecture combines both self-attention and cross-attention in a two-stage design. The motivation is that raw projected frames lack intra-tracklet context: frame 50 does not know what the player looked like at frame 1 or frame 100 within the same tracklet. By first running self-attention within each tracklet, the model can build contextualized frame representations that encode temporal patterns such as appearance drift, before performing cross-tracklet comparison.
+
+\
+
+In the first stage, a shared self-attention encoder processes each tracklet independently. This encoder includes a learned \texttt{[CLS]} token and uses the same pre-norm transformer encoder layer design as the Siamese CLS model. Unlike the Siamese CLS model, the full output sequence (including the \texttt{[CLS]} token) is retained rather than extracting only the \texttt{[CLS]} summary.
+
+\
+
+In the second stage, the contextualized sequences from both tracklets enter cross-attention layers with the same bidirectional design as the Cross-Attention model. After cross-attention, the \texttt{[CLS]} token from each side is extracted as the final tracklet representation.
+
+
+\paragraph{Classification Head}
+All three architectures produce two fixed-size vectors (one per tracklet) that must be combined into a single merge prediction. The classification head takes as input the concatenation of four comparison vectors: the two tracklet embeddings $\mathbf{h}_A$ and $\mathbf{h}_B$, their element-wise absolute difference $|\mathbf{h}_A - \mathbf{h}_B|$, and their element-wise product $\mathbf{h}_A \odot \mathbf{h}_B$. The absolute difference captures the magnitude of disagreement between the two representations, while the element-wise product captures correlation patterns. Together with the raw embeddings, this provides the classifier with multiple views of the relationship between the two tracklets.
+
+\
+
+Optionally, the 12 pairwise features used by the XGBoost connector (described in Section \ref{}) can be concatenated to the input of the classification head. These handcrafted features provide the model with pre-computed summary statistics such as temporal gap, ReID cosine similarity, and jersey agreement. Whether to include these features is treated as an experimental variable: we first evaluate the transformer without pairwise features to test whether attention alone is sufficient, then add them to measure their contribution.
+
+\
+
+The classification head itself is an MLP that maps the combined input through hidden layers with layer normalization, GELU activations, and dropout to produce a single scalar logit. The output logit is converted to a merge probability via the sigmoid function during inference.
+
+\paragraph{Inference}
+The inference procedure is identical to the XGBoost connector: the transformer outputs a merge probability $p(T_A, T_B) \in [0,1]$ for each candidate pair, which is converted to a distance $d(T_A, T_B) = 1 - p(T_A, T_B)$. Hard constraint filtering is applied (temporal overlap, jersey conflict, team conflict), and the resulting distance matrix is fed into hierarchical agglomerative clustering with average linkage. Clustering terminates when the minimum inter-cluster distance exceeds the merge threshold $\theta_{\text{merge}}$. This shared inference pipeline enables a direct comparison between the XGBoost and transformer connectors, since only the pairwise scoring model differs.

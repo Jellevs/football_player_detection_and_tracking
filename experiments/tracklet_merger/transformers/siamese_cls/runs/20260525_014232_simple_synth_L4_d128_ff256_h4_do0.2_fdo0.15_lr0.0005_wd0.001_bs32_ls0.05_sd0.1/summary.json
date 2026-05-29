@@ -1,0 +1,32 @@
+{
+  "run_id": "20260525_014232_simple_synth_L4_d128_ff256_h4_do0.2_fdo0.15_lr0.0005_wd0.001_bs32_ls0.05_sd0.1",
+  "run_name": "simple_synth_L4_d128_ff256_h4_do0.2_fdo0.15_lr0.0005_wd0.001_bs32_ls0.05_sd0.1",
+  "data_strategy": "simple_synth",
+  "timestamp": "20260525_014232",
+  "best_epoch": 21,
+  "n_params": 710465,
+  "val_metrics": {
+    "threshold": 0.8400000000000002,
+    "auc_roc": 0.8952759622929239,
+    "avg_precision": 0.5129524532200395,
+    "f1": 0.5285154549412276,
+    "precision": 0.5759013282732448,
+    "recall": 0.4883346741753821,
+    "tn": 16401,
+    "fp": 447,
+    "fn": 636,
+    "tp": 607
+  },
+  "test_metrics": {
+    "threshold": 0.8400000000000002,
+    "auc_roc": 0.8530620418343616,
+    "avg_precision": 0.4197440389818946,
+    "f1": 0.4763636363636364,
+    "precision": 0.5072604065827686,
+    "recall": 0.4490145672664953,
+    "tn": 17288,
+    "fp": 509,
+    "fn": 643,
+    "tp": 524
+  }
+}

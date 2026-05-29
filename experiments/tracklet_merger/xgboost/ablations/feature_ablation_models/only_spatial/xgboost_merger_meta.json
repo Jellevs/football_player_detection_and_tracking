@@ -1,0 +1,19 @@
+{
+  "feature_cols": [
+    "A_start_x",
+    "A_start_y",
+    "A_end_x",
+    "A_end_y",
+    "A_mean_bbox_height",
+    "B_start_x",
+    "B_start_y",
+    "B_end_x",
+    "B_end_y",
+    "B_mean_bbox_height",
+    "pairwise_spatial_distance",
+    "pairwise_endpoint_dx",
+    "pairwise_endpoint_dy",
+    "pairwise_bbox_height_ratio"
+  ],
+  "threshold": 0.6700000000000002
+}

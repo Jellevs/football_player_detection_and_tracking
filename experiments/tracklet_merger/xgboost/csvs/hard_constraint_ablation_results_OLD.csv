@@ -1,0 +1,17 @@
+config_name,merge_threshold,temporal_enabled,jersey_enabled,team_enabled,HOTA,DetA,AssA,IDF1,MOTA,split,timestamp
+neg3_minlen0_purity0.6_splitTrue,0.5,True,True,True,90.257,94.055,86.628,93.881,99.436,valid,2026-05-19 14:46:04
+neg3_minlen0_purity0.6_splitTrue,0.5,False,True,True,90.257,94.055,86.628,93.881,99.436,valid,2026-05-19 14:46:04
+neg3_minlen0_purity0.6_splitTrue,0.5,True,False,True,90.257,94.055,86.628,93.881,99.436,valid,2026-05-19 14:46:04
+neg3_minlen0_purity0.6_splitTrue,0.5,True,True,False,90.257,94.055,86.628,93.881,99.436,valid,2026-05-19 14:46:04
+neg3_minlen0_purity0.6_splitTrue,0.5,False,False,True,90.257,94.055,86.628,93.881,99.436,valid,2026-05-19 14:46:04
+neg3_minlen0_purity0.6_splitTrue,0.5,False,True,False,90.257,94.055,86.628,93.881,99.436,valid,2026-05-19 14:46:04
+neg3_minlen0_purity0.6_splitTrue,0.5,True,False,False,90.257,94.055,86.628,93.881,99.436,valid,2026-05-19 14:46:04
+neg3_minlen0_purity0.6_splitTrue,0.5,False,False,False,90.257,94.055,86.628,93.881,99.436,valid,2026-05-19 14:46:04
+neg3_minlen0_purity0.6_splitTrue,0.65,True,True,True,90.462,94.055,87.022,94.327,99.438,valid,2026-05-19 15:00:42
+neg3_minlen0_purity0.6_splitTrue,0.65,False,True,True,84.229,94.082,75.437,84.064,99.364,valid,2026-05-19 15:08:15
+neg3_minlen0_purity0.6_splitTrue,0.65,True,False,True,90.582,94.051,87.256,94.554,99.439,valid,2026-05-19 15:11:52
+neg3_minlen0_purity0.6_splitTrue,0.65,True,True,False,90.632,94.053,87.351,94.576,99.445,valid,2026-05-19 15:16:26
+neg3_minlen0_purity0.6_splitTrue,0.65,False,False,True,82.164,94.084,71.788,81.015,99.349,valid,2026-05-19 15:24:57
+neg3_minlen0_purity0.6_splitTrue,0.65,False,True,False,84.282,94.077,75.537,84.129,99.364,valid,2026-05-19 15:36:13
+neg3_minlen0_purity0.6_splitTrue,0.65,True,False,False,90.742,94.049,87.567,94.804,99.446,valid,2026-05-19 15:41:18
+neg3_minlen0_purity0.6_splitTrue,0.65,False,False,False,82.205,94.087,71.858,80.919,99.347,valid,2026-05-19 15:53:44

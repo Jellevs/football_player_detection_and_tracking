@@ -1,0 +1,21 @@
+{
+  "size_label": "base",
+  "d_model": 80,
+  "dim_feedforward": 128,
+  "nhead": 4,
+  "num_layers": 4,
+  "n_params": 342961,
+  "best_epoch": 60,
+  "threshold": 0.49000000000000005,
+  "val_auc": 0.9008482401734613,
+  "val_ap": 0.5395906391998381,
+  "test_auc": 0.8868743174655771,
+  "test_ap": 0.48219954055850467,
+  "test_f1": 0.4806142034548944,
+  "test_precision": 0.43532684283727396,
+  "test_recall": 0.5364181662382177,
+  "tn": 16985,
+  "fp": 812,
+  "fn": 541,
+  "tp": 626
+}

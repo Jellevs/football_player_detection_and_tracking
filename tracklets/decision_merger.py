@@ -19,8 +19,8 @@ class DecisionMerger:
     def __init__(
         self,
         reid_threshold: float = 0.4,
-        jersey_entropy_threshold: float = 0.2,
-        min_jersey_predictions: int = 5,
+        jersey_entropy_threshold: float = 0.05,
+        min_jersey_predictions: int = 10,
         team_confidence_threshold: float = 0.6,
         team_consistency_threshold: float = 0.9,
     ):
@@ -109,7 +109,7 @@ class DecisionMerger:
             # Jersey matches but team is not confident for both → fall back to ReID
             return 'reid'
 
-        # At least one jersey is not confident → fall back to ReID
+        # At least one jersey is not confident → fall back to ReID 
         return 'reid'
 
     # ------------------------------------------------------------------

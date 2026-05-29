@@ -1,0 +1,6 @@
+{
+  "feature_cols": [
+    "pairwise_reid_cosine_sim"
+  ],
+  "threshold": 0.6200000000000001
+}

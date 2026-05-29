@@ -17,7 +17,7 @@ from pathlib import Path
 
 # ── paths ────────────────────────────────────────────────────────────────────
 SCRIPT_DIR = Path(__file__).resolve().parent
-CSV_PATH = SCRIPT_DIR / "sweep_summary.csv"
+CSV_PATH = Path(r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\experiments\tracklet_merger\xgboost\ablations\sweep_results") / "sweep_summary.csv"
 OUT_DIR = SCRIPT_DIR / "figures"
 OUT_DIR.mkdir(exist_ok=True)
 

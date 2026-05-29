@@ -1,0 +1,52 @@
+\paragraph{Data Generation and Training}\label{par:data_generation}
+
+The XGBoost connector requires labelled training data consisting of tracklet fragment pairs with a binary merge/no-merge label. For each pair, we compute 47 features organised into per-tracklet summary statistics (jersey, team, temporal, spatial) and pairwise comparison features (temporal gap, spatial distance, ReID cosine similarity, jersey match, team match, and SigLIP cosine similarity). Labels are derived from the ground truth identity annotations: a pair is labelled positive if both fragments share the same majority ground truth identity, and negative otherwise. Fragments whose ground truth purity falls below a configurable threshold receive no label and are treated as negative.
+
+The quality of the training data depends on four generation parameters: the \emph{negative ratio}, which controls class balance by downsampling negative pairs; the \emph{minimum tracklet length}, which excludes short fragments; the \emph{tracklet purity threshold}, which controls how pure a fragment must be for its ground truth label to be trusted; and \emph{splitted}, which determines whether the tracklet splitter is applied before pair generation. To find the best combination, we perform a grid search over all four parameters (Table~\ref{tab:sweep_grid}), producing 72 training configurations. Validation and test data are generated once with fixed canonical parameters (no downsampling, minimum length 0, purity 0.6, splitted) and shared across all configurations to ensure fair comparison.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{ll}
+\toprule
+\textbf{Parameter} & \textbf{Values} \\
+\midrule
+Negative ratio      & None, 3, 5, 10 \\
+Min.\ tracklet length & 0, 5, 10 \\
+Tracklet purity     & 0.6, 0.8, 1.0 \\
+Splitted            & True, False \\
+\bottomrule
+\end{tabular}
+\caption{Training data generation grid. Each combination produces a different training set; validation and test data are fixed across all configurations.}
+\label{tab:sweep_grid}
+\end{table}
+
+Each model is trained with identical XGBoost hyperparameters (1000 estimators, max depth 6, learning rate 0.05, early stopping after 30 rounds without improvement) so that differences in performance are attributable to the training data alone. We evaluate in two stages: first, all 72 models are ranked by their classifier metrics (AUC-ROC, F1) on the shared validation set. Second, the top 25 models by test F1 are evaluated through the full pipeline --- split, merge with hierarchical agglomerative clustering at threshold 0.70, and HOTA evaluation on the validation set. Table~\ref{tab:sweep_hota_top10} shows the top 10 configurations ranked by HOTA.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{llcccc}
+\toprule
+\textbf{Configuration} & \textbf{HOTA $\uparrow$} & \textbf{AssA} & \textbf{DetA} & \textbf{IDF1} \\
+\midrule
+neg3, purity 0.8, split     & \textbf{90.849} & \textbf{87.765} & 94.057 & \textbf{94.902} \\
+neg5, purity 0.6, no split  & 90.803 & 87.674 & 94.060 & 94.732 \\
+neg3, purity 0.6, split     & 90.725 & 87.527 & 94.055 & 94.771 \\
+neg3, purity 0.6, no split  & 90.589 & 87.269 & 94.052 & 94.509 \\
+neg3, minlen 5, purity 0.6, split & 90.535 & 87.162 & 94.055 & 94.418 \\
+neg5, purity 0.8, split     & 90.516 & 87.128 & 94.052 & 94.351 \\
+neg5, minlen 5, purity 0.6, split & 90.490 & 87.059 & 94.073 & 94.236 \\
+neg5, purity 0.6, split     & 90.490 & 87.076 & 94.053 & 94.337 \\
+neg5, purity 0.8, no split  & 90.466 & 87.032 & 94.052 & 94.177 \\
+neg10, purity 0.6, split    & 90.420 & 86.942 & 94.054 & 94.007 \\
+\bottomrule
+\end{tabular}
+\caption{Top 10 training data configurations by HOTA on the validation set. All models use merge threshold 0.70, average linkage, and minimum tracklet length 0 unless noted otherwise.}
+\label{tab:sweep_hota_top10}
+\end{table}
+
+The results reveal several consistent patterns. Moderate negative downsampling (ratio 3 or 5) outperforms both no downsampling and aggressive downsampling (ratio 10). Without downsampling, the training set is heavily imbalanced --- the vast majority of fragment pairs belong to different players --- which causes the model to learn a conservative decision boundary. A ratio of 3 provides enough negative examples for the model to learn what distinguishes different players while reducing the class imbalance sufficiently for the positive examples to influence the decision boundary.
+
+Minimum tracklet length has a clear effect: including all fragments (minlen 0) consistently outperforms filtering short ones. Short fragments are common in broadcast football due to frequent occlusions, and excluding them removes valid training signal. The splitted parameter shows a slight preference for post-split tracklets, which produce purer fragments and therefore cleaner labels. A purity threshold of 0.8 edges out 0.6 for the top configuration, suggesting that slightly stricter label assignment reduces noise during training without discarding too many examples.
+
+Based on these results, we select \texttt{neg3\_minlen0\_purity0.8\_splitTrue} (HOTA 90.849) as the training configuration for all subsequent XGBoost experiments.
+

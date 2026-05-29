@@ -1,0 +1,15 @@
+{
+  "size_label": "large",
+  "d_model": 192,
+  "dim_feedforward": 384,
+  "nhead": 4,
+  "num_layers": 4,
+  "n_params": 1546177,
+  "best_epoch": 79,
+  "threshold": 0.7800000000000001,
+  "val_auc": 0.9071075324762641,
+  "val_ap": 0.558700096671281,
+  "test_auc": 0.891067277400912,
+  "test_ap": 0.5229258614340071,
+  "test_f1": 0.519669742593492
+}

@@ -442,35 +442,35 @@ To understand which data generation parameters matter most, Table~\ref{tab:xgboo
 \textbf{Parameter} & \textbf{Value} & \textbf{Mean HOTA $\uparrow$} & \textbf{Std} & \textbf{Range} \\
 \midrule
 \multirow{4}{*}{Negative ratio}
- & None       & 88.926 & 0.964 & [87.473, 89.741] \\
- & 3          & 89.757 & 0.421 & [88.998, 90.257] \\
- & 5          & \textbf{89.806} & 0.422 & [89.026, 90.202] \\
- & 10         & 89.465 & 0.450 & [88.669, 90.000] \\
+ & None       & 89.671 & 0.648 & [88.549, 90.417] \\
+ & 3          & \textbf{90.145} & 0.563 & [88.690, 90.849] \\
+ & 5          & 90.051 & 0.589 & [88.784, 90.803] \\
+ & 10         & 89.912 & 0.427 & [89.042, 90.420] \\
 \midrule
 \multirow{3}{*}{Purity threshold}
- & 0.6        & \textbf{89.918} & 0.201 & [89.607, 90.257] \\
- & 0.8        & 89.760 & 0.328 & [88.839, 90.202] \\
- & 1.0        & 88.786 & 0.743 & [87.473, 89.851] \\
+ & 0.6        & \textbf{90.318} & 0.309 & [89.330, 90.803] \\
+ & 0.8        & 90.055 & 0.545 & [88.690, 90.849] \\
+ & 1.0        & 89.461 & 0.491 & [88.549, 90.220] \\
 \midrule
 \multirow{3}{*}{Min. tracklet length}
- & 0          & \textbf{89.536} & 0.741 & [87.473, 90.257] \\
- & 5          & 89.484 & 0.698 & [87.635, 90.202] \\
- & 10         & 89.445 & 0.666 & [87.682, 90.107] \\
+ & 0          & \textbf{90.046} & 0.642 & [88.549, 90.849] \\
+ & 5          & 89.925 & 0.575 & [88.566, 90.652] \\
+ & 10         & 89.863 & 0.525 & [88.784, 90.501] \\
 \midrule
 \multirow{2}{*}{Splitter applied}
- & True       & \textbf{89.576} & 0.678 & [87.595, 90.257] \\
- & False      & 89.400 & 0.707 & [87.473, 90.197] \\
+ & True       & \textbf{90.128} & 0.465 & [88.824, 90.849] \\
+ & False      & 89.761 & 0.629 & [88.549, 90.803] \\
 \bottomrule
 \end{tabular}
 \caption{Mean validation HOTA per parameter level, averaged over all other parameters. Bold indicates the best level per parameter.}
 \label{tab:xgboost_param_trends}
 \end{table}
 
-The negative sampling ratio is the most influential parameter. Using all negative pairs (ratio = None) produces the lowest mean HOTA of 88.926 and the highest variance ($\sigma = 0.964$), because the resulting class imbalance causes the model to underpredict merges. Ratios of 3 and 5 perform best (89.757 and 89.806 respectively), providing enough negative examples for the model to learn discriminative features without overwhelming the positive class. A ratio of 10 slightly degrades performance, suggesting that the optimal balance lies in the range of 3 to 5 negatives per positive.
+The negative sampling ratio is the most influential parameter. Using all negative pairs (ratio = None) produces the lowest mean HOTA of 89.671 and the highest variance ($\sigma = 0.648$), because the resulting class imbalance causes the model to underpredict merges. Ratios of 3 and 5 perform best (90.145 and 90.051 respectively), providing enough negative examples for the model to learn discriminative features without overwhelming the positive class. A ratio of 10 slightly degrades performance, suggesting that the optimal balance lies in the range of 3 to 5 negatives per positive.
 
 \
 
-The purity threshold has the second largest effect. Configurations with purity $= 1.0$ score 1.13 HOTA points below those with purity $= 0.6$ on average. Training exclusively on pure fragments creates a distribution mismatch: at inference time, the splitter produces fragments that are not perfectly pure, and the model has never seen feature vectors computed from impure fragments. Lowering the purity threshold to 0.6 exposes the model to noisier training examples that better reflect the inference distribution, acting as a form of implicit regularization. This finding is consistent across all negative ratios and minimum lengths.
+The purity threshold has the second largest effect. Configurations with purity $= 1.0$ score 0.857 HOTA points below those with purity $= 0.6$ on average. Training exclusively on pure fragments creates a distribution mismatch: at inference time, the splitter produces fragments that are not perfectly pure, and the model has never seen feature vectors computed from impure fragments. Lowering the purity threshold to 0.6 exposes the model to noisier training examples that better reflect the inference distribution, acting as a form of implicit regularization. This finding is consistent across all negative ratios and minimum lengths.
 
 \
 
@@ -501,10 +501,42 @@ The parameter-level trends are consistent across both splits: negative ratios of
 Based on the validation HOTA ranking, we select \texttt{neg3\_minlen0\_purity0.6\_splitTrue} as the base XGBoost model for all subsequent experiments (merge threshold sweep, hard constraint ablation, feature ablation). This configuration achieves a validation HOTA of 90.257 and a test HOTA of 89.666. Although it is not the top-performing configuration on the test set, selecting by validation performance is the methodologically correct approach as it prevents implicit data leakage from the test set into the model selection process.
 
 
+\paragraph{Merge Threshold}\label{par:merge_threshold}
+
+After selecting the best training configuration, the merge distance threshold remains the single most direct hyperparameter controlling the connector's behaviour. The threshold determines the maximum average linkage distance at which two clusters of fragments are merged. Because the distance is defined as $d = 1 - p$, where $p$ is the predicted merge probability, a higher threshold is more lenient: at threshold 0.65 any pair with predicted probability above 0.35 can be merged, whereas at threshold 0.30 only pairs with probability above 0.70 qualify.
+
+\
+
+Table~\ref{tab:merge_threshold} shows the results of sweeping the merge threshold from 0.30 to 0.70 in steps of 0.05 on the validation set, using the selected model (\texttt{neg3\_minlen0\_purity0.6\_splitTrue}). HOTA increases monotonically from 89.730 at threshold 0.30 to 90.462 at threshold 0.65, before slightly decreasing to 90.452 at 0.70. DetA remains effectively constant across all thresholds ($\approx 94.055$), confirming that the threshold only affects the association component. The entire HOTA gain of 0.732 points comes from AssA, which rises from 85.614 to 87.022.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{ccccc}
+\toprule
+\textbf{Threshold} & \textbf{HOTA $\uparrow$} & \textbf{AssA} & \textbf{IDF1} & \textbf{MOTA} \\
+\midrule
+0.30 & 89.730 & 85.614 & 92.838 & 99.426 \\
+0.35 & 89.929 & 85.997 & 93.224 & 99.429 \\
+0.40 & 90.116 & 86.354 & 93.534 & 99.433 \\
+0.45 & 90.195 & 86.507 & 93.730 & 99.435 \\
+0.50 & 90.257 & 86.628 & 93.881 & 99.436 \\
+0.55 & 90.314 & 86.737 & 94.027 & 99.437 \\
+0.60 & 90.361 & 86.828 & 94.156 & 99.437 \\
+0.65 & \textbf{90.462} & \textbf{87.022} & \textbf{94.327} & \textbf{99.438} \\
+0.70 & 90.452 & 87.005 & 94.362 & 99.438 \\
+\bottomrule
+\end{tabular}
+\caption{Merge threshold sweep on the validation set. The optimal threshold of 0.65 improves HOTA by 0.205 over the default threshold of 0.50.}
+\label{tab:merge_threshold}
+\end{table}
+
+The optimal threshold of 0.65 is more lenient than the default of 0.50, indicating that the model benefits from merging more aggressively. This is plausible because the hard constraints already prevent merging clearly conflicting pairs (temporal overlap, jersey conflict, team conflict), and the splitter has produced relatively pure fragments where most candidate pairs genuinely belong together. A conservative threshold unnecessarily leaves correct merges on the table. The slight decline at 0.70 suggests that beyond 0.65, the model begins merging fragments that should remain separate, introducing a small number of incorrect associations.
+
+\
+
+Based on this sweep, we adopt a merge threshold of 0.65 for all subsequent experiments. This improves validation HOTA from 90.257 to 90.462 without any retraining.
+
+
 \paragraph{Hard Constraints}\label{par:hard_constraints}
 
-
-\paragraph{Feature Ablation}\label{par:feature_ablation}
-
-
-\subsection{Transformer Connector}\label{subsec:transformer_connector}
+The XGBoost connector enforces three hard constraints that override the model's prediction by setting the pairwise distance to 2.0,

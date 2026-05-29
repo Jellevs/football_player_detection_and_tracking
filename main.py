@@ -1,3 +1,5 @@
+import pickle
+from pathlib import Path
 from tqdm import tqdm
 
 import settings
@@ -16,7 +18,10 @@ from tracklets.splitters.bbox_anomaly_splitter import BboxAnomalySplitter
 from tracklets.simple_tracklet_merger import  SimpleTrackletMerger
 from tracklets.xgboost_merger import XGBoostMerger
 from tracklets.transformer_merger import TransformerMerger
-from tracklets.transformer_merger_extended_pw import TransformerMergerExtendedPW
+from tracklets.cross_attention_merger import CrossAttentionMerger
+from tracklets.hybrid_merger import HybridMerger
+from tracklets.oracle_merger import OracleMerger
+from tracklets.pairwise_mlp_merger import PairwiseMLPMerger
 
 
 def main(sequence, tracker_cfg, jersey_cfg, splitter_cfg, merger_cfg, device, method_name):
@@ -52,39 +57,81 @@ def main(sequence, tracker_cfg, jersey_cfg, splitter_cfg, merger_cfg, device, me
 
     attributes_tracklets = predict_attributes(images, tracklets, paths, jersey_cfg, device)
 
-    # Split tracklets based 
-    splitted_tracklets = split_tracklets(attributes_tracklets, splitter_cfg)
+    # Split tracklets (with caching)
+    split_cache_dir = Path(settings.OUTPUT_ROOT) / "cache_split"
+    split_cache_path = split_cache_dir / f"cache_split_{sequence}.pkl"
+    if split_cache_path.exists():
+        with open(split_cache_path, "rb") as f:
+            splitted_tracklets = pickle.load(f)
+        print(f"  Loaded cached split tracklets for {sequence} ({len(splitted_tracklets)} tracklets)")
+    else:
+        splitted_tracklets = split_tracklets(attributes_tracklets, splitter_cfg)
+        split_cache_dir.mkdir(parents=True, exist_ok=True)
+        with open(split_cache_path, "wb") as f:
+            pickle.dump(splitted_tracklets, f)
+        print(f"  Cached split tracklets for {sequence} ({len(splitted_tracklets)} tracklets)")
 
+
+    # ---- Merger selection ----
+    # XGBoost merger (best: HOTA 90.75) 90.33
+    # test 0.8 -> 89.68
+    # 0.75 -> 89.835
+    # 0.7 -> 89.881
+    # purity 0.6 ->
     # tracklet_merger = XGBoostMerger(
-    #     model_path=r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\weights\xgboost_5_neg_ratio_no_main_subj_filt\xgboost_merger.json",
-    #     meta_path=r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\weights\xgboost_5_neg_ratio_no_main_subj_filt\xgboost_merger_meta.json",
-    #     merge_threshold=0.5,
+    #     model_path=r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\experiments\tracklet_merger\xgboost\ablations\sweep_results\neg3_minlen0_purity0.8_splitTrue\xgboost_merger.json",
+    #     meta_path=r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\experiments\tracklet_merger\xgboost\ablations\sweep_results\neg3_minlen0_purity0.8_splitTrue\xgboost_merger_meta.json",
+    #     merge_threshold=0.7,
     # )
 
-    tracklet_merger = XGBoostMerger(
-        model_path=r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\experiments\tracklet_merger\xgboost\sweep_results\neg3_minlen10_purity1.0_splitFalse_BEST\xgboost_merger.json",
-        meta_path=r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\experiments\tracklet_merger\xgboost\sweep_results\neg3_minlen10_purity1.0_splitFalse_BEST\xgboost_merger_meta.json",
-        merge_threshold=0.5,
-    )
+    # tracklet_merger = XGBoostMerger( # 90.003
+    #     model_path=r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\experiments\tracklet_merger\xgboost\feature_ablation_models\remove_siglip\xgboost_merger.json",
+    #     meta_path=r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\experiments\tracklet_merger\xgboost\feature_ablation_models\remove_siglip\xgboost_merger_meta.json",
+    #     merge_threshold=0.7,
+    # )
 
-    merged_tracklets = tracklet_merger.merge(splitted_tracklets)
-
-    
-    # transformer_merger = TransformerMerger(
-    #     model_path=r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\weights\transformer\best_model.pt",
-    #     meta_path=r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\weights\transformer\transformer_merger_meta.json",
-    #     merge_threshold=0.5,
-    #     linkage_method="average",
-    #     jersey_entropy_threshold=0.15,
-    #     team_consistency_threshold=0.9,
-    #     device=None)
-    
-    # merged_tracklets = transformer_merger.merge(splitted_tracklets)
-
-
-    # from tracklets.decision_merger import DecisionMerger
-    # tracklet_merger = DecisionMerger(reid_threshold=0.4)
     # merged_tracklets = tracklet_merger.merge(splitted_tracklets)
+
+    # Siamese CLS Transformer merger (real_synth data, test AUC 0.974)
+    # _siamese_cls_root = r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\experiments\tracklet_merger\transformers\siamese_cls\output"
+    # transformer_merger = TransformerMerger(
+    #     model_path=_siamese_cls_root + r"\siamese_cls_real_synth\best_model.pt",
+    #     meta_path=_siamese_cls_root + r"\siamese_cls_real_synth\transformer_merger_meta.json",
+    #     merge_threshold=0.7,
+    # )
+
+    # Cross Attention Transformer merger (test AUC 0.9764, F1 0.888)
+    # original data test thresh = 0.7 -> 87.952
+    # augmented data thresh 0.7 -> 87.584
+    # cross_attn_merger = CrossAttentionMerger(
+    #     model_path=r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\experiments\tracklet_merger\transformers\cross_attention\output\cross_attention_simple_synth\best_model.pt",
+    #     meta_path=r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\experiments\tracklet_merger\transformers\cross_attention\output\cross_attention_simple_synth\transformer_merger_meta.json",
+    #     merge_threshold=0.7,
+    # )
+    # merged_tracklets = cross_attn_merger.merge(splitted_tracklets)
+
+    # Hybrid (self-attn -> cross-attn) Transformer merger (test AUC 0.9731, F1 0.881) 87.636
+    # hybrid_merger = HybridMerger(
+    #     model_path=r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\experiments\tracklet_merger\transformers\hybrid\output\hybrid_real_synth\best_model.pt",
+    #     meta_path=r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\experiments\tracklet_merger\transformers\hybrid\output\hybrid_real_synth\transformer_merger_meta.json",
+    #     merge_threshold=0.75,
+    # )
+    # merged_tracklets = hybrid_merger.merge(merged_tracklets)
+
+    # Pairwise MLP merger (12 pairwise features only, 3k params)
+    # test 0.7 -> 87.839
+    # 0.8 -> 88.254
+    mlp_merger = PairwiseMLPMerger(
+        model_path=r"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\tracklet_splitter_scratch\experiments\tracklet_merger\transformers\pairwise_mlp\output\pairwise_mlp_xgb_matched\best_model.pt",
+        merge_threshold=0.8,
+    )
+    merged_tracklets = mlp_merger.merge(splitted_tracklets)
+
+    # Oracle merger (uses GT annotations for perfect merge decisions — ceiling experiment)
+    # oracle_merger = OracleMerger(gt_root=settings.DATA_ROOT)
+    # merged_tracklets = oracle_merger.merge(splitted_tracklets, sequence_name=sequence)
+
+
 
     # Save tracklets in MOT format
     save_mot_file_for_sn_trackeval(

@@ -2,7 +2,7 @@ from pathlib import Path
 
 # Evaluation
 METHOD_NAME = "bbox_std_3"
-EVAL_SPLIT = "test"  # "train" or "test"
+EVAL_SPLIT = "valid"  # "train" or "test"
 
 # Paths
 DATA_ROOT = Path(rf"C:\Users\jelle\Documents\TUEindhoven\Master\Thesis\development\data\soccernet\soccernet-player-tracking\{EVAL_SPLIT}")  # Path to the folder with the images
