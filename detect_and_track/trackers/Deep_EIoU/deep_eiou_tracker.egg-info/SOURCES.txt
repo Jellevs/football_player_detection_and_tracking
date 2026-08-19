@@ -1,0 +1,15 @@
+setup.py
+core/Deep_EIoU.py
+core/__init__.py
+core/basetrack.py
+core/kalman_filter.py
+core/matching.py
+deep_eiou_tracker.egg-info/PKG-INFO
+deep_eiou_tracker.egg-info/SOURCES.txt
+deep_eiou_tracker.egg-info/dependency_links.txt
+deep_eiou_tracker.egg-info/requires.txt
+deep_eiou_tracker.egg-info/top_level.txt
+reid/__init__.py
+reid/extractor.py
+utils/__init__.py
+utils/conversions.py

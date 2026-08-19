@@ -1,0 +1,12 @@
+weights/
+output/
+outputs/
+evaluation/
+trackeval_lite/
+cache_split/
+
+__pycache__/
+*.pyc
+*.jpg
+*.pkl
+sn-trackeval/
